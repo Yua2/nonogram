@@ -3,35 +3,35 @@
 #include "MouseState.h"
 #include "KeyboardState.h"
 
-// ƒvƒƒOƒ‰ƒ€‚Í WinMain ‚©‚çn‚Ü‚è‚Ü‚·
+// ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã¯ WinMain ã‹ã‚‰å§‹ã¾ã‚Šã¾ã™
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	ChangeWindowMode(TRUE), DxLib_Init(), SetDrawScreen(DX_SCREEN_BACK);
 
-	ScrMgr_t scrMgr;	// ƒV[ƒ“ŠÇ—\‘¢‘Ì
+	ScrMgr_t scrMgr;	// ã‚·ãƒ¼ãƒ³ç®¡ç†æ§‹é€ ä½“
 
-	EScene scene = None;		// Œ»İƒV[ƒ“
-	EScene nextScene = None;	// Ÿ‚ÌƒV[ƒ“
+	EScene scene = None;		// ç¾åœ¨ã‚·ãƒ¼ãƒ³
+	EScene nextScene = None;	// æ¬¡ã®ã‚·ãƒ¼ãƒ³
 
-	int key[256];		// ƒL[ƒ{[ƒhó‘ÔŠi”[•Ï”
-	Mouse_t mouse;		// ƒ}ƒEƒXó‘ÔŠm”F•Ï”
+	int key[256];		// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰çŠ¶æ…‹æ ¼ç´å¤‰æ•°
+	Mouse_t mouse;		// ãƒã‚¦ã‚¹çŠ¶æ…‹ç¢ºèªå¤‰æ•°
 
-	Pazzle pz = tutorialPz;		// —V‚ÔƒpƒYƒ‹(‰Šúó‘Ô‚Íƒ`ƒ…[ƒgƒŠƒAƒ‹ƒpƒYƒ‹)
+	Pazzle pz = tutorialPz;		// éŠã¶ãƒ‘ã‚ºãƒ«(åˆæœŸçŠ¶æ…‹ã¯ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«ãƒ‘ã‚ºãƒ«)
 
-	scene = CheckPlayerID("ƒtƒ@ƒCƒ‹ƒpƒX");		// ‹N“®ˆ—
+	scene = CheckPlayerID("ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹");		// èµ·å‹•æ™‚å‡¦ç†
 	
 	while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0 && scene != None) {
-		GetKeyBoardState(key);		// ƒL[ƒ{[ƒhó‘Ôæ“¾
-		GetMouseState(&mouse);		// ƒ}ƒEƒXó‘Ôæ“¾
+		GetKeyBoardState(key);		// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰çŠ¶æ…‹å–å¾—
+		GetMouseState(&mouse);		// ãƒã‚¦ã‚¹çŠ¶æ…‹å–å¾—
 
-		// ƒV[ƒ“‚ª‘JˆÚ‚·‚é‚È‚ç‚Î
+		// ã‚·ãƒ¼ãƒ³ãŒé·ç§»ã™ã‚‹ãªã‚‰ã°
 		if (scene != nextScene) {	
-			scene = InitializeScene(nextScene, &scrMgr);	// ‘JˆÚæ‚ÌƒV[ƒ“‚Ì‰Šú‰»‚ğÀs‚µ‚ÄC¡‚ÌƒV[ƒ“‚©‚ç‘JˆÚ
-			FinalizeScene(scene, &scrMgr);					// ‘JˆÚ‘O‚Ì‚ÌƒV[ƒ“‚ğI—¹
+			scene = InitializeScene(nextScene, &scrMgr);	// é·ç§»å…ˆã®ã‚·ãƒ¼ãƒ³ã®åˆæœŸåŒ–ã‚’å®Ÿè¡Œã—ã¦ï¼Œä»Šã®ã‚·ãƒ¼ãƒ³ã‹ã‚‰é·ç§»
+			FinalizeScene(scene, &scrMgr);					// é·ç§»å‰ã®ã®ã‚·ãƒ¼ãƒ³ã‚’çµ‚äº†
 		}
 
-		nextScene = UpdateScene(scene, &scrMgr, mouse, key, &pz);	// ¡‚ÌƒV[ƒ“‚ÌXV(•`‰æ‚àŠÜ‚Ş)‚µ‚Ä‘JˆÚæ‚ÌƒV[ƒ“‚ğŒˆ‚ß‚é
+		nextScene = UpdateScene(scene, &scrMgr, mouse, key, &pz);	// ä»Šã®ã‚·ãƒ¼ãƒ³ã®æ›´æ–°(æç”»ã‚‚å«ã‚€)ã—ã¦é·ç§»å…ˆã®ã‚·ãƒ¼ãƒ³ã‚’æ±ºã‚ã‚‹
 	}
 
-	DxLib_End();		    // ‚c‚wƒ‰ƒCƒuƒ‰ƒŠg—p‚ÌI—¹ˆ—
-	return 0;				// ƒ\ƒtƒg‚ÌI—¹ 
+	DxLib_End();		    // ï¼¤ï¼¸ãƒ©ã‚¤ãƒ–ãƒ©ãƒªä½¿ç”¨ã®çµ‚äº†å‡¦ç†
+	return 0;				// ã‚½ãƒ•ãƒˆã®çµ‚äº† 
 }

@@ -8,7 +8,7 @@ typedef struct MOUSE {
 	int mY;
 } Mouse_t;
 
-// M4:ƒ}ƒEƒXˆ—
+// M4:ãƒã‚¦ã‚¹å‡¦ç†
 void GetMouseState(Mouse_t* mouse);
 
 #endif /* MOUSESTATE_H_ */
