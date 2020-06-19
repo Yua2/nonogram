@@ -8,33 +8,33 @@
 #include "MakePuzzle.h"
 #include "MouseState.h"
 
-// ƒV[ƒ“—ñ‹“‘Ì
+// ã‚·ãƒ¼ãƒ³åˆ—æŒ™ä½“
 typedef enum {
-	InputNickNameScr,	// ƒjƒbƒNƒl[ƒ€“ü—Í‰æ–Ê
-	MenuScr,			// ƒƒjƒ…[‰æ–Ê
-	SelectionScr,		// “ïˆÕ“xEƒpƒYƒ‹‘I‘ğ‰æ–Ê
-	GameScr,			// ƒ`ƒ…[ƒgƒŠƒAƒ‹/ƒQ[ƒ€ƒvƒŒƒC‰æ–Ê
-	MakePuzzleScr,			// ƒpƒYƒ‹ì¬/“Še‰æ–Ê
-	None				// Ú‘±¸”s
+	InputNickNameScr,	// ãƒ‹ãƒƒã‚¯ãƒãƒ¼ãƒ å…¥åŠ›ç”»é¢
+	MenuScr,			// ãƒ¡ãƒ‹ãƒ¥ãƒ¼ç”»é¢
+	SelectionScr,		// é›£æ˜“åº¦ãƒ»ãƒ‘ã‚ºãƒ«é¸æŠç”»é¢
+	GameScr,			// ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«/ã‚²ãƒ¼ãƒ ãƒ—ãƒ¬ã‚¤ç”»é¢
+	MakePuzzleScr,			// ãƒ‘ã‚ºãƒ«ä½œæˆ/æŠ•ç¨¿ç”»é¢
+	None				// æ¥ç¶šå¤±æ•—
 } EScene;
 
-//@ƒV[ƒ“ŠÇ—\‘¢‘Ì
+//ã€€ã‚·ãƒ¼ãƒ³ç®¡ç†æ§‹é€ ä½“
 typedef struct SCR_MGR {
-	InputNickName_t mInputNickName;	// ƒjƒbƒNƒl[ƒ€“ü—Í‰æ–Ê\‘¢‘Ì
-	Menu_t          mMenu;			// ƒƒjƒ…[‰æ–Ê\‘¢‘Ì
-	Selection_t	    mSelection;		// “ïˆÕ“xEƒpƒYƒ‹‘I‘ğ‰æ–Ê\‘¢‘Ì
-	Game_t          mGame;			// ƒ`ƒ…[ƒgƒŠƒAƒ‹/ƒQ[ƒ€ƒvƒŒƒC‰æ–Ê\‘¢‘Ì
-	MakePuzzle_t    mMakePuzzle;	// ƒpƒYƒ‹ì¬/“Še‰æ–Ê\‘¢‘Ì
+	InputNickName_t mInputNickName;	// ãƒ‹ãƒƒã‚¯ãƒãƒ¼ãƒ å…¥åŠ›ç”»é¢æ§‹é€ ä½“
+	Menu_t          mMenu;			// ãƒ¡ãƒ‹ãƒ¥ãƒ¼ç”»é¢æ§‹é€ ä½“
+	Selection_t	    mSelection;		// é›£æ˜“åº¦ãƒ»ãƒ‘ã‚ºãƒ«é¸æŠç”»é¢æ§‹é€ ä½“
+	Game_t          mGame;			// ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«/ã‚²ãƒ¼ãƒ ãƒ—ãƒ¬ã‚¤ç”»é¢æ§‹é€ ä½“
+	MakePuzzle_t    mMakePuzzle;	// ãƒ‘ã‚ºãƒ«ä½œæˆ/æŠ•ç¨¿ç”»é¢æ§‹é€ ä½“
 } ScrMgr_t;							
 
 
-// M1:ƒV[ƒ“‰Šú‰»ˆ—
+// M1:ã‚·ãƒ¼ãƒ³åˆæœŸåŒ–å‡¦ç†
 EScene InitializeScene(EScene nextScene, ScrMgr_t* scrMgr);
 
-// M2:ƒV[ƒ“XVˆ—
+// M2:ã‚·ãƒ¼ãƒ³æ›´æ–°å‡¦ç†
 EScene UpdateScene(EScene scene, ScrMgr_t* scrMgr, Mouse_t mouse, int* key, Puzzle puzzle);
 
-// M3:ƒV[ƒ“I—¹ˆ—
+// M3:ã‚·ãƒ¼ãƒ³çµ‚äº†å‡¦ç†
 void FinalizeScene(EScene scene, ScrMgr_t* scrMgr);
 
 #endif /* SCENEMGR_H_ */

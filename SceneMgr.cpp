@@ -3,7 +3,7 @@
 #include "MouseState.h"
 #include "Information.h"
 
-// M1:ƒV[ƒ“‰Šú‰»ˆ—
+// M1:ã‚·ãƒ¼ãƒ³åˆæœŸåŒ–å‡¦ç†
 EScene InitializeScene(EScene nextScene, ScrMgr_t* scrMgr) {
 	EScene scene;
 
@@ -28,7 +28,7 @@ EScene InitializeScene(EScene nextScene, ScrMgr_t* scrMgr) {
 	return scene;
 }
 
-// M2:ƒV[ƒ“XVˆ—
+// M2:ã‚·ãƒ¼ãƒ³æ›´æ–°å‡¦ç†
 EScene UpdateScene(EScene scene, ScrMgr_t* scrMgr, Mouse_t mouse, int* key, Puzzle *puzzle) {
 	EScene nextScene;
 
@@ -54,7 +54,7 @@ EScene UpdateScene(EScene scene, ScrMgr_t* scrMgr, Mouse_t mouse, int* key, Puzz
 }
 
 
-// M3:ƒV[ƒ“I—¹ˆ—
+// M3:ã‚·ãƒ¼ãƒ³çµ‚äº†å‡¦ç†
 void FinalizeScene(EScene scene, ScrMgr_t* scrMgr) {
 	switch (scene) {
 	case(InputNickNameScr):
