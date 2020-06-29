@@ -1,8 +1,10 @@
 #ifndef MOUSE_STATE_H_
 #define MOUSE_STATE_H_
 
+enum mButtonState{none, left, right, middle};
+
 typedef struct MOUSE {
-	int mButton;
+	mButtonState mButton;
 	int mWheel;
 	int mX;
 	int mY;
