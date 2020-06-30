@@ -6,14 +6,9 @@
 
 #include <stdio.h>
 #include <Windows.h>
+#include"InputNickName.h"
 #include "DxLib.h"
-#include "InputNickName.h"
-
-//memo(マージの注意点)
-/*
-・InputNickName.hの#includeをSceneMgr.hのみにする
-・InputNickNameのtest_系を本番用に変更
-*/
+#include "SceneMgr.h"
 
 //memo(作成、修正予定)
 /*
@@ -229,7 +224,7 @@ int UpdateInputNickName(InputNickName_t *innt, Mouse_t *mouse) {
 *** Function		:使用した画像のハンドルを開放する。現時点では使用していない
 *** Return			: void		--戻り値なし
 ******************************/
-//void FinalizeInputNickName(InputNickName_t *innt) {}
+void FinalizeInputNickName(InputNickName_t *innt) {}
 
 /******************************
 *** Function Name	: checkNickName

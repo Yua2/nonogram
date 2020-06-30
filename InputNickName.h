@@ -4,11 +4,6 @@
 
 #include <iostream>
 #include <string>
-
-//本番用
-//#include "SceneMgr.h"
-
-//テスト用
 #include "MouseState.h"
 #include "KeyboardState.h"
 
@@ -23,10 +18,10 @@
 
 enum InputNickNamePhase {standard, textBox, check, used};
 
-typedef struct InputNickName_t {
+typedef struct InputNickName_t{
 	enum InputNickNamePhase phase = standard;
 	std::string nickName;
-} InputNickName_t;
+}InputNickName_t;
 
 //本番用
 int InitializeInputNickName(InputNickName_t *);

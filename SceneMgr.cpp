@@ -33,7 +33,7 @@ int UpdateScene(int scene, ScrMgr_t* scrMgr, Mouse_t* mouse, int* key, Puzzle_t 
 
 	switch (scene) {
 	case(InputNickNameScr):
-		nextScene = UpdateInputNickName(&(scrMgr->mInputNickName));
+		nextScene = UpdateInputNickName(&(scrMgr->mInputNickName), mouse);
 		break;
 	case(MenuScr):
 		nextScene = UpdateMenu(&(scrMgr->mMenu),mouse);
