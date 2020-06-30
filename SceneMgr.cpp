@@ -3,9 +3,8 @@
 #include "MouseState.h"
 #include "Information.h"
 
-// M1:シーン初期化処理
-EScene InitializeScene(EScene nextScene, ScrMgr_t* scrMgr) {
-	EScene scene;
+int InitializeScene(int nextScene, ScrMgr_t* scrMgr) {
+	int scene = 1;
 
 	switch (nextScene) {
 	case(InputNickNameScr) :
@@ -29,21 +28,21 @@ EScene InitializeScene(EScene nextScene, ScrMgr_t* scrMgr) {
 }
 
 // M2:シーン更新処理
-EScene UpdateScene(EScene scene, ScrMgr_t* scrMgr, Mouse_t mouse, int* key, Puzzle *puzzle) {
-	EScene nextScene;
+int UpdateScene(int scene, ScrMgr_t* scrMgr, Mouse_t* mouse, int* key, Puzzle_t *puzzle) {
+	int nextScene=1;
 
 	switch (scene) {
 	case(InputNickNameScr):
 		nextScene = UpdateInputNickName(&(scrMgr->mInputNickName));
 		break;
 	case(MenuScr):
-		nextScene = UpdateMenu(&(scrMgr->mMenu));
+		nextScene = UpdateMenu(&(scrMgr->mMenu),mouse);
 		break;
 	case(SelectionScr):
-		nextScene = UpdateSelection(&(scrMgr->mSelection), &puzzle);
+		nextScene = UpdateSelection(&(scrMgr->mSelection), puzzle);
 		break;
 	case(GameScr):
-		nextScene = UpdateGame(&(scrMgr->mGame), &puzzle);
+		nextScene = UpdateGame(&(scrMgr->mGame), puzzle);
 		break;
 	case(MakePuzzleScr):
 		nextScene = UpdateMakePuzzle(&(scrMgr->mMakePuzzle));
@@ -55,7 +54,7 @@ EScene UpdateScene(EScene scene, ScrMgr_t* scrMgr, Mouse_t mouse, int* key, Puzz
 
 
 // M3:シーン終了処理
-void FinalizeScene(EScene scene, ScrMgr_t* scrMgr) {
+void FinalizeScene(int scene, ScrMgr_t* scrMgr) {
 	switch (scene) {
 	case(InputNickNameScr):
 		FinalizeInputNickName(&(scrMgr->mInputNickName));

@@ -1,28 +1,34 @@
 #ifndef CONTROLLER_H_
 #define CONTROLLER_H_
-
+#include "MouseState.h"
+// テキスト構造体
 typedef struct TEXT {
-	int mX;
-	int mY;
-	char[] mSentence;
+	int   mX;			// x座標
+	int   mY;			// y座標
+	char* mSentence;	// 表示文
 } Text_t;
 
+// テキストボックス構造体
 typedef struct TEXT_BOX {
-	int mX1;
-	int mY1;
-	int mX2;
-	int mY2;
-	char[] inputSentence;
+	int   mX1;				// 左端座標
+	int   mY1;				// 上端座標
+	int   mX2;				// 右端座標
+	int   mY2;				// 下端座標
+	char* inputSentence;	// 入力された文
 } TextBox_t;
 
+// ボタン構造体
 typedef struct BUTTON {
-	int mX;
-	int mY;
-	int mImageHandle;
+	int			  mX1;			// 左端座標
+	int			  mY1;			// 上端座標
+	int			  mX2;			// 右端座標
+	int			  mY2;			// 下端座標
+	int			  mImageHandle;	// ボタン画像
+	unsigned int  mColor;		// マスの色		
+	bool          mState;		// ボタン判定: true = 押されている, false = 押されていない
 } Button_t;
 
-typedef struct PUZZLE_LIST {
-
-};
+// ボタン関数
+Button_t setButton(int,int,int,int,int,unsigned int,Mouse_t);
 
 #endif /* CONTROLLER_H_ */
