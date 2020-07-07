@@ -18,7 +18,7 @@
 *** Function      : 引数でとったチュートリアル/ゲームプレイ画面の
                     構造体(Game_t)のメンバ()
 */
-EScene InitializeGame(Game_t* game, Puzzle_t* puzzle) {
+int InitializeGame(Game_t* game, Puzzle_t* puzzle) {
 	Mouse_t mouse;
 	GetMouseState(&mouse);
 
@@ -195,7 +195,7 @@ EScene InitializeGame(Game_t* game, Puzzle_t* puzzle) {
 }
 
 // M17:チュートリアル画面更新
-EScene UpdateTutorial(Game_t* game, Puzzle_t* puzzle) {
+int UpdateTutorial(Game_t* game, Puzzle_t* puzzle) {
 	Mouse_t mouse;
 	GetMouseState(&mouse);
 
@@ -330,7 +330,7 @@ EScene UpdateTutorial(Game_t* game, Puzzle_t* puzzle) {
 }
 
 // M18:ゲームプレイ更新
-EScene UpdateGame(Game_t* game, Puzzle_t* puzzle) {
+int UpdateGame(Game_t* game, Puzzle_t* puzzle) {
 	Mouse_t mouse;
 	GetMouseState(&mouse);
 
