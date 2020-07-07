@@ -8,15 +8,20 @@ typedef struct PLAYER {
 } Player_t;
 
 // F2: パズル/ランキング情報
+typedef struct RANKING {
+	int playerId;
+	int cleartime;
+}RANKING_t;
 typedef struct PUZZLE {
 	int  puzzleId;				// パズルID
 	char puzzleTitle[256];		// パズルタイトル
+	int  x_size;
+	int  y_size;
 	int  puzzleData[20][20];	// パズルデータ
-	int  puzzleMakerID;			// パズル作成者ID
-	int* playedPlayerId;		// プレイ済みプレイヤーのID
-	int* timeRanking;			// タイムランキング
-	int  ranking;				// ランキング
+	int  puzzleMakerId;			// パズル作成者ID
+	RANKING_t ranking[10];
 } Puzzle_t;
+
 
 #endif // INFORMATION_H_
 
