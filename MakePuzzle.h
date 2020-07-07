@@ -2,6 +2,8 @@
 #define MAKEPUZZLE_H_
 #include "Controller.h"
 #include "Information.h"
+#include "Dxlib.h"
+
 typedef struct MakePuzzle{
 	Button_t eraserButton;
 	Button_t resetButton;
@@ -10,9 +12,9 @@ typedef struct MakePuzzle{
 	int selectsize = 40; // 色選択マス1個のサイズ
 	int sellsize = 25; // パズルマス１個のサイズ
 	int semisize = 10;  // 縮小パズルマス1個のサイズ
-	int size = 20;
-	//int x_size = 20;
-	//int y_size = 20;// パズル画面のサイズ 
+	//int size = 20;
+	int x_size = 20;
+	int y_size = 20;// パズル画面のサイズ 
 
 	// 色宣言
 		int	white = GetColor(255, 255, 255), black = GetColor(0, 0, 0), gainsboro = GetColor(220, 220, 220),
@@ -41,4 +43,6 @@ int InitializeMakePuzzle(MakePuzzle_t*);
 int UpdateMakePuzzle(MakePuzzle_t*);
 void FinalizeMakePuzzle(MakePuzzle_t*);
 int click(Mouse_t*, int, int, int ,int);
+void savePuzzle(Puzzle_t*);
+
 #endif /* MAKEPUZZLE_H_*/
