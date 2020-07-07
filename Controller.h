@@ -29,6 +29,6 @@ typedef struct BUTTON {
 } Button_t;
 
 // ボタン関数
-Button_t setButton(int,int,int,int,int,unsigned int,Mouse_t);
+void setButton(int, int, int, int, int, unsigned int, Mouse_t, Button_t*);
 
 #endif /* CONTROLLER_H_ */
