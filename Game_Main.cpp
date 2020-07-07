@@ -4,9 +4,10 @@
 #include "KeyboardState.h"
 #include "Information.h"
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow){
-	ChangeWindowMode(TRUE), DxLib_Init(), SetDrawScreen(DX_SCREEN_BACK);
 	SetGraphMode(1080, 720, 16);
-	SetBackgroundColor(255, 255, 255);
+	ChangeWindowMode(TRUE), DxLib_Init(), SetDrawScreen(DX_SCREEN_BACK);
+	
+	SetBackgroundColor(222, 184, 135);
 	
 	
 
@@ -26,10 +27,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0 && scene != None) {
 		GetKeyBoardState(key);
 		GetMouseState(&mouse);
-
+		if (mouse.mButton == none) {
+			mouse.waitRelease = 0;
+		}
+		SetDrawScreen(DX_SCREEN_BACK);
 		if (scene != nextScene) {	
-			scene = InitializeScene(nextScene, &scrMgr);
 			FinalizeScene(scene, &scrMgr);
+			scene = InitializeScene(nextScene, &scrMgr);
 		}
 
 		nextScene = UpdateScene(scene, &scrMgr, &mouse, key, &pz);

@@ -33,7 +33,8 @@ int InitializeMenu(Menu_t *mMenu) {
 	}
 	ScreenFlip();
 	return MenuScr;
-}/******************************************************
+}
+/******************************************************
 *** Function Name: UpedateMenu
 *** Designer: 陳
 *** Date: 2020.6.23
@@ -45,13 +46,15 @@ int UpdateMenu(Menu_t* mMenu,Mouse_t* mouse) {
 	for (i = 0; i < 3; i++) {                                                                       //マウスが置かれているボタンを判定
 		if (mouse->mX > mMenu->b[i].leftx && mouse->mX<mMenu->b[i].rightx && mouse->mY>mMenu->b[i].upy && mouse->mY < mMenu->b[i].downy) {
 			color[i] = GetColor(120, 120, 120);
-			if (mouse->mButton == left)
+			if (mouse->mButton == left && mouse->waitRelease != 1) {
+				mouse->waitRelease = 1;
 				switch (i) {
 				case(0): return GameScr;
 				case(1):return SelectionScr;
 				case(2):return MakePuzzleScr;
 				fault: break;
 				}
+			}
 		}	
 		else
 			color[i] = GetColor(0,0,0);
