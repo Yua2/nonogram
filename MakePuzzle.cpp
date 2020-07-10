@@ -17,7 +17,6 @@
 #include "InputNickName.h"
 static int flag = 0;
 static Puzzle_t puzzle;
-static char title[126];
 /******************************************************
 /******************************************************
 *** Function Name	: InitializeMakePuzzle
@@ -31,7 +30,7 @@ int InitializeMakePuzzle(MakePuzzle_t* create) {
 	//char test[256] = "テスト";
 	puzzle.puzzleId = 1;
 	puzzle.puzzleMakerId = 1;
-	sprintf_s(puzzle.puzzleTitle, 256, "テスト");
+	//sprintf_s(puzzle.puzzleTitle, 256, "テスト");
 
 	GetMouseState(&mouse);
 	
@@ -65,7 +64,17 @@ int InitializeMakePuzzle(MakePuzzle_t* create) {
 	DrawFormatString(890, 50, create->black, "20 × 20");
 
 	DrawFormatString(850, 200, create->black, "画像を取り込む");
-	DrawFormatString(850, 350, create->black, "パズルを投稿する");
+	DrawFormatString(850, 350, create->black, "パズルを保存する");
+
+	DrawFormatString(820, 450, create->black, "16色から好きな色を選んで");
+	DrawFormatString(820, 480, create->black, "パズルを作成しましょう!");
+	DrawFormatString(820, 560, create->black, "・左クリックで色を選び");
+	DrawFormatString(820, 590, create->black, "  マスを塗ることができます");
+	DrawFormatString(820, 620, create->black, "・色選択マスの上段は");
+	DrawFormatString(820, 650, create->black, "  ゲーム画面で黒く塗られます");
+	DrawFormatString(80, 410, create->black, "ゲーム時の画面");
+
+
 	// DrawFormatString(850, 450, GetColor(0, 0, 0), "パズルに変換");
 
 
@@ -178,7 +187,6 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 
 	// 消しゴムボタンが押されたら白色の情報を保持
 	if ((&mouse)->mButton == left && click(&(mouse), 20, 20, 110, 110)) {
-		DrawBox(10, 100, 120, 120, create->white, FALSE);
 		create->tmp = create->white;
 	}
 
@@ -189,7 +197,9 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 			int T = create->posi + j * create->selectsize; // パズルマスの縦
 			// 左クリックされたら色の情報を保持
 			if ((&mouse)->mButton == left && click(&(mouse), S, T + 520, S + create->selectsize - 1, T + create->selectsize - 1 + 520)) {
-				DrawBox(S+1, T+1, S + create->semisize-2, T + create->semisize-2, create->white, FALSE);
+				DrawBox(S-10, T + 510, S + create->selectsize - 1+10, T + create->selectsize - 1 + 530, create->col[i][j], TRUE);
+
+				//DrawBox(S+1, T+1, S + create->semisize-2, T + create->semisize-2, create->white, FALSE);
 				create->tmp = create->col[i][j];
 			}
 		}
@@ -203,7 +213,7 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 			int s = create->posi + i * create->semisize - 50;
 			int t = create->posi + j * create->semisize + 100;
 
-			// マスを左クリックし, 色を反映させる
+			// マスを左クリックし, 色を反映させる準備
 			if ((&mouse)->mButton == left && click(&(mouse), S, T, S + create->sellsize - 1, T + create->sellsize - 1)) {
 
 				// 色塗り中であり, マスに色が塗られていない、または白色の場合リストに格納
@@ -233,66 +243,51 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 				if(create->colorlist[i][j] == create->white)
 					puzzle.puzzleData[i][j] = 0;
 				
-
 				if(create->colorlist[i][j] == create->black)
 					puzzle.puzzleData[i][j] = 101;
 				
-
 				if (create->colorlist[i][j] == create->gainsboro)
 					puzzle.puzzleData[i][j] = 1;
 
 				if (create->colorlist[i][j] == create->blue)
 					puzzle.puzzleData[i][j] = 102;
 					
-
 				if (create->colorlist[i][j] == create->aqua)
 					puzzle.puzzleData[i][j] = 2;
 				
-
 				if (create->colorlist[i][j] == create->green)
 					puzzle.puzzleData[i][j] = 103;
 				
-
 				if (create->colorlist[i][j] == create->springgreen)
 					puzzle.puzzleData[i][j] = 3;
 					
-
 				if (create->colorlist[i][j] == create->maroon)
 					puzzle.puzzleData[i][j] = 104;
 					
-
 				if (create->colorlist[i][j] == create->red)
 					puzzle.puzzleData[i][j] = 4;
 				
-
 				if (create->colorlist[i][j] == create->deeppink)
 					puzzle.puzzleData[i][j] = 105;
-					
-
+				
 				if (create->colorlist[i][j] == create->pink)
 					puzzle.puzzleData[i][j] = 5;
 					
-
 				if (create->colorlist[i][j] == create->saddlebrown)
 					puzzle.puzzleData[i][j] = 106;
 					
-
 				if (create->colorlist[i][j] == create->orange)
 					puzzle.puzzleData[i][j] = 6;
 					
-
 				if (create->colorlist[i][j] == create->gold)
 					puzzle.puzzleData[i][j] = 107;
 					
-
 				if (create->colorlist[i][j] == create->lemonchiffon)
 					puzzle.puzzleData[i][j] = 7;
 					
-
 				if (create->colorlist[i][j] == create->indigo)
 					puzzle.puzzleData[i][j] = 108;
 					
-
 				if (create->colorlist[i][j] == create->mediumpurple)
 					puzzle.puzzleData[i][j] = 8;
 			
@@ -359,9 +354,11 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 	//DrawBox(830, 280, 1000, 330, create->black, FALSE);
 
 
+	// パズルを保存するボタンが押されたらflagを1にし、タイトル入力画面を表示
 	if ((&mouse)->mButton == left && click((&mouse), 830, 330, 1000, 380)) {
 		flag = 1;
 	}
+	// ニックネームを入力する処理
 	if (flag == 1) {
 		DrawBox(350, 200, 800, 500, create->black, TRUE);
 		//DrawBox(370, 450, 440, 490, create->white, FALSE);
@@ -370,8 +367,8 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		DrawFormatString(420, 210, create->white, "タイトルを付けてください",TRUE);
 		DrawFormatString(420, 230, create->white, "(Enterキーで決定) (Escキーで戻る)", TRUE);
 
-		DrawBox(460, 340, 640, 370, create->white, FALSE);
-		KeyInputString(470,350,16,puzzle.puzzleTitle, create->white);
+		DrawBox(460, 340, 700, 370, create->white, FALSE);
+		KeyInputString(470,350,30,puzzle.puzzleTitle, create->white);
 
 		savePuzzle(&(puzzle));
 		flag = 0;
@@ -402,7 +399,24 @@ void FinalizeMakePuzzle(MakePuzzle_t* create) {
 }
 
 
+
+/******************************
+*** Function Name	: click
+*** Designer		: 笹川
+*** Date			: 2020.6.28
+*** Function		: クリック判定
+*** Return			: 成功: 1 or 失敗: 0
+******************************/
+//int click(Mouse_t* mouse, int x1, int y1, int x2, int y2) {
+	//if (mouse->mX > x1 && mouse->mX < x2 && mouse->mY > y1 && mouse->mY < y2) {
+	//	return 1;
+	//}
+	//return 0;
+//}
+
+
 // csvファイル書き込みテスト
+// 陳君作成、後で変更あるかも
 void savePuzzle(Puzzle_t* pz) {
 	FILE* fp;
 	int i, j, x = pz->x_size, y = pz->y_size;
