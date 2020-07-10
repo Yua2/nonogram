@@ -373,10 +373,9 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle) {
 	}
 
 	int nowMiliSec = GetNowCount();
-	int msec = (((nowMiliSec - (game->startTime)) / 10) * 10 - ((nowMiliSec - (game->startTime)) / 1000) * 1000) / 10;
 	int sec = ((nowMiliSec - (game->startTime)) % 60000) / 1000;
 	int minute = (nowMiliSec - (game->startTime)) / 60000;
-
+	int life = 0;
 	DrawGraph(game->backButton.mX1, game->backButton.mY1, game->backButton.mImageHandle, FALSE);
 	DrawGraph(game->hintButton.mX1, game->hintButton.mY1, game->hintButton.mImageHandle, FALSE);
 	DrawGraph(game->resetButton.mX1, game->resetButton.mY1, game->resetButton.mImageHandle, FALSE);
@@ -384,17 +383,31 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle) {
 	DrawGraph(game->eraserButton.mX1, game->eraserButton.mY1, game->eraserButton.mImageHandle, FALSE);
 	DrawGraph(170, 200, game->lifeImageHandle, TRUE);
 	DrawFormatStringToHandle(210, 200, GetColor(0, 0, 0), game->lifeFontHandle, "×%d", game->lifeCounter);
-	DrawFormatStringToHandle(70, 100, GetColor(0, 0, 0), game->startTimeFontHandle, "Time : %02d:%02d:%02d", minute, sec, msec);
+	DrawFormatStringToHandle(70, 100, GetColor(0, 0, 0), game->startTimeFontHandle, "Time : %02d:%02d", minute, sec);
 	int titleWidth = GetDrawFormatStringWidthToHandle(game->puzzleTitleFontHandle, puzzle->puzzleTitle);
 	DrawFormatStringToHandle(720 - (titleWidth / 2), 10, GetColor(0, 0, 0), game->puzzleTitleFontHandle, puzzle->puzzleTitle);
 
 	for (int i = 0; i < puzzle->y_size; i++) {
 		for (int j = 0; j < puzzle->x_size; j++) {
+			bool preState = game->puzzleState[i][j];
 			setButton(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, NULL, game->puzzleGrid[i][j].mColor, mouse, &(game->puzzleGrid[i][j]));
-			if (game->puzzleGrid[i][j].mState) {
+			if (game->puzzleGrid[i][j].mState && game->checkPuzzle.puzzleData[i][j] == -1) {
 				game->puzzleState[i][j] = true;
 				if (game->penButton.mState) {
 					game->checkPuzzle.puzzleData[i][j] = 1;
+				}
+				else if (game->eraserButton.mState) {
+					game->checkPuzzle.puzzleData[i][j] = 0;
+				}
+
+				if (puzzle->puzzleData[i][j] / 100 != game->checkPuzzle.puzzleData[i][j]) {
+					life--;
+					if (game->checkPuzzle.puzzleData[i][j] == 1) {
+						game->checkPuzzle.puzzleData[i][j] = 0;
+					}
+					else if (game->checkPuzzle.puzzleData[i][j] == 0) {
+						game->checkPuzzle.puzzleData[i][j] = 1;
+					}
 				}
 			}
 
@@ -407,9 +420,9 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle) {
 					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
 					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
 				}
-				else {
-					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), 5);
-					DrawLine(game->puzzleGrid[i][j + 1].mX1, game->puzzleGrid[i][j + 1].mY1, game->puzzleGrid[i + 1][j].mX1, game->puzzleGrid[i + 1][j].mY1, GetColor(0, 0, 0), 5);
+				else if (game->checkPuzzle.puzzleData[i][j] == 0) {
+					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), 1);
+					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, GetColor(0, 0, 0), 1);
 				}
 			}
 		}
@@ -418,10 +431,33 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle) {
 	int index = 0;
 	DrawLine(game->puzzleX, game->puzzleY, (game->puzzleX) - 100, game->puzzleY, GetColor(0, 0, 0));
 	DrawLine(game->puzzleX, game->puzzleY, (game->puzzleX), game->puzzleY - 100, GetColor(0, 0, 0));
-	for (int i = 0; i < puzzle->y_size; i++) {
-		for (int j = 0; j < puzzle->x_size; j++) {
-			DrawLine(game->puzzleX, (game->puzzleY) + (game->puzzleGridSize), (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize), GetColor(0, 0, 0));
-			DrawLine(game->puzzleX + (game->puzzleGridSize), game->puzzleY, (game->puzzleX) + (game->puzzleGridSize), (game->puzzleY) - 100, GetColor(0, 0, 0));
+	for (int i = 1; i <= puzzle->y_size; i++) {
+		for (int j = 1; j <= puzzle->x_size; j++) {
+			DrawLine(game->puzzleX, (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0));
+			DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY, (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0));
+		}
+	}
+
+	int tmpLife = game->lifeCounter - 1;
+	if (life < 0 && game->lifeCounter >= 1) {
+		game->lifeCounter = tmpLife;
+	}
+
+	for (int i = 0, y = ((game->puzzleY)); i < (puzzle->y_size); i++, y += ((game->puzzleGridSize) - 1)) {
+		for (int j = 0, x = ((game->puzzleX) - 100); j < 10; j++, x += 10) {
+			if ((game->drawGrid_V[i][j]) != 0) {
+				int drawY = y + (game->puzzleGridSize / 2) - 4;
+				DrawFormatStringToHandle(x, drawY, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_V[i][j]));
+			}
+		}
+	}
+
+	for (int i = 0, x = ((game->puzzleX)); i < (puzzle->x_size); i++, x += ((game->puzzleGridSize) - 1)) {
+		for (int j = 0, y = ((game->puzzleY) - 100); j < 10; j++, y += 10) {
+			if ((game->drawGrid_H[i][j]) != 0) {
+				int drawX = x + (game->puzzleGridSize / 2) - (GetDrawFormatStringWidthToHandle(game->drawNumFontHandle, "&d", game->drawGrid_H[i][j]) / 2);
+				DrawFormatStringToHandle(drawX, y, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_H[i][j]));
+			}
 		}
 	}
 
