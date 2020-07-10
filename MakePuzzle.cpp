@@ -14,8 +14,10 @@
 #include "Information.h"
 #include <string.h>
 #include <stdlib.h>
-
+#include "InputNickName.h"
+static int flag = 0;
 static Puzzle_t puzzle;
+static char title[126];
 /******************************************************
 /******************************************************
 *** Function Name	: InitializeMakePuzzle
@@ -51,20 +53,19 @@ int InitializeMakePuzzle(MakePuzzle_t* create) {
 	DrawBox(580, 30, 670, 80, create->black, FALSE);
 	DrawBox(730, 30, 820, 80, create->black, FALSE);
 	DrawBox(880, 30, 970, 80, create->black, FALSE);
-
 	
-	DrawBox(830, 130, 1000, 180, create->black, FALSE);
-	DrawBox(830, 280, 1000, 330, create->black, FALSE);
+	DrawBox(830, 180, 1000, 230, create->black, FALSE);
+	DrawBox(830, 330, 1000, 380, create->black, FALSE);
 	//DrawBox(830, 430, 1000, 480, GetColor(0, 0, 0), FALSE);
-
 
 	DrawFormatString(290, 50, create->black, "10 × 10");
 	DrawFormatString(440, 50, create->black, "15 × 10");
 	DrawFormatString(590, 50, create->black, "15 × 15");
 	DrawFormatString(740, 50, create->black, "20 × 15");
 	DrawFormatString(890, 50, create->black, "20 × 20");
-	DrawFormatString(850, 150, create->black, "画像を取り込む");
-	DrawFormatString(850, 300, create->black, "パズルを投稿する");
+
+	DrawFormatString(850, 200, create->black, "画像を取り込む");
+	DrawFormatString(850, 350, create->black, "パズルを投稿する");
 	// DrawFormatString(850, 450, GetColor(0, 0, 0), "パズルに変換");
 
 
@@ -96,7 +97,7 @@ int InitializeMakePuzzle(MakePuzzle_t* create) {
 		for (int i = 0; i < 8; i++) {
 			int S = create->posi + i * create->selectsize + 270; // パズルマスの横
 			int T = create->posi + j * create->selectsize; // パズルマスの縦
-			DrawBox(S, T + 520, S + create->selectsize - 1, T + create->selectsize - 1 + 520, create->col[i][j], TRUE); // 460とかはパズル画面表示の調整
+			DrawBox(S, T + 520, S + create->selectsize - 1, T + create->selectsize - 1 + 520, create->col[i][j], TRUE); // 520とかはパズル画面表示の調整
 		}
 	}
 
@@ -117,6 +118,7 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 	GetMouseState(&mouse);
 
 	// サイズ選択ボタンが押されたらパズルのサイズを変更する
+	// 10*10
 	if ((&mouse)->mButton == left && click(&(mouse), 280, 30, 370, 80)) {
 		create->x_size = 10;
 		create->y_size = 10;
@@ -124,8 +126,12 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		create->semisize = 20;
 		puzzle.x_size = create->x_size;
 		puzzle.y_size = create->y_size;
+		DrawFormatString(290, 50, create->aqua, "10 × 10");
+
+		//DrawBox(290, 40, 360, 70, create->gainsboro, FALSE);
 
 	}
+	// 15*10
 	if ((&mouse)->mButton == left && click(&(mouse), 430, 30, 520, 80)) {
 		create->x_size = 15;
 		create->y_size = 10;
@@ -133,8 +139,10 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		create->semisize = 13;
 		puzzle.x_size = create->x_size;
 		puzzle.y_size = create->y_size;
+		DrawFormatString(440, 50, create->aqua, "15 × 10");
 
 	}
+	// 15*15
 	if ((&mouse)->mButton == left && click(&(mouse), 580, 30, 670, 80)) {
 		create->x_size = 15;
 		create->y_size = 15;
@@ -142,9 +150,10 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		create->semisize = 13;
 		puzzle.x_size = create->x_size;
 		puzzle.y_size = create->y_size;
+		DrawFormatString(590, 50, create->aqua, "15 × 15");
 
 	}
-
+	// 20*15
 	if ((&mouse)->mButton == left && click(&(mouse), 740, 30, 830, 80)) {
 		create->x_size = 20;
 		create->y_size = 15;
@@ -152,9 +161,10 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		create->semisize = 10;
 		puzzle.x_size = create->x_size;
 		puzzle.y_size = create->y_size;
+		DrawFormatString(740, 50, create->aqua, "20 × 15");
 
 	}
-
+	// 20*20
 	if ((&mouse)->mButton == left && click(&(mouse), 890, 30, 980, 80)) {
 		create->x_size = 20;
 		create->y_size = 20;
@@ -162,11 +172,13 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		create->semisize = 10;
 		puzzle.x_size = create->x_size;
 		puzzle.y_size = create->y_size;
+		DrawFormatString(890, 50, create->aqua, "20 × 20");
 
 	}
 
 	// 消しゴムボタンが押されたら白色の情報を保持
 	if ((&mouse)->mButton == left && click(&(mouse), 20, 20, 110, 110)) {
+		DrawBox(10, 100, 120, 120, create->white, FALSE);
 		create->tmp = create->white;
 	}
 
@@ -177,6 +189,7 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 			int T = create->posi + j * create->selectsize; // パズルマスの縦
 			// 左クリックされたら色の情報を保持
 			if ((&mouse)->mButton == left && click(&(mouse), S, T + 520, S + create->selectsize - 1, T + create->selectsize - 1 + 520)) {
+				DrawBox(S+1, T+1, S + create->semisize-2, T + create->semisize-2, create->white, FALSE);
 				create->tmp = create->col[i][j];
 			}
 		}
@@ -202,78 +215,85 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 					create->colorlist[i][j] = create->tmp;
 				}
 			}
+
 			// colorlistの色情報を画面に反映
 			if (create->colorlist[i][j] != 0) {
 				DrawBox(S, T, S + create->sellsize - 1, T + create->sellsize - 1, create->colorlist[i][j], TRUE);
 
-				// 縮小パズルのマスを黒く塗る
+				// 濃い色が塗られている場合, 縮小パズルのマスを黒く塗る
 				if (create->colorlist[i][j] != create->white)
-					DrawBox(s, t, s + create->semisize - 1, t + create->semisize - 1, create->black, TRUE);
-				
-				if(create->tmp ==create->white)
+					if (create->colorlist[i][j] != create->gainsboro && create->colorlist[i][j] != create->aqua &&
+						create->colorlist[i][j] != create->springgreen && create->colorlist[i][j] != create->red &&
+						create->colorlist[i][j] != create->pink && create->colorlist[i][j] != create->orange &&
+						create->colorlist[i][j] != create->lemonchiffon && create->colorlist[i][j] != create->mediumpurple) {
+						DrawBox(s, t, s + create->semisize - 1, t + create->semisize - 1, create->black, TRUE);
+					}
+
+				// 色情報を決められた値に代入する
+				if(create->colorlist[i][j] == create->white)
 					puzzle.puzzleData[i][j] = 0;
 				
 
-				if(create->tmp== create->black)
+				if(create->colorlist[i][j] == create->black)
 					puzzle.puzzleData[i][j] = 101;
 				
 
-				if (create->tmp == create->gainsboro)
+				if (create->colorlist[i][j] == create->gainsboro)
 					puzzle.puzzleData[i][j] = 1;
 
-				if (create->tmp == create->blue)
+				if (create->colorlist[i][j] == create->blue)
 					puzzle.puzzleData[i][j] = 102;
 					
 
-				if (create->tmp == create->aqua)
+				if (create->colorlist[i][j] == create->aqua)
 					puzzle.puzzleData[i][j] = 2;
 				
 
-				if (create->tmp == create->green)
+				if (create->colorlist[i][j] == create->green)
 					puzzle.puzzleData[i][j] = 103;
 				
 
-				if (create->tmp == create->springgreen)
+				if (create->colorlist[i][j] == create->springgreen)
 					puzzle.puzzleData[i][j] = 3;
 					
 
-				if (create->tmp == create->maroon)
+				if (create->colorlist[i][j] == create->maroon)
 					puzzle.puzzleData[i][j] = 104;
 					
 
-				if (create->tmp == create->red)
+				if (create->colorlist[i][j] == create->red)
 					puzzle.puzzleData[i][j] = 4;
 				
 
-				if (create->tmp == create->deeppink)
+				if (create->colorlist[i][j] == create->deeppink)
 					puzzle.puzzleData[i][j] = 105;
 					
 
-				if (create->tmp == create->pink)
+				if (create->colorlist[i][j] == create->pink)
 					puzzle.puzzleData[i][j] = 5;
 					
 
-				if (create->tmp == create->saddlebrown)
+				if (create->colorlist[i][j] == create->saddlebrown)
 					puzzle.puzzleData[i][j] = 106;
 					
 
-				if (create->tmp == create->orange)
+				if (create->colorlist[i][j] == create->orange)
 					puzzle.puzzleData[i][j] = 6;
 					
 
-				if (create->tmp == create->gold)
+				if (create->colorlist[i][j] == create->gold)
 					puzzle.puzzleData[i][j] = 107;
 					
 
-				if (create->tmp == create->lemonchiffon)
+				if (create->colorlist[i][j] == create->lemonchiffon)
 					puzzle.puzzleData[i][j] = 7;
 					
 
-				if (create->tmp == create->indigo)
+				if (create->colorlist[i][j] == create->indigo)
 					puzzle.puzzleData[i][j] = 108;
 					
 
-				if (create->tmp == create->mediumpurple)
+				if (create->colorlist[i][j] == create->mediumpurple)
 					puzzle.puzzleData[i][j] = 8;
 			
 			}
@@ -295,7 +315,9 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 
 	// 画像を取り込むボタンが押されたらエクスプローラーを起動し、パズル作成処理部に選択された画像を送信する
 	// とりあえず、今は画像を取り込むまで
-	if ((&mouse)->mButton == left && click(&(mouse), 830, 130, 1000, 180)) {
+	if ((&mouse)->mButton == left && click(&(mouse), 830, 180, 1000, 230)) {
+		DrawFormatString(850, 200, create->aqua, "画像を取り込む");
+
 		int GrHandle = 0;
 		char FullPath[MAX_PATH], FileName[MAX_PATH];
 
@@ -334,15 +356,25 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 			GrHandle = LoadGraph(FullPath);
 		}
 	}
-	DrawBox(830, 280, 1000, 330, create->black, FALSE);
+	//DrawBox(830, 280, 1000, 330, create->black, FALSE);
 
 
-	if ((&mouse)->mButton == left && click((&mouse), 830, 280, 1000, 330)) {
-		// アップロードする
-		//DrawBox(530, 350, 620, 440, create->black, FALSE);
-		//DrawFormatString(540, 360, create->black, "本当に投稿しますか？");
-		
+	if ((&mouse)->mButton == left && click((&mouse), 830, 330, 1000, 380)) {
+		flag = 1;
+	}
+	if (flag == 1) {
+		DrawBox(350, 200, 800, 500, create->black, TRUE);
+		//DrawBox(370, 450, 440, 490, create->white, FALSE);
+		//DrawFormatString(400, 460, create->white, "OK");
+
+		DrawFormatString(420, 210, create->white, "タイトルを付けてください",TRUE);
+		DrawFormatString(420, 230, create->white, "(Enterキーで決定) (Escキーで戻る)", TRUE);
+
+		DrawBox(460, 340, 640, 370, create->white, FALSE);
+		KeyInputString(470,350,16,puzzle.puzzleTitle, create->white);
+
 		savePuzzle(&(puzzle));
+		flag = 0;
 	}
 
 
@@ -370,22 +402,7 @@ void FinalizeMakePuzzle(MakePuzzle_t* create) {
 }
 
 
-
-/******************************
-*** Function Name	: click
-*** Designer		: 笹川
-*** Date			: 2020.6.28
-*** Function		: クリック判定
-*** Return			: 成功: 1 or 失敗: 0
-******************************/
-int click(Mouse_t* mouse, int x1, int y1, int x2, int y2) {
-	if (mouse->mX > x1 && mouse->mX < x2 && mouse->mY > y1 && mouse->mY < y2) {
-		return 1;
-	}
-	return 0;
-}
-
-
+// csvファイル書き込みテスト
 void savePuzzle(Puzzle_t* pz) {
 	FILE* fp;
 	int i, j, x = pz->x_size, y = pz->y_size;

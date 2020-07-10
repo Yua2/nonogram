@@ -8,6 +8,8 @@ typedef struct MakePuzzle{
 	Button_t eraserButton;
 	Button_t resetButton;
 	Button_t backButton;
+
+
 	int posi = 100; // 余白
 	int selectsize = 40; // 色選択マス1個のサイズ
 	int sellsize = 25; // パズルマス１個のサイズ
@@ -42,7 +44,6 @@ typedef struct MakePuzzle{
 int InitializeMakePuzzle(MakePuzzle_t*);
 int UpdateMakePuzzle(MakePuzzle_t*);
 void FinalizeMakePuzzle(MakePuzzle_t*);
-int click(Mouse_t*, int, int, int ,int);
 void savePuzzle(Puzzle_t*);
 
 #endif /* MAKEPUZZLE_H_*/
