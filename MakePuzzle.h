@@ -3,11 +3,6 @@
 #include "Controller.h"
 #include "Information.h"
 #include "Dxlib.h"
-#ifndef MAKEPUZZLE_H_
-#define MAKEPUZZLE_H_
-#include "Controller.h"
-#include "Information.h"
-#include "Dxlib.h"
 
 typedef struct MakePuzzle{
 	Button_t eraserButton;

@@ -12,11 +12,13 @@
 #include "Information.h"
 #include "SceneMgr.h"
 #include "Information.h"
+#include "InputNickName.h"
 #include <string.h>
 #include <stdlib.h>
-#include "InputNickName.h"
+#include <windows.h>
 static int flag = 0;
 static Puzzle_t puzzle;
+static Player_t player;
 /******************************************************
 /******************************************************
 *** Function Name	: InitializeMakePuzzle
@@ -369,8 +371,25 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 
 		DrawBox(460, 340, 700, 370, create->white, FALSE);
 		KeyInputString(470,350,30,puzzle.puzzleTitle, create->white);
-
-		savePuzzle(&(puzzle));
+		// Enterキーが押されたら保存し, flag=2に移動
+		if (CheckHitKey(KEY_INPUT_RETURN) == 1){
+			savePuzzle(&(puzzle));
+			flag++;
+		}
+		// Escキーが押されたら作成画面に戻る
+		else if (CheckHitKey(KEY_INPUT_ESCAPE) == 1) {
+			flag = 0;
+		}
+	}
+	// 保存したとメッセージを表示し,flag=3に移動   本当は直下にSleep書きたかったけど表示がうまくいかなかったので、分岐したらなんかできた
+	else if (flag == 2) {
+		DrawBox(350, 200, 800, 500, create->black, TRUE);
+		DrawFormatString(500, 300, create->white, "保存しました", TRUE);
+		flag++;
+	}
+	// 2秒間メッセージを表示させて作成画面に戻る
+	else if (flag == 3) {
+		Sleep(2000);
 		flag = 0;
 	}
 
