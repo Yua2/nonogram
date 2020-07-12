@@ -1,4 +1,4 @@
-﻿/******************************************************
+/******************************************************
 *** Designer      : 杉田
 *** Date          : 2020.6.24
 *** Purpose       : W5 パズル作成画面
@@ -365,31 +365,51 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		//DrawFormatString(400, 460, create->white, "OK");
 
 		DrawFormatString(420, 210, create->white, "タイトルを付けてください", TRUE);
-		DrawFormatString(420, 230, create->white, "(Enterキーで決定) (Escキーで戻る)", TRUE);
-
+		DrawFormatString(420, 230, create->white, "(Enterキーで決定) (Escキーで作成画面に戻る)", TRUE);
 		DrawBox(460, 340, 700, 370, create->white, FALSE);
-		KeyInputString(470, 350, 30, puzzle.puzzleTitle, create->white);
+		KeyInputString(470, 350, 256, puzzle.puzzleTitle, create->white);
 
-		DrawBox(460, 340, 700, 370, create->white, FALSE);
-		KeyInputString(470, 350, 30, puzzle.puzzleMakerId, create->white);
-
-		for (int i = 0; i < 10; i++) {
-			puzzle.ranking[i].flag = 0;
-			sprintf_s(puzzle.ranking[i].playerId, "none");
-			puzzle.ranking[i].cleartime = 0;
+		// Enterキーが押されたらニックネーム入力に移る
+		if (CheckHitKey(KEY_INPUT_RETURN) == 1) {
+			flag++;
 		}
-		savePuzzle(&(puzzle));
-		flag = 0;
+		// Escキーが押されたら入力画面を閉じる
+		else if (CheckHitKey(KEY_INPUT_ESCAPE) == 1) {
+			flag = 0;
+		}
 	}
-
-	// 保存したとメッセージを表示し,flag=3に移動   本当は直下にSleep書きたかったけど表示がうまくいかなかったので、分岐したらなんかできた
+	// ニックネーム入力画面の処理
 	else if (flag == 2) {
+		DrawBox(350, 200, 800, 500, create->black, TRUE);
+		DrawBox(460, 340, 700, 370, create->white, FALSE);
+		DrawFormatString(420, 210, create->white, "ニックネームを付けてください", TRUE);
+		DrawFormatString(420, 230, create->white, "(Enterキーで決定) (Escキーで作成画面に戻る)", TRUE);
+		KeyInputString(470, 350, 256, puzzle.puzzleMakerId, create->white);
+
+		// Enterキーが押されたらflag=3に移動
+		if (CheckHitKey(KEY_INPUT_RETURN) == 1) {
+			savePuzzle(&(puzzle));
+			// ランキング情報を更新
+			for (int i = 0; i < 10; i++) {
+				puzzle.ranking[i].flag = 0;
+				sprintf_s(puzzle.ranking[i].playerId, "none");
+				puzzle.ranking[i].cleartime = 0;
+			}
+			flag++;
+		}
+		// Escキーが押されたら作成画面に戻る
+		else if (CheckHitKey(KEY_INPUT_ESCAPE) == 1) {
+			flag = 0;
+		}
+	}
+	// 保存完了メッセージを表示 flag=4に移動
+	else if (flag == 3) {
 		DrawBox(350, 200, 800, 500, create->black, TRUE);
 		DrawFormatString(500, 300, create->white, "保存しました", TRUE);
 		flag++;
 	}
 	// 2秒間メッセージを表示させて作成画面に戻る
-	else if (flag == 3) {
+	else if (flag == 4) {
 		Sleep(2000);
 		flag = 0;
 	}
