@@ -6,6 +6,8 @@
 #include "DxLib.h"
 #include "SceneMgr.h"
 #include "MouseState.h"
+#include "file.h"
+#include "Information.h"
 
 /******************************************************
 *** Function Name: InitializeMenu
@@ -41,15 +43,16 @@ int InitializeMenu(Menu_t *mMenu) {
 *** Function:メニュー画面を更新する．
 *** Return: Escene
 *******************************************************/
-int UpdateMenu(Menu_t* mMenu,Mouse_t* mouse) {
+int UpdateMenu(Menu_t* mMenu,Mouse_t* mouse,Puzzle_t* puzzle) {
 	int i,j,color[3];
+	char name[64]="puzzleInfo/Puzzle0.csv";
 	for (i = 0; i < 3; i++) {                                                                       //マウスが置かれているボタンを判定
 		if (mouse->mX > mMenu->b[i].leftx && mouse->mX<mMenu->b[i].rightx && mouse->mY>mMenu->b[i].upy && mouse->mY < mMenu->b[i].downy) {
 			color[i] = GetColor(120, 120, 120);
 			if (mouse->mButton == left && mouse->waitRelease != 1) {
 				mouse->waitRelease = 1;
 				switch (i) {
-				case(0): return GameScr;
+				case(0): readPuzzle(puzzle,name); return GameScr;
 				case(1):return SelectionScr;
 				case(2):return MakePuzzleScr;
 				fault: break;

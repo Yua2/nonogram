@@ -7,7 +7,6 @@ typedef struct TEXT {
 	int   mY;			// y座標
 	char* mSentence;	// 表示文
 } Text_t;
-
 // テキストボックス構造体
 typedef struct TEXT_BOX {
 	int   mX1;				// 左端座標
@@ -16,7 +15,6 @@ typedef struct TEXT_BOX {
 	int   mY2;				// 下端座標
 	char* inputSentence;	// 入力された文
 } TextBox_t;
-
 // ボタン構造体
 typedef struct BUTTON {
 	int			  mX1;			// 左端座標
@@ -27,8 +25,6 @@ typedef struct BUTTON {
 	unsigned int  mColor;		// マスの色		
 	bool          mState;		// ボタン判定: true = 押されている, false = 押されていない
 } Button_t;
-
 // ボタン関数
 void setButton(int, int, int, int, int, unsigned int, Mouse_t, Button_t*);
-
 #endif /* CONTROLLER_H_ */

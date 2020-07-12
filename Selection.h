@@ -7,6 +7,7 @@ typedef struct {
 	char puzzleMakerName[256];
 	char fastestId[256];
 	int fastestTime;
+	int flag;
 }SimplePuzzle_t;
 typedef struct {
 	int size;

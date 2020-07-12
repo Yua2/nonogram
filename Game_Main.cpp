@@ -32,8 +32,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		SetDrawScreen(DX_SCREEN_BACK);
 		if (scene != nextScene) {	
-			FinalizeScene(scene, &scrMgr);
-			scene = InitializeScene(nextScene, &scrMgr);
+			FinalizeScene(scene, &scrMgr,&pz);
+			scene = InitializeScene(nextScene, &scrMgr,&pz);
 		}
 
 		nextScene = UpdateScene(scene, &scrMgr, &mouse, key, &pz);

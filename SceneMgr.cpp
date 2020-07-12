@@ -3,7 +3,7 @@
 #include "MouseState.h"
 #include "Information.h"
 
-int InitializeScene(int nextScene, ScrMgr_t* scrMgr) {
+int InitializeScene(int nextScene, ScrMgr_t* scrMgr,Puzzle_t *puzzle) {
 	int scene = 1;
 
 	switch (nextScene) {
@@ -17,7 +17,7 @@ int InitializeScene(int nextScene, ScrMgr_t* scrMgr) {
 		scene = InitializeSelection(&(scrMgr->mSelection));
 		break;
 	case(GameScr):
-		scene = InitializeGame(&(scrMgr->mGame));
+		scene = InitializeGame(&(scrMgr->mGame),puzzle);
 		break;
 	case(MakePuzzleScr):
 		scene = InitializeMakePuzzle(&(scrMgr->mMakePuzzle));
@@ -33,16 +33,16 @@ int UpdateScene(int scene, ScrMgr_t* scrMgr, Mouse_t* mouse, int* key, Puzzle_t 
 
 	switch (scene) {
 	case(InputNickNameScr):
-		nextScene = UpdateInputNickName(&(scrMgr->mInputNickName), mouse);
+		nextScene = UpdateInputNickName(&(scrMgr->mInputNickName),mouse);
 		break;
 	case(MenuScr):
-		nextScene = UpdateMenu(&(scrMgr->mMenu),mouse);
+		nextScene = UpdateMenu(&(scrMgr->mMenu),mouse,puzzle);
 		break;
 	case(SelectionScr):
 		nextScene = UpdateSelection(&(scrMgr->mSelection), puzzle,mouse);
 		break;
 	case(GameScr):
-		nextScene = UpdateGame(&(scrMgr->mGame), puzzle);
+		nextScene = UpdateGame(&(scrMgr->mGame), puzzle,mouse,key);
 		break;
 	case(MakePuzzleScr):
 		nextScene = UpdateMakePuzzle(&(scrMgr->mMakePuzzle));
@@ -54,7 +54,7 @@ int UpdateScene(int scene, ScrMgr_t* scrMgr, Mouse_t* mouse, int* key, Puzzle_t 
 
 
 // M3:シーン終了処理
-void FinalizeScene(int scene, ScrMgr_t* scrMgr) {
+void FinalizeScene(int scene, ScrMgr_t* scrMgr,Puzzle_t *puzzle) {
 	switch (scene) {
 	case(InputNickNameScr):
 		FinalizeInputNickName(&(scrMgr->mInputNickName));
@@ -66,7 +66,7 @@ void FinalizeScene(int scene, ScrMgr_t* scrMgr) {
 		FinalizeSelection(&(scrMgr->mSelection));
 		break;
 	case(GameScr):
-		FinalizeGame(&(scrMgr->mGame));
+		FinalizeGame(&(scrMgr->mGame),puzzle);
 		break;
 	case(MakePuzzleScr):
 		FinalizeMakePuzzle(&(scrMgr->mMakePuzzle));
