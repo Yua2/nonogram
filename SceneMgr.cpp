@@ -27,7 +27,7 @@ int InitializeScene(int nextScene, ScrMgr_t* scrMgr,Puzzle_t *puzzle) {
 	return scene;
 }
 
-// M2:シーン更新処理
+// M2:シーン更新処�?
 int UpdateScene(int scene, ScrMgr_t* scrMgr, Mouse_t* mouse, int* key, Puzzle_t *puzzle) {
 	int nextScene=1;
 
@@ -42,7 +42,12 @@ int UpdateScene(int scene, ScrMgr_t* scrMgr, Mouse_t* mouse, int* key, Puzzle_t 
 		nextScene = UpdateSelection(&(scrMgr->mSelection), puzzle,mouse);
 		break;
 	case(GameScr):
-		nextScene = UpdateGame(&(scrMgr->mGame), puzzle,mouse,key);
+		if (puzzle->puzzleId == 0) {
+			nextScene = UpdateTutorial(&(scrMgr->mGame), puzzle, mouse, key);
+		}
+		else {
+			nextScene = UpdateGame(&(scrMgr->mGame), puzzle, mouse, key);
+		}
 		break;
 	case(MakePuzzleScr):
 		nextScene = UpdateMakePuzzle(&(scrMgr->mMakePuzzle));
@@ -53,7 +58,7 @@ int UpdateScene(int scene, ScrMgr_t* scrMgr, Mouse_t* mouse, int* key, Puzzle_t 
 }
 
 
-// M3:シーン終了処理
+// M3:シーン終�??�?
 void FinalizeScene(int scene, ScrMgr_t* scrMgr,Puzzle_t *puzzle) {
 	switch (scene) {
 	case(InputNickNameScr):

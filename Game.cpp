@@ -139,11 +139,13 @@ int InitializeGame(Game_t* game, Puzzle_t* puzzle) {
 	game->penButton.mState = true;
 	game->clearFlag = true;
 	game->inputNicknameDisplayFlag = -1;
+	game->fromWhiteChange = false;
+	game->toWhiteChange = false;
 
 	for (int j = 0, k = game->puzzleY; j < puzzle->y_size; j++, k += game->puzzleGridSize - 1) {
 		for (int i = 0, l = game->puzzleX; i < puzzle->x_size; i++, l += game->puzzleGridSize - 1) {
 			setButton(l, k, l + game->puzzleGridSize, k + game->puzzleGridSize, NULL, GetColor(255, 255, 255), mouse, &(game->puzzleGrid[i][j]));
-			game->puzzleState[i][j] = false;
+			game->puzzleState[i][j] = true;
 		}
 	}
 
@@ -199,7 +201,9 @@ int InitializeGame(Game_t* game, Puzzle_t* puzzle) {
 // M17:チュートリアル画面更新
 int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 	GetMouseState(mouse);
+
 	if (game->clearFlag) {
+	
 		bool penState = game->penButton.mState;
 		bool eraserState = !penState;
 
@@ -383,8 +387,6 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			}
 		}
 
-
-
 		if (diff == 0) {
 			game->clearFlag = false;
 			game->finishTime = GetNowCount();
@@ -451,97 +453,26 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			}
 		}
 
-		int titleWidth = GetDrawFormatStringWidthToHandle(game->puzzleTitleFontHandle, puzzle->puzzleTitle);
-		DrawFormatStringToHandle(720 - (titleWidth / 2), 10, GetColor(0, 0, 0), game->puzzleTitleFontHandle, puzzle->puzzleTitle);
-
-		DrawBox(20, 20, 500, 590, GetColor(255, 255, 255), TRUE);
-		DrawBox(20, 20, 500, 590, GetColor(0, 0, 0), FALSE);
-		for (int i = 0; i < 10; i++) {
-			DrawLine(20, 50 + (54 * i), 500, 50 + (54 * i), GetColor(0, 0, 0), 1);
-		}
-		int drawRankingLeftLineX = 24 + GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%2d", 10);
-		int drawRankingRightLineX = 496 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "9999秒");
-		DrawLine(drawRankingLeftLineX, 50, drawRankingLeftLineX, 590, GetColor(0, 0, 0), 1);
-		DrawLine(drawRankingRightLineX, 50, drawRankingRightLineX, 590, GetColor(0, 0, 0), 1);
-
-		int drawTitleX = 270 - (GetDrawFormatStringWidthToHandle(game->rankingTitleFontHnadle, "ランキング") / 2);
-		DrawFormatStringToHandle(drawTitleX, 21, GetColor(0, 0, 0), game->puzzleTitleFontHandle, "ランキング");
-		for (int i = 0; i < 10; i++) {
-			int drawRankingNumX = drawRankingLeftLineX - 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%2d", 10) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%d", i + 1) / 2;
-			DrawFormatStringToHandle(drawRankingNumX, 52 + (54 * i), GetColor(0, 0, 0), game->rankingFontHandle, "%d", i + 1);
-			int drawRankingNameX = drawRankingRightLineX - (drawRankingRightLineX - drawRankingLeftLineX) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, puzzle->ranking[i].playerId) / 2;
-			DrawFormatStringToHandle(drawRankingNameX, 52 + (54 * i), GetColor(0, 0, 0), game->rankingFontHandle, puzzle->ranking[i].playerId);
-			int drawRankingTimeX = drawRankingRightLineX + 2 + (500 - drawRankingRightLineX) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%d秒", puzzle->ranking[i].cleartime) / 2;
-			DrawFormatStringToHandle(drawRankingTimeX, 52 + (54 * i), GetColor(0, 0, 0), game->rankingFontHandle, "%d秒", puzzle->ranking[i].cleartime);
-		}
-
 		DrawGraph(215, 610, game->backButton.mImageHandle, FALSE);
 		setButton(215, 610, 305, 700, game->backButton.mImageHandle, NULL, *mouse, &(game->backButton));
 
 		if (game->backButton.mState) {
 			mouse->waitRelease = 1;
-			if (game->inputNicknameDisplayFlag == 1) {
-				return MenuScr;
-			}
+			return MenuScr;
 		}
-
 
 		DrawBox(game->puzzleX, game->puzzleY - 100, game->puzzleX + 400, game->puzzleY - 20, GetColor(255, 255, 255), TRUE);
 		DrawBox(game->puzzleX, game->puzzleY - 100, game->puzzleX + 400, game->puzzleY - 20, GetColor(0, 0, 0), FALSE);
-		int drawPlayerRankingLeftLineX = game->puzzleX + 10 + GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "ランク外");
 		int drawPlayerRankingRightLineX = game->puzzleX + 400 - 10 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "9999秒");
-		DrawLine(drawPlayerRankingLeftLineX, game->puzzleY - 100, drawPlayerRankingLeftLineX, game->puzzleY - 20, GetColor(0, 0, 0), 1);
 		DrawLine(drawPlayerRankingRightLineX, game->puzzleY - 100, drawPlayerRankingRightLineX, game->puzzleY - 20, GetColor(0, 0, 0), 1);
 		int time = (game->finishTime / 1000) - (game->startTime / 1000);
-		int rank = 0;
-		for (int i = 0; i < 10; i++) {
-			if (puzzle->ranking[i].cleartime > time) {
-				rank = i + 1;
-				if (game->inputNicknameDisplayFlag == -1) {
-					game->inputNicknameDisplayFlag = 0;
-				}
-				SetActiveKeyInput(game->keyHandle);
-				break;
-			}
-		}
-		int drawPlayerRankingNumX = drawPlayerRankingLeftLineX - (drawPlayerRankingLeftLineX - game->puzzleX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "%d", rank) / 2;
-		int drawPlayerRankingNameX = drawPlayerRankingRightLineX - (drawPlayerRankingRightLineX - drawPlayerRankingLeftLineX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "あなた") / 2;
+		int drawPlayerRankingNameX = drawPlayerRankingRightLineX - (drawPlayerRankingRightLineX - game->puzzleX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "あなた") / 2;
 		int drawPlayerRankingTimeX = drawPlayerRankingRightLineX + (game->puzzleX + 400 - drawPlayerRankingRightLineX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "%d秒", time) / 2;
-		if (rank > 0) {
-			DrawFormatStringToHandle(drawPlayerRankingNumX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "%d", rank);
-		}
-		else {
-			DrawFormatStringToHandle(game->puzzleX + 5, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "ランク外");
-		}
 		DrawFormatStringToHandle(drawPlayerRankingNameX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "あなた");
 		DrawFormatStringToHandle(drawPlayerRankingTimeX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "%d秒", time);
 
-		if (game->inputNicknameDisplayFlag == 0) {
-			DrawBox(350, 200, 800, 500, GetColor(200, 200, 200), TRUE);
-			DrawBox(350, 200, 800, 500, GetColor(0, 0, 0), FALSE);
-			DrawBox(370, 450, 440, 490, GetColor(255, 255, 255), TRUE);
-			DrawBox(370, 450, 440, 490, GetColor(0, 0, 0), FALSE);
-			DrawFormatString(395, 465, GetColor(0, 0, 0), "OK");
-
-			int str1X = 350 + (800 - 350) / 2 - GetDrawFormatStringWidth("ランキングTOP10入りおめでとうございます!!") / 2;
-			int str2X = 350 + (800 - 350) / 2 - GetDrawFormatStringWidth("ランキングに乗せるニックネームを入力してください") / 2;
-			DrawFormatString(str1X, 210, GetColor(0, 0, 0), "ランキングTOP10入りおめでとうございます!!");
-			DrawFormatString(str2X, 230, GetColor(0, 0, 0), "ランキングに乗せるニックネームを入力してください");
-
-			DrawBox(460, 340, 700, 370, GetColor(0, 0, 0), FALSE);
-
-			Button_t tmpButton;
-			setButton(370, 450, 440, 490, NULL, NULL, *mouse, &tmpButton);
-			if (tmpButton.mState) {
-				game->inputNicknameDisplayFlag = 1;
-				DeleteKeyInput(game->keyHandle);
-			}
-			else {
-				int black = GetColor(255, 255, 255);
-				SetKeyInputStringColor(black, black, black, black, black, black, black);
-				DrawKeyInputString(462, 344, game->keyHandle);
-			}
-		}
+		DrawString(50, 340, "クリアおめでとうございます。", GetColor(0, 0, 0));
+		DrawString(50, 380, "他のパズルや、自分で作ったパズルも遊んでみてください。", GetColor(0, 0, 0));
 	}
 
 	mouse->waitRelease = 1;
@@ -550,8 +481,12 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 
 // M18:ゲームプレイ更新
 int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
-	GetMouseState(mouse);
-	char playerId[256];
+	GetMouseState(mouse, TRUE);
+	
+	if (mouse->waitRelease == 0) {
+		mouse->mButton = none;
+	}
+
 	if (game->clearFlag) {
 		bool penState = game->penButton.mState;
 		bool eraserState = !penState;
@@ -598,32 +533,97 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			mouse->waitRelease = 1;
 			return SelectionScr;
 		}
-
+		
+		// ヒントボタンが押された場合
 		if (game->hintButton.mState) {
-			game->hintcounter++;
+			// ループで回ってきたとき，ヒントボタンを前のループでクリックしていなかった場合
 			if (!hintState) {
-				int i = GetRand(puzzle->y_size - 1);
-				int j = GetRand(puzzle->x_size - 1);
-				while (game->puzzleState[i][j]) {
-					i = GetRand(puzzle->y_size - 1);
-					j = GetRand(puzzle->x_size - 1);
+				game->hintcounter++;	// ヒントボタンを押した回数(0より大きいとランキングに反映されない)
+				int rand = GetRand(1);	// 乱数でヒントを列で出すか行で出すかの決定(0:行, 1:列)
+				// 行でヒントを出す場合
+				if (rand == 0) {
+					int line = 0;	// 乱数で何行目をヒントとして表示するかの決定
+					bool breakFlag = true;	// whileループのブレークフラグ
+					// 正しくないマスが1つでもあるような行が見つかるまでlineを更新
+					while (breakFlag) {
+						line = GetRand(puzzle->y_size - 1);	// lineの更新
+
+						// ヒントとして表示する行がすべて正しく塗られているか判定し，間違っているマスが見つかればwhileループのブレークフラグをfalseにする
+						for (int i = 0; i < puzzle->x_size; i++) {
+							// ユーザによって塗られていないマス(空白マスまたは×マス)が間違っている場合(もし遊んでいるパズルのパズルデータのline行目のi列が100より大きく(黒く塗るマス)，かつ，正誤判定用のパズルデータのline行目のi列が黒く塗られていない)
+							if (puzzle->puzzleData[i][line] > 100 && game->checkPuzzle.puzzleData[i][line] != 1) {
+								breakFlag = false;	// whileループを抜ける
+								break;	// ループを抜ける
+							}
+							// ユーザによって塗られているマスが間違っている場合(もし遊んでいるパズルのパズルデータのline行目のi列100がより小さく(塗らないマス)，かつ，正誤判定用のパズルデータのline行目のi列が黒く塗られている)
+							else if (puzzle->puzzleData[i][line] <= 100 && game->checkPuzzle.puzzleData[i][line] == 1) {
+								breakFlag = false;	// whileループを抜ける
+								break;	// ループを抜ける
+							}
+						}
+					}
+
+					// ヒントとして表示する行の正解データをセットし，表示するマスを不変のマスにセットする
+					for (int i = 0; i < puzzle->x_size; i++) {
+						// もし遊んでいるパズルのパズルデータのline行目のi列が100より大きい(黒く塗るマス)の場合
+						if (puzzle->puzzleData[i][line] > 100) {
+							game->checkPuzzle.puzzleData[i][line] = 1;	// 正誤判定用パズルのパズルデータのline行目のiを黒マス(1)にセット
+						}
+						// 遊んでいるパズルのパズルデータのline行目のi列が100以下(塗らなくていいますマス)の場合
+						else {
+							game->checkPuzzle.puzzleData[i][line] = 0;	// 正誤判定用パズルのパズルデータのline行目のiを×表示のマス(0)にセット
+						}
+						game->puzzleState[i][line] = false;	// line行目のi列を不変マスにセット
+					}
 				}
-				game->puzzleState[i][j] = true;
-				if (puzzle->puzzleData[i][j] > 100) {
-					game->checkPuzzle.puzzleData[i][j] = 1;
-				}
-				else if (puzzle->puzzleData[i][j] < 100) {
-					game->checkPuzzle.puzzleData[i][j] = 0;
+				// 列でヒントを出す場合
+				else {	// rand == 1
+					int cols = 0;	// 乱数で何列目をヒントとして表示するかの決定
+					bool breakFlag = true;	// whileループのブレークフラグ
+					// 正しくないマスが1つでもあるような列が見つかるまでcolsを更新
+					while (breakFlag) {
+						cols = GetRand(puzzle->x_size - 1);	// colsの更新
+
+						// ヒントとして表示する列がすべて正しく塗られているか判定し，間違っているマスが見つかればwhileループのブレークフラグをfalseにする
+						for (int j = 0; j < puzzle->y_size; j++) {
+							// ユーザによって塗られていないマス(空白マスまたは×マス)が間違っている場合(もし遊んでいるパズルのパズルデータのcols列目のj行が100より大きく(黒く塗るマス)，かつ，正誤判定用のパズルデータのcols列目のj行が黒く塗られていない)
+							if (puzzle->puzzleData[cols][j] > 100 && game->checkPuzzle.puzzleData[cols][j] != 1) {
+								breakFlag = false;	// whileループを抜ける
+								break;	// ループを抜ける
+							}
+							// ユーザによって塗られているマスが間違っている場合(もし遊んでいるパズルのパズルデータのcols列目のj行が100より小さく(塗らないマス)，かつ，正誤判定用のパズルデータのcols列目のj行が黒く塗られている)
+							else if (puzzle->puzzleData[cols][j] <= 100 && game->checkPuzzle.puzzleData[cols][j] == 1) {
+								breakFlag = false;	// whileループを抜ける
+								break;	// ループを抜ける
+							}
+						}
+					}
+									
+					// ヒントとして表示する列の正解データをセットし，表示するマスを不変のマスにセットする
+					for (int j = 0; j < puzzle->y_size; j++) {
+						// もし遊んでいるパズルのパズルデータのcols行目のi行が100より大きい(黒く塗るマス)の場合
+						if (puzzle->puzzleData[cols][j] > 100) {
+							game->checkPuzzle.puzzleData[cols][j] = 1;	// 正誤判定用パズルのパズルデータのcols列目のj行を黒マス(1)にセット
+						}
+						// 遊んでいるパズルのパズルデータのline行目のi列が100以下(塗らなくていいますマス)の場合
+						else {
+							game->checkPuzzle.puzzleData[cols][j] = 0;	// 正誤判定用パズルのパズルデータのline行目のj行を×表示のマス(0)にセット
+						}
+
+						game->puzzleState[cols][j] = false;	// cols列目のj行を不変マスにセット
+					}
 				}
 			}
 		}
 
+
 		if (game->resetButton.mState) {
 			for (int j = 0; j < puzzle->y_size; j++) {
 				for (int i = 0; i < puzzle->x_size; i++) {
-					game->puzzleState[i][j] = false;
-					game->checkPuzzle.puzzleData[i][j] = -1;
-					game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+					if (game->puzzleState[i][j]) {
+						game->checkPuzzle.puzzleData[i][j] = -1;
+						game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+					}
 				}
 			}
 		}
@@ -650,40 +650,73 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 					game->puzzleGrid[i][j].mState = true;
 				}
 
-				if (preState.mState != game->puzzleGrid[i][j].mState) {
-					if (game->puzzleGrid[i][j].mState && game->checkPuzzle.puzzleData[i][j] == -1 && mouse->mButton != right) {
-						game->puzzleState[i][j] = true;
-						if (game->penButton.mState) {
-							game->checkPuzzle.puzzleData[i][j] = 1;
+				if (game->puzzleGrid[i][j].mState && game->puzzleState[i][j]) {
+					switch (mouse->mState) {
+					case leftClick:
+						if (game->checkPuzzle.puzzleData[i][j] == -1) {
+							if (game->penButton.mState) {
+								game->checkPuzzle.puzzleData[i][j] = 1;
+								game->fromWhiteChange = true;
+								game->toWhiteChange = false;
+							}
+							else if (game->eraserButton.mState) {
+								game->checkPuzzle.puzzleData[i][j] = 0;
+								game->fromWhiteChange = true;
+								game->toWhiteChange = false;
+							}
 						}
-						else if (game->eraserButton.mState) {
+						else {
+							game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+							game->checkPuzzle.puzzleData[i][j] = -1;
+							game->fromWhiteChange = false;
+							game->toWhiteChange = true;
+						}
+						break;
+					case leftDrag:
+						if (game->checkPuzzle.puzzleData[i][j] == -1) {
+							if (game->fromWhiteChange) {
+								if (game->penButton.mState) {
+									game->checkPuzzle.puzzleData[i][j] = 1;
+								}
+								else if (game->eraserButton.mState) {
+									game->checkPuzzle.puzzleData[i][j] = 0;
+								}
+							}
+						}
+						else {
+							if (game->toWhiteChange) {
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->checkPuzzle.puzzleData[i][j] = -1;
+							}
+						}
+						break;
+					case rightClick:
+						game->checkPuzzle.puzzleData[i][j] = 0;
+						break;
+					case rightDrag:
+						if (game->checkPuzzle.puzzleData[i][j] == -1) {
 							game->checkPuzzle.puzzleData[i][j] = 0;
 						}
-					}
-					else if (game->puzzleGrid[i][j].mState && game->checkPuzzle.puzzleData[i][j] != -1 && mouse->mButton != right) {
-						game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
-						game->puzzleState[i][j] = false;
-						game->checkPuzzle.puzzleData[i][j] = -1;
-					}
-					else if (mouse->mButton == right) {
-						game->puzzleState[i][j] = true;
-						game->checkPuzzle.puzzleData[i][j] = 0;
+						break;
+					case none:
+						game->fromWhiteChange = false;
+						game->toWhiteChange = false;
+						break;
 					}
 				}
 
-				if (game->puzzleState[i][j]) {
-					if (game->checkPuzzle.puzzleData[i][j] == 1) {
-						game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
-						DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
-						DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
-					}
-					else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-						game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
-						DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
-						DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
-						DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), 1);
-						DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, GetColor(0, 0, 0), 1);
-					}
+
+				if (game->checkPuzzle.puzzleData[i][j] == 1) {
+					game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
+				}
+				else if (game->checkPuzzle.puzzleData[i][j] == 0) {
+					game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
+					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), 1);
+					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, GetColor(0, 0, 0), 1);
 				}
 				else {
 					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
@@ -692,13 +725,18 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			}
 		}
 
-		int index = 0;
-		DrawLine(game->puzzleX, game->puzzleY, (game->puzzleX) - 100, game->puzzleY, GetColor(0, 0, 0));
-		DrawLine(game->puzzleX, game->puzzleY, (game->puzzleX), game->puzzleY - 100, GetColor(0, 0, 0));
-		for (int j = 1; j <= puzzle->y_size; j++) {
-			for (int i = 1; i <= puzzle->x_size; i++) {
+		for (int j = 0; j <= puzzle->y_size; j++) {
+			for (int i = 0; i <= puzzle->x_size; i++) {
 				DrawLine(game->puzzleX, (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0));
 				DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY, (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0));
+				
+				if (j % 5 == 0) {
+					DrawLine(game->puzzleX + ((game->puzzleGridSize) * (puzzle->x_size)) - (puzzle->x_size), (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0), 3);
+				}
+
+				if (i % 5 == 0) {
+					DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY + ((game->puzzleGridSize) * (puzzle->y_size)) - (puzzle->y_size), (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0), 3);
+				}
 			}
 		}
 
@@ -706,7 +744,7 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			for (int j = 0, x = ((game->puzzleX) - 10); j < 10; j++, x -= 10) {
 				if ((game->drawGrid_V[i][j]) != 0) {
 					int drawY = y + (game->puzzleGridSize / 2) - 4;
-					DrawFormatStringToHandle(x, drawY, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_V[i][j]));
+					DrawFormatStringToHandle(x, drawY, GetColor(0, 0, 0), game->drawNumFontHandle, "%2d", (game->drawGrid_V[i][j]));
 				}
 			}
 		}
@@ -714,8 +752,19 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 		for (int i = 0, x = ((game->puzzleX)); i < (puzzle->x_size); i++, x += ((game->puzzleGridSize) - 1)) {
 			for (int j = 0, y = ((game->puzzleY) - 10); j < 10; j++, y -= 10) {
 				if ((game->drawGrid_H[i][j]) != 0) {
-					int drawX = x + (game->puzzleGridSize / 2) - (GetDrawFormatStringWidthToHandle(game->drawNumFontHandle, "%d", game->drawGrid_H[i][j]) / 2);
-					DrawFormatStringToHandle(drawX, y, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_H[i][j]));
+					int drawX = x + (game->puzzleGridSize / 2) - (GetDrawFormatStringWidthToHandle(game->drawNumFontHandle, "%2d", game->drawGrid_H[i][j]) / 2);
+					DrawFormatStringToHandle(drawX, y, GetColor(0, 0, 0), game->drawNumFontHandle, "%2d", (game->drawGrid_H[i][j]));
+				}
+			}
+		}
+
+		for (int j = 0; j < puzzle->y_size; j++) {
+			for (int i = 0; i < puzzle->x_size; i++) {
+				if (game->puzzleState[i][j] == false) {
+					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, GetColor(255, 0, 0), 3);
+					DrawLine(game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(255, 0, 0), 3);
+					DrawLine(game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY2, GetColor(255, 0, 0), 3);
+					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, GetColor(255, 0, 0), 3);
 				}
 			}
 		}
@@ -736,18 +785,9 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			}
 		}
 
-		DrawFormatString(0, 0, GetColor(0, 0, 0), "%d", diff);
-
 		if (diff == 0) {
 			game->clearFlag = false;
 			game->finishTime = GetNowCount();
-			if (puzzle->puzzleId != 0 && game->hintcounter == 0) {
-				DrawBox(350, 200, 800, 500, GetColor(0, 0, 0), TRUE);
-				DrawBox(460, 340, 700, 370, GetColor(255, 255, 255), FALSE);
-				KeyInputString(470, 350, 30, playerId, GetColor(255, 255, 255));
-				updateRanking(puzzle, playerId, (game->finishTime - game->startTime) / 1000);
-
-			}
 		}
 	}
 	else {
@@ -841,7 +881,7 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 		if (game->backButton.mState) {
 			mouse->waitRelease = 1;
 			return MenuScr;
-			
+
 		}
 
 
@@ -858,8 +898,8 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 				rank = i + 1;
 				if (game->inputNicknameDisplayFlag == -1) {
 					game->inputNicknameDisplayFlag = 0;
+					SetActiveKeyInput(game->keyHandle);
 				}
-				SetActiveKeyInput(game->keyHandle);
 				break;
 			}
 		}
@@ -875,7 +915,7 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 		DrawFormatStringToHandle(drawPlayerRankingNameX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "あなた");
 		DrawFormatStringToHandle(drawPlayerRankingTimeX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "%d秒", time);
 
-		if (game->inputNicknameDisplayFlag == 0) {
+		if (game->inputNicknameDisplayFlag == 0 && game->hintcounter == 0) {
 			DrawBox(350, 200, 800, 500, GetColor(200, 200, 200), TRUE);
 			DrawBox(350, 200, 800, 500, GetColor(0, 0, 0), FALSE);
 			DrawBox(370, 450, 440, 490, GetColor(255, 255, 255), TRUE);
@@ -888,18 +928,21 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(str2X, 230, GetColor(0, 0, 0), "ランキングに乗せるニックネームを入力してください");
 
 			DrawBox(460, 340, 700, 370, GetColor(0, 0, 0), FALSE);
-		
-			/*Button_t tmpButton;
+
+			Button_t tmpButton;
 			setButton(370, 450, 440, 490, NULL, NULL, *mouse, &tmpButton);
 			if (tmpButton.mState) {
 				game->inputNicknameDisplayFlag = 1;
+				char player[256];
+				GetKeyInputString(player, game->keyHandle);
+				updateRanking(puzzle, player, (game->finishTime - game->startTime) / 1000);
 				DeleteKeyInput(game->keyHandle);
 			}
 			else {
 				int black = GetColor(255, 255, 255);
 				SetKeyInputStringColor(black, black, black, black, black, black, black);
 				DrawKeyInputString(462, 344, game->keyHandle);
-			}*/
+			}
 		}
 	}
 

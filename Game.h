@@ -28,6 +28,8 @@ struct Game_t {
 	int drawNumFontHandle;
 	Button_t puzzleGrid[20][20];
 	bool puzzleState[20][20];
+	bool toWhiteChange;
+	bool fromWhiteChange;
 	Puzzle_t checkPuzzle;
 	bool clearFlag;
 	int inputNicknameDisplayFlag;
