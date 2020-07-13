@@ -13,6 +13,7 @@
 #include "SceneMgr.h"
 #include "Information.h"
 #include "InputNickName.h"
+#include "file.h"
 #include <string.h>
 #include <stdlib.h>
 #include <windows.h>
@@ -388,13 +389,14 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 
 		// Enterキーが押されたらflag=3に移動
 		if (CheckHitKey(KEY_INPUT_RETURN) == 1) {
-			savePuzzle(&(puzzle));
 			// ランキング情報を更新
 			for (int i = 0; i < 10; i++) {
 				puzzle.ranking[i].flag = 0;
 				sprintf_s(puzzle.ranking[i].playerId, "none");
 				puzzle.ranking[i].cleartime = 0;
 			}
+			savePuzzle(&(puzzle));
+
 			flag++;
 		}
 		// Escキーが押されたら作成画面に戻る
@@ -417,6 +419,16 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 
 	// 戻るボタンが押されたらメニュー画面に移動
 	if ((&mouse)->mButton == left && click((&mouse), 5, 630, 95, 720)) {
+		for (int j = 0; j < 20; j++) {
+			for (int i = 0; i < 20; i++) {
+				int S = create->posi + i * create->sellsize + 200; // パズルマスの横
+				int T = create->posi + j * create->sellsize; // パズルマスの縦
+
+				create->colorlist[i][j] = create->white;
+			}
+		}
+
+
 		return MenuScr;
 	}
 
