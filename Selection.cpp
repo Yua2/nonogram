@@ -107,7 +107,7 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 	DrawFormatString(520, 100, GetColor(0, 0, 0), "15*15");
 	DrawFormatString(680, 100, GetColor(0, 0, 0), "20*15");
 	DrawFormatString(840, 100, GetColor(0, 0, 0), "20*20");
-	if (mouse->mX < 114 && mouse->mX < 114 >0 && mouse->mY>661 && mouse->mY <720) {
+	if (mouse->mX < 114 && mouse->mX >0 && mouse->mY>661 && mouse->mY <720) {
 		DrawGraph(-1, 661, mSelection->HandleR2, TRUE);
 		if (mouse->mButton == left)
 			return MenuScr;

@@ -55,7 +55,7 @@ int UpdateMenu(Menu_t* mMenu,Mouse_t* mouse,Puzzle_t* puzzle) {
 				case(0): readPuzzle(puzzle,name); return GameScr;
 				case(1):return SelectionScr;
 				case(2):return MakePuzzleScr;
-				fault: break;
+				default: break;
 				}
 			}
 		}	
