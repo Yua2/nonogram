@@ -11,7 +11,7 @@
 #include "MakePuzzle.h"
 #include "Information.h"
 #include "SceneMgr.h"
-#include "Information.h"
+#include "PuzzleConverter.h"
 #include "InputNickName.h"
 #include "file.h"
 #include <string.h>
@@ -37,7 +37,7 @@ int InitializeMakePuzzle(MakePuzzle_t* create) {
 
 	int backImageHandle = LoadGraph("graph/backButton.bmp");
 	int resetImageHandle = LoadGraph("graph/resetButton.bmp");
-	int penImageHandle = LoadGraph("graph/penButton.bmp");
+	//int penImageHandle = LoadGraph("graph/penButton.bmp");
 	int eraserImageHandle = LoadGraph("graph/eraserButton.bmp");
 
 	setButton(5, 630, 95, 720, backImageHandle, NULL, mouse, &(create->backButton));
@@ -314,7 +314,6 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 	if ((&mouse)->mButton == left && click(&(mouse), 830, 180, 1000, 230)) {
 		DrawFormatString(850, 200, create->aqua, "画像を取り込む");
 
-		int GrHandle = 0;
 		char FullPath[MAX_PATH], FileName[MAX_PATH];
 
 		// ウインドウモードで起動
@@ -349,7 +348,28 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		if (GetOpenFileName(&ofn) != 0)
 		{
 			// ファイル名を取得できたら画像を読み込む
-			GrHandle = LoadGraph(FullPath);
+			pzAdjust(FullPath, puzzle.x_size, puzzle.y_size, &puzzle);
+			for (int i = 0; i < puzzle.y_size; i++) {
+				for (int j = 0; j < puzzle.x_size; j++) {
+					if (puzzle.puzzleData[i][j] ==   0) create->colorlist[j][i] = create->white;
+					if (puzzle.puzzleData[i][j] == 101) create->colorlist[j][i] = create->black;
+					if (puzzle.puzzleData[i][j] ==   1) create->colorlist[j][i] = create->gainsboro;
+					if (puzzle.puzzleData[i][j] == 102) create->colorlist[j][i] = create->blue;
+					if (puzzle.puzzleData[i][j] ==   2) create->colorlist[j][i] = create->aqua;
+					if (puzzle.puzzleData[i][j] == 103) create->colorlist[j][i] = create->green;
+					if (puzzle.puzzleData[i][j] ==   3) create->colorlist[j][i] = create->springgreen;
+					if (puzzle.puzzleData[i][j] == 104) create->colorlist[j][i] = create->maroon;
+					if (puzzle.puzzleData[i][j] ==   4) create->colorlist[j][i] = create->red;
+					if (puzzle.puzzleData[i][j] == 105) create->colorlist[j][i] = create->deeppink;
+					if (puzzle.puzzleData[i][j] ==   5) create->colorlist[j][i] = create->pink;
+					if (puzzle.puzzleData[i][j] == 106) create->colorlist[j][i] = create->saddlebrown;
+					if (puzzle.puzzleData[i][j] ==   6) create->colorlist[j][i] = create->orange;
+					if (puzzle.puzzleData[i][j] == 107) create->colorlist[j][i] = create->gold;
+					if (puzzle.puzzleData[i][j] ==   7) create->colorlist[j][i] = create->lemonchiffon;
+					if (puzzle.puzzleData[i][j] == 108) create->colorlist[j][i] = create->indigo;
+					if (puzzle.puzzleData[i][j] ==   8) create->colorlist[j][i] = create->mediumpurple;
+				}
+			}
 		}
 	}
 	//DrawBox(830, 280, 1000, 330, create->black, FALSE);
