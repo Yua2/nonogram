@@ -1,4 +1,4 @@
-#ifndef PUZZLE_CONVERTER_H_
+﻿#ifndef PUZZLE_CONVERTER_H_
 #define PUZZLE_CONVERTER_H_
 
 #include "Information.h"
