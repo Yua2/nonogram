@@ -95,15 +95,17 @@ void updatesimpleRanking(Puzzle_t* pz, char* name, int time) {
 	fclose(fp);
 }
 void updateRanking(Puzzle_t* pz, char playerId[256], int time) {
-	int i, j, rank;
+	int i, j, rank=1;
 	char filename[64];
 	FILE* fp;
 
 	for (i = 0; pz->ranking[i].cleartime <= time; i++) {
+		rank++;
 		if (pz->ranking[i].flag == 0) {
 			pz->ranking[i].flag = 1;
 			sprintf_s(pz->ranking[i].playerId, 256, "%s", playerId);
 			pz->ranking[i].cleartime = time;
+			rank = i + 1;
 			i = 10;
 			break;
 		}
@@ -113,7 +115,7 @@ void updateRanking(Puzzle_t* pz, char playerId[256], int time) {
 		}
 
 	}
-	rank = i + 1;
+
 	if (i <= 9) {
 		for (j = 9; j > i; j--) {
 			sprintf_s(pz->ranking[j].playerId, 256, "%s", pz->ranking[j - 1].playerId);
