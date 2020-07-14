@@ -95,28 +95,35 @@ void updatesimpleRanking(Puzzle_t* pz, char* name, int time) {
 	fclose(fp);
 }
 void updateRanking(Puzzle_t* pz, char playerId[256], int time) {
-    int i, j;
+	int i, j, rank;
 	char filename[64];
 	FILE* fp;
 
-    for (i = 0; pz->ranking[i].cleartime <= time; i++) {
-        if (pz->ranking[i].flag == 0) {
-            pz->ranking[i].flag = 1;
+	for (i = 0; pz->ranking[i].cleartime <= time; i++) {
+		if (pz->ranking[i].flag == 0) {
+			pz->ranking[i].flag = 1;
 			sprintf_s(pz->ranking[i].playerId, 256, "%s", playerId);
-            pz->ranking[i].cleartime = time;
-            i = 10;
-            break;
-        }
-    }
-    if (i < 9) {
-        for (j = 9; j > i; j--) {
+			pz->ranking[i].cleartime = time;
+			i = 10;
+			break;
+		}
+		if (i == 9) {
+			i++;
+			break;
+		}
+
+	}
+	rank = i + 1;
+	if (i <= 9) {
+		for (j = 9; j > i; j--) {
 			sprintf_s(pz->ranking[j].playerId, 256, "%s", pz->ranking[j - 1].playerId);
-            pz->ranking[j].cleartime = pz->ranking[j - 1].cleartime;
-            pz->ranking[j].flag = 1;
-        }
-		sprintf_s(pz->ranking[i].playerId, 256,"%s", playerId);
-        pz->ranking[i].cleartime = time;
-    }
+			pz->ranking[j].cleartime = pz->ranking[j - 1].cleartime;
+			pz->ranking[j].flag = pz->ranking[j - 1].flag;
+		}
+		sprintf_s(pz->ranking[i].playerId, 256, "%s", playerId);
+		pz->ranking[i].cleartime = time;
+		pz->ranking[i].flag = 1;
+	}
 	sprintf_s(filename, 64, "PuzzleInfo/%d%d/Puzzle%d.csv", pz->x_size, pz->y_size, pz->puzzleId);
 	fopen_s(&fp, filename, "w");
 	fprintf(fp, "%d\n", pz->puzzleId);
@@ -131,9 +138,7 @@ void updateRanking(Puzzle_t* pz, char playerId[256], int time) {
 	for (i = 0; i < 10; i++)
 		fprintf(fp, "%s %d %d\n", pz->ranking[i].playerId, pz->ranking[i].cleartime, pz->ranking[i].flag);
 	fclose(fp);
-	sprintf_s(filename, 64, "PuzzleInfo/%d%d/simpleInformation.csv", pz->x_size, pz->y_size);
-	fopen_s(&fp, filename, "a");
-	fprintf(fp, "\n%d %s %s %s %d %d", pz->puzzleId, pz->puzzleTitle, pz->puzzleMakerId, pz->ranking[0].playerId, pz->ranking[0].cleartime, pz->ranking[0].flag);
-	fclose(fp);
-	updatesimpleRanking(pz, playerId, time);
+	if (rank == 1){
+		updatesimpleRanking(pz, playerId, time);
+	}
 }
