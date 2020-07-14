@@ -1,4 +1,4 @@
-#ifndef KEYBOARD_STATE_H_
+﻿#ifndef KEYBOARD_STATE_H_
 #define KEYBOARD_STATE_H_
 
 // M5:キーボード状態の取得

@@ -1,4 +1,4 @@
-#ifndef INFORMATION_H_
+﻿#ifndef INFORMATION_H_
 #define INFORMATION_H_
 
 // F1: プレイヤー情報

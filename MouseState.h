@@ -1,4 +1,4 @@
-#ifndef MOUSE_STATE_H_
+﻿#ifndef MOUSE_STATE_H_
 #define MOUSE_STATE_H_
 
 #include "DxLib.h"
