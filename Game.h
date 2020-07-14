@@ -37,7 +37,8 @@ struct Game_t {
 	int rankingFontHandle;
 	int playerRankingFontHandle;
 	int keyHandle;
-	int tutorial;
+	int tutorialProcess;
+	Button_t nextButton;
 	int hintcounter;
 };
 
