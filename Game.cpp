@@ -1541,22 +1541,22 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 		int drawPlayerRankingRightLineX = game->puzzleX + 400 - 10 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "9999秒");
 		DrawLine(drawPlayerRankingLeftLineX, game->puzzleY - 100, drawPlayerRankingLeftLineX, game->puzzleY - 20, GetColor(0, 0, 0), 1);
 		DrawLine(drawPlayerRankingRightLineX, game->puzzleY - 100, drawPlayerRankingRightLineX, game->puzzleY - 20, GetColor(0, 0, 0), 1);
-		int time = (game->finishTime / 1000) - (game->startTime / 1000);
+		int time = (game->finishTime - game->startTime) / 1000;
 		int rank = 0;
 		for (int i = 0; i < 10; i++) {
-			if (puzzle->ranking[i].cleartime > time) {
-				rank = i + 1;
+			rank = i + 1;
+			if (puzzle->ranking[i].flag == 0 || puzzle->ranking[i].cleartime >= time) {
 				if (game->inputNicknameDisplayFlag == -1) {
 					game->inputNicknameDisplayFlag = 0;
 					SetActiveKeyInput(game->keyHandle);
+					break;
 				}
-				break;
 			}
 		}
 		int drawPlayerRankingNumX = drawPlayerRankingLeftLineX - (drawPlayerRankingLeftLineX - game->puzzleX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "%d", rank) / 2;
 		int drawPlayerRankingNameX = drawPlayerRankingRightLineX - (drawPlayerRankingRightLineX - drawPlayerRankingLeftLineX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "あなた") / 2;
 		int drawPlayerRankingTimeX = drawPlayerRankingRightLineX + (game->puzzleX + 400 - drawPlayerRankingRightLineX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "%d秒", time) / 2;
-		if (rank > 0) {
+		if (puzzle->ranking[rank - 1].flag == 0 || rank >= 0) {
 			DrawFormatStringToHandle(drawPlayerRankingNumX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "%d", rank);
 		}
 		else {
@@ -1579,14 +1579,18 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 
 			DrawBox(460, 340, 700, 370, GetColor(0, 0, 0), FALSE);
 
-			Button_t tmpButton;
+			static Button_t tmpButton;
+			bool preTmpButtonState = tmpButton.mState;
 			setButton(370, 450, 440, 490, NULL, NULL, *mouse, &tmpButton);
 			if (tmpButton.mState) {
-				game->inputNicknameDisplayFlag = 1;
-				char player[256];
-				GetKeyInputString(player, game->keyHandle);
-				updateRanking(puzzle, player, (game->finishTime - game->startTime) / 1000);
-				DeleteKeyInput(game->keyHandle);
+				if (!preTmpButtonState) {
+					game->inputNicknameDisplayFlag = 1;
+					char player[1024];
+					GetKeyInputString(player, game->keyHandle);
+					updateRanking(puzzle, player, (game->finishTime - game->startTime) / 1000);
+					DeleteKeyInput(game->keyHandle);
+				}
+
 			}
 			else {
 				int black = GetColor(255, 255, 255);
