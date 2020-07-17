@@ -314,7 +314,7 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 	if ((&mouse)->mButton == left && click(&(mouse), 830, 180, 1000, 230)) {
 		DrawFormatString(850, 200, create->aqua, "画像を取り込む");
 
-		char FullPath[MAX_PATH], FileName[MAX_PATH];
+		char FullPath[MAX_PATH], FileName[MAX_PATH], CurrentDir[MAX_PATH];
 
 		// ウインドウモードで起動
 		ChangeWindowMode(TRUE);
@@ -324,9 +324,11 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		memset(&ofn, 0, sizeof(OPENFILENAME));
 		memset(FullPath, 0, sizeof(FullPath));
 		memset(FileName, 0, sizeof(FileName));
+		memset(CurrentDir, 0, sizeof(CurrentDir));
 		ofn.lStructSize = sizeof(OPENFILENAME);
 		ofn.hwndOwner = GetMainWindowHandle();
-
+		// 現在のカレントディレクトリを取得
+		GetCurrentDirectory(MAX_PATH, CurrentDir);
 		// 説明の末尾に \0 を記載して、その後ろに表示するファイルの指定、最後に \0\0 を記述
 		ofn.lpstrFilter = "Bitmap File  or  Jpeg File  or  Png File\0*.bmp;*.jpg;*.png\0\0";
 
@@ -349,6 +351,7 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		{
 			// ファイル名を取得できたら画像を読み込む
 			pzAdjust(FullPath, puzzle.x_size, puzzle.y_size, &puzzle);
+			// 読み込んだパズルデータを代入
 			for (int i = 0; i < puzzle.y_size; i++) {
 				for (int j = 0; j < puzzle.x_size; j++) {
 					if (puzzle.puzzleData[i][j] ==   0) create->colorlist[j][i] = create->white;
@@ -371,6 +374,8 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 				}
 			}
 		}
+		// カレントディレクトリを元に戻す
+		SetCurrentDirectory(CurrentDir);
 	}
 	//DrawBox(830, 280, 1000, 330, create->black, FALSE);
 
