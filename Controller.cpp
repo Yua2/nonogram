@@ -1,9 +1,9 @@
-#include "DxLib.h"
+﻿#include "DxLib.h"
 #include "Controller.h"
 #include "MouseState.h"
 
 // ボタン関数
-void setButton(int x1, int y1, int x2, int y2, int imageHandle, unsigned int color, Mouse_t mouse, Button_t* button) {
+void setButton(int x1, int y1, int x2, int y2, int imageHandle, unsigned int color, Mouse_t mouse, Button_t* button, int getState) {
 	button->mX1 = x1;
 	button->mY1 = y1;
 	button->mX2 = x2;
@@ -17,10 +17,21 @@ void setButton(int x1, int y1, int x2, int y2, int imageHandle, unsigned int col
 			button->mImageHandle = NULL;
 			button->mColor = color;
 		}
-		if(mouse.mX > x1 && mouse.mX < x2 && mouse.mY > y1 && mouse.mY < y2 && mouse.mButton == left) {
-			button->mState = true;
+
+		if (getState == 0) {
+			if (mouse.mX > x1 && mouse.mX < x2 && mouse.mY > y1 && mouse.mY < y2 && mouse.mButton == left) {
+				button->mState = true;
+			}
+			else {
+				button->mState = false;
+			}
 		}
 		else {
-			button->mState = false;
+			if (mouse.mX > x1 && mouse.mX < x2 && mouse.mY > y1 && mouse.mY < y2 && mouse.mState == leftClick) {
+				button->mState = true;
+			}
+			else {
+				button->mState = false;
+			}
 		}
 }
