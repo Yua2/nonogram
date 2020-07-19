@@ -130,9 +130,9 @@ int InitializeGame(Game_t* game, Puzzle_t* puzzle) {
 	game->timeFontHandle = CreateFontToHandle(NULL, 40, 4);
 	game->drawNumFontHandle = CreateFontToHandle(NULL, 8, 2);
 	game->rankingTitleFontHnadle = CreateFontToHandle(NULL, 34, 3);
-	game->rankingFontHandle = CreateFontToHandle(NULL, 50, 3);
+	game->rankingFontHandle = CreateFontToHandle(NULL, 35, 3);
 	game->playerRankingFontHandle = CreateFontToHandle(NULL, 30, 3);
-	game->keyHandle = MakeKeyInput(7, FALSE, FALSE, FALSE);
+	game->keyHandle = MakeKeyInput(16, FALSE, FALSE, FALSE);
 	game->hintcounter = 0;
 
 	setButton(55, 435, 145, 525, backImageHandle, NULL, mouse, &(game->backButton), TRUE);
@@ -746,7 +746,6 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 				}
 			}
 
-
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "ここで列ごとに見てみましょう。");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "最も右側の9列目、10列目は完成");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "していることがわかります。");
@@ -798,7 +797,6 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 				}
 			}
 
-
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "7列目も先ほどと似た考え方ですが");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "今の6列目の状態は「1 2 1」なの");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "で、真ん中の2つの黒いマスと下端");
@@ -848,7 +846,6 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 					}
 				}
 			}
-
 
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "6列目と5列目も7列目と同じ考え方");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "で完成させることができます。");
@@ -1125,8 +1122,6 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 					}
 				}
 			}
-
-			DrawFormatString(0, 0, GetColor(255, 255, 255), "%d", processCounter);
 
 			if (processCounter == 100) {
 				processFlag[game->tutorialProcess] = true;
@@ -1669,11 +1664,11 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 		for (int i = 0; i < 10; i++) {
 			if (puzzle->ranking[i].flag != 0) {
 				int drawRankingNumX = drawRankingLeftLineX - 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%2d", 10) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%d", i + 1) / 2;
-				DrawFormatStringToHandle(drawRankingNumX, 52 + (54 * i), GetColor(0, 0, 0), game->rankingFontHandle, "%d", i + 1);
+				DrawFormatStringToHandle(drawRankingNumX, 52 + (54 * i) + 5, GetColor(0, 0, 0), game->rankingFontHandle, "%d", i + 1);
 				int drawRankingNameX = drawRankingRightLineX - (drawRankingRightLineX - drawRankingLeftLineX) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, puzzle->ranking[i].playerId) / 2;
-				DrawFormatStringToHandle(drawRankingNameX, 52 + (54 * i), GetColor(0, 0, 0), game->rankingFontHandle, puzzle->ranking[i].playerId);
+				DrawFormatStringToHandle(drawRankingNameX, 52 + (54 * i) + 5, GetColor(0, 0, 0), game->rankingFontHandle, puzzle->ranking[i].playerId);
 				int drawRankingTimeX = drawRankingRightLineX + 2 + (500 - drawRankingRightLineX) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%d秒", puzzle->ranking[i].cleartime) / 2;
-				DrawFormatStringToHandle(drawRankingTimeX, 52 + (54 * i), GetColor(0, 0, 0), game->rankingFontHandle, "%d秒", puzzle->ranking[i].cleartime);
+				DrawFormatStringToHandle(drawRankingTimeX, 52 + (54 * i) + 5, GetColor(0, 0, 0), game->rankingFontHandle, "%d秒", puzzle->ranking[i].cleartime);
 			}
 		}
 
@@ -1693,25 +1688,20 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 		DrawLine(drawPlayerRankingRightLineX, game->puzzleY - 100, drawPlayerRankingRightLineX, game->puzzleY - 20, GetColor(0, 0, 0), 1);
 		int time = (game->finishTime - game->startTime) / 1000;
 		int rank = 0;
-		bool rankFlag = false;
-		for (rank = 1; puzzle->ranking[rank-1].cleartime <= time; rank++) {
-			if (rank == 10) {
-				rank++;
-				rankFlag = false;
+		for (int i = 0; i < 10; i++) {
+			if (puzzle->ranking[i].flag == 0 || puzzle->ranking[i].cleartime > time) {
+				if (game->inputNicknameDisplayFlag == -1) {
+					game->inputNicknameDisplayFlag = 0;
+					SetActiveKeyInput(game->keyHandle);
+					break;
+				}
+				rank = i + 1;
 				break;
 			}
-			rankFlag = true;
 		}
 
 		if (game->inputNicknameDisplayFlag == 1) {
 			rank--;
-		}
-
-		if (rankFlag) {
-			if (game->inputNicknameDisplayFlag == -1) {
-				game->inputNicknameDisplayFlag = 0;
-				SetActiveKeyInput(game->keyHandle);
-			}
 		}
 
 		int drawPlayerRankingNumX = drawPlayerRankingLeftLineX - (drawPlayerRankingLeftLineX - game->puzzleX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "%d", rank) / 2;
@@ -1754,9 +1744,19 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 				if (str.find(" ") == str.length() - 1) {
 					str.pop_back();
 				}
+
+				if (str.find("　") != -1) {
+					str.pop_back();
+					str.pop_back();
+				}
 			}
 
-			const char* player = str.c_str();
+			char player[17];
+			strcpy_s(player, 17, str.c_str());
+
+			if (player[16] != '\0') {
+				player[16] = '\0';
+			}
 
 			SetKeyInputString(player, game->keyHandle);
 			GetKeyInputString((char*)player, game->keyHandle);
@@ -1765,7 +1765,7 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 				if (!preTmpButtonState || CheckHitKey(KEY_INPUT_RETURN) == 1) {
 					game->inputNicknameDisplayFlag = 1;
 
-					if (strcmp((char*)player, "") == 0) {
+					if (strcmp(player, "") == 0) {
 						strcpy_s((char*)player, 7, "匿名");
 					}
 
@@ -1775,7 +1775,8 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			}
 			else {
 				int black = GetColor(0, 0, 0);
-				SetKeyInputStringColor(black, black, black, black, black, black, black);
+				int white = GetColor(255, 255, 255);
+				SetKeyInputStringColor(black, black, white, black, black, white, black);
 				DrawKeyInputString(462, 344, game->keyHandle);
 			}
 		}
