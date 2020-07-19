@@ -1,3 +1,4 @@
+
 #ifndef INPUTNICKNAME_H_
 #define INPUTNICKNAME_H_
 
@@ -16,20 +17,20 @@
 #define FONT_SIZE 16
 #define NAME_MAX 20
 
-enum InputNickNamePhase {standard, textBox, check, used};
+enum InputNickNamePhase { standard, textBox, check, used };
 
-typedef struct InputNickName_t{
+typedef struct InputNickName_t {
 	enum InputNickNamePhase phase = standard;
 	std::string nickName;
 }InputNickName_t;
 
 //本番用
-int InitializeInputNickName(InputNickName_t *);
-int UpdateInputNickName(InputNickName_t *, Mouse_t *);
-void FinalizeInputNickName(InputNickName_t *);
+int InitializeInputNickName(InputNickName_t*);
+int UpdateInputNickName(InputNickName_t*, Mouse_t*);
+void FinalizeInputNickName(InputNickName_t*);
 
 
-int click(Mouse_t *, int, int, int, int);
+//int click(Mouse_t*, int, int, int, int);
 int checkNickName(std::string);
 
 /*テスト用

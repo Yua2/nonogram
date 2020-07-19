@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿
+#pragma once
 #include "Information.h"
 #include "MouseState.h"
 typedef struct {
@@ -7,6 +8,7 @@ typedef struct {
 	char puzzleMakerName[256];
 	char fastestId[256];
 	int fastestTime;
+	int flag;
 }SimplePuzzle_t;
 typedef struct {
 	int size;
@@ -27,9 +29,9 @@ typedef struct {
 	int HandleDown;
 	int scroll_mouse_y;
 	int scrollbar_on;
-	SimplePuzzle_t *Spz;
+	SimplePuzzle_t* Spz;
 }Selection_t;
 
 int InitializeSelection(Selection_t*);
-int UpdateSelection(Selection_t*, Puzzle_t*,Mouse_t*);
+int UpdateSelection(Selection_t*, Puzzle_t*, Mouse_t*);
 void FinalizeSelection(Selection_t*);
