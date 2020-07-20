@@ -19,10 +19,12 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <assert.h>
-static int flag = 0;
+static int flag = 0; // ニックネーム入力, パズルタイトル時のフラグ
 static Puzzle_t puzzle;
-static Player_t player;
-int click(Mouse_t* mouse, int x1, int y1, int x2, int y2);
+static int k = 0; // waitReleaseのフラグ
+int click(Mouse_t* mouse, int x1, int y1, int x2, int y2, int* k);
+char* replace(char* s, const char* before, const char* after);
+
 /******************************************************
 /******************************************************
 *** Function Name	: InitializeMakePuzzle
@@ -42,9 +44,9 @@ int InitializeMakePuzzle(MakePuzzle_t* create) {
 	int penImageHandle = LoadGraph("graph/penButton.bmp");
 	int eraserImageHandle = LoadGraph("graph/eraserButton.bmp");
 
-	setButton(5, 630, 95, 720, backImageHandle, NULL, mouse, &(create->backButton));
-	setButton(150, 630, 240, 720, resetImageHandle, NULL, mouse, &(create->resetButton));
-	setButton(20, 20, 110, 110, eraserImageHandle, NULL, mouse, &(create->eraserButton));
+	setButton(5, 630, 95, 720, backImageHandle, NULL, mouse, &(create->backButton),TRUE);
+	setButton(150, 630, 240, 720, resetImageHandle, NULL, mouse, &(create->resetButton),TRUE);
+	setButton(20, 20, 110, 110, eraserImageHandle, NULL, mouse, &(create->eraserButton),TRUE);
 
 	DrawGraph(create->backButton.mX1, create->backButton.mY1, create->backButton.mImageHandle, FALSE);
 	DrawGraph(create->resetButton.mX1, create->resetButton.mY1, create->resetButton.mImageHandle, FALSE);
@@ -58,7 +60,6 @@ int InitializeMakePuzzle(MakePuzzle_t* create) {
 
 	DrawBox(830, 180, 1000, 230, create->black, FALSE);
 	DrawBox(830, 330, 1000, 380, create->black, FALSE);
-	//DrawBox(830, 430, 1000, 480, GetColor(0, 0, 0), FALSE);
 
 	DrawFormatString(290, 50, create->black, "10 × 10");
 	DrawFormatString(440, 50, create->black, "15 × 10");
@@ -78,9 +79,6 @@ int InitializeMakePuzzle(MakePuzzle_t* create) {
 	DrawFormatString(80, 410, create->black, "ゲーム時の画面");
 
 
-	// DrawFormatString(850, 450, GetColor(0, 0, 0), "パズルに変換");
-
-
 	// パズルの初期画面表示と縮小パズルの初期画面表示　色は白
 	for (int j = 0; j < create->y_size; j++) {
 		for (int i = 0; i < create->x_size; i++) {
@@ -94,15 +92,6 @@ int InitializeMakePuzzle(MakePuzzle_t* create) {
 			DrawBox(S, T, S + create->sellsize - 1, T + create->sellsize - 1, create->white, TRUE);
 		}
 	}
-
-	// 縮小パズルの初期画面表示、色は白
-	/*for (int j = 0; j < Size; j++) {
-		for (int i = 0; i < Size; i++) {
-			int s = Posi + i * semisize-50; // パズルマスの横
-			int t = Posi + j * semisize + 50; // パズルマスの縦
-			DrawBox(s, t, s + semisize - 1, t + semisize - 1, white, TRUE);
-		}
-	}*/
 
 	// 色を選択するマスを表示
 	for (int j = 0; j < 2; j++) {
@@ -126,12 +115,22 @@ int InitializeMakePuzzle(MakePuzzle_t* create) {
 
 int UpdateMakePuzzle(MakePuzzle_t* create) {
 	InitializeMakePuzzle(create);
-	Mouse_t mouse;
+	static Mouse_t mouse;
 	GetMouseState(&mouse);
+
+	// waitRelease初期処理
+	if (k == 0 && mouse.mButton == left)
+		mouse.waitRelease = 1;
+
+	// waitRelease初期処理
+	if (mouse.mButton == none) {
+		mouse.waitRelease = 0;
+	}
+	k = 0;
 
 	// サイズ選択ボタンが押されたらパズルのサイズを変更する
 	// 10*10
-	if ((&mouse)->mButton == left && click(&(mouse), 280, 30, 370, 80)) {
+	if (click(&(mouse), 280, 30, 370, 80, &k) && (&mouse)->mButton == left &&  (&mouse)->waitRelease == 0) {
 		create->x_size = 10;
 		create->y_size = 10;
 		create->sellsize = 50;
@@ -139,12 +138,10 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		puzzle.x_size = create->x_size;
 		puzzle.y_size = create->y_size;
 		DrawFormatString(290, 50, create->aqua, "10 × 10");
-
-		//DrawBox(290, 40, 360, 70, create->gainsboro, FALSE);
-
+		//k = 0;
 	}
 	// 15*10
-	if ((&mouse)->mButton == left && click(&(mouse), 430, 30, 520, 80)) {
+	if (click(&(mouse), 430, 30, 520, 80, &k) && (&mouse)->mButton == left &&  (&mouse)->waitRelease == 0) {
 		create->x_size = 15;
 		create->y_size = 10;
 		create->sellsize = 33;
@@ -152,10 +149,10 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		puzzle.x_size = create->x_size;
 		puzzle.y_size = create->y_size;
 		DrawFormatString(440, 50, create->aqua, "15 × 10");
-
+		//k = 0;
 	}
 	// 15*15
-	if ((&mouse)->mButton == left && click(&(mouse), 580, 30, 670, 80)) {
+	if (click(&(mouse), 580, 30, 670, 80, &k) && (&mouse)->mButton == left &&  (&mouse)->waitRelease == 0) {
 		create->x_size = 15;
 		create->y_size = 15;
 		create->sellsize = 33;
@@ -163,10 +160,10 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		puzzle.x_size = create->x_size;
 		puzzle.y_size = create->y_size;
 		DrawFormatString(590, 50, create->aqua, "15 × 15");
-
+		//k = 0;
 	}
 	// 20*15
-	if ((&mouse)->mButton == left && click(&(mouse), 740, 30, 830, 80)) {
+	if (click(&(mouse), 740, 30, 830, 80, &k) && (&mouse)->mButton == left &&  (&mouse)->waitRelease == 0) {
 		create->x_size = 20;
 		create->y_size = 15;
 		create->sellsize = 25;
@@ -174,10 +171,10 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		puzzle.x_size = create->x_size;
 		puzzle.y_size = create->y_size;
 		DrawFormatString(740, 50, create->aqua, "20 × 15");
-
+		//k = 0;
 	}
 	// 20*20
-	if ((&mouse)->mButton == left && click(&(mouse), 890, 30, 980, 80)) {
+	if (click(&(mouse), 890, 30, 980, 80, &k) && (&mouse)->mButton == left &&  (&mouse)->waitRelease == 0) {
 		create->x_size = 20;
 		create->y_size = 20;
 		create->sellsize = 25;
@@ -185,11 +182,11 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		puzzle.x_size = create->x_size;
 		puzzle.y_size = create->y_size;
 		DrawFormatString(890, 50, create->aqua, "20 × 20");
-
+		//k = 0;
 	}
 
 	// 消しゴムボタンが押されたら白色の情報を保持
-	if ((&mouse)->mButton == left && click(&(mouse), 20, 20, 110, 110)) {
+	if (click(&(mouse), 20, 20, 110, 110, &k) && (&mouse)->mButton == left &&  (&mouse)->waitRelease == 0) {
 		create->tmp = create->white;
 	}
 
@@ -199,10 +196,8 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 			int S = create->posi + i * create->selectsize + 270; // パズルマスの横
 			int T = create->posi + j * create->selectsize; // パズルマスの縦
 			// 左クリックされたら色の情報を保持
-			if ((&mouse)->mButton == left && click(&(mouse), S, T + 520, S + create->selectsize - 1, T + create->selectsize - 1 + 520)) {
+			if (click(&(mouse), S, T + 520, S + create->selectsize - 1, T + create->selectsize - 1 + 520, &k) && (&mouse)->mButton == left && mouse.waitRelease==0) {
 				DrawBox(S - 10, T + 510, S + create->selectsize - 1 + 10, T + create->selectsize - 1 + 530, create->col[i][j], TRUE);
-
-				//DrawBox(S+1, T+1, S + create->semisize-2, T + create->semisize-2, create->white, FALSE);
 				create->tmp = create->col[i][j];
 			}
 		}
@@ -217,7 +212,7 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 			int t = create->posi + j * create->semisize + 100;
 
 			// マスを左クリックし, 色を反映させる準備
-			if ((&mouse)->mButton == left && click(&(mouse), S, T, S + create->sellsize - 1, T + create->sellsize - 1)) {
+			if ((&mouse)->mButton == left && click(&(mouse), S, T, S + create->sellsize - 1, T + create->sellsize - 1, &k)) {
 
 				// 色塗り中であり, マスに色が塗られていない、または白色の場合リストに格納
 				if (create->colorlist[i][j] == NULL || create->colorlist[i][j] == create->white) {
@@ -304,18 +299,18 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 			int S = create->posi + i * create->sellsize + 200; // パズルマスの横
 			int T = create->posi + j * create->sellsize; // パズルマスの縦
 
-				// リセットボタンが押されたらすべてのマスを初期状態（白色）にする
-			if ((&mouse)->mButton == left && click(&(mouse), 150, 630, 240, 720)) {
+			// リセットボタンが押されたらすべてのマスを初期状態（白色）にする
+			if (click(&(mouse), 150, 630, 240, 720, &k) && (&mouse)->mButton == left && mouse.waitRelease == 0) {
 				create->colorlist[i][j] = create->white;
 			}
 		}
 	}
 
-	// 画像を取り込むボタンが押されたらエクスプローラーを起動し、パズル作成処理部に選択された画像を送信する
-	if ((&mouse)->mButton == left && click(&(mouse), 830, 180, 1000, 230)) {
+	// 画像を取り込むボタンが押されたらエクスプローラーを起動し、パズルに変換する
+	if (click(&(mouse), 830, 180, 1000, 230, &k) && (&mouse)->mButton == left && mouse.waitRelease == 0) {
 		DrawFormatString(850, 200, create->aqua, "画像を取り込む");
 
-		int GrHandle = 0;
+		//int GrHandle = 0;
 		char FullPath[MAX_PATH], FileName[MAX_PATH], CurrentDir[MAX_PATH];
 
 		// ウインドウモードで起動
@@ -354,8 +349,9 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		if (GetOpenFileName(&ofn) != 0)
 		{
 			// ファイル名を取得できたら画像を読み込む
-			//GrHandle = LoadGraph(FullPath);
+
 			pzAdjust(FullPath, puzzle.x_size, puzzle.y_size, &puzzle);
+			// 得られたパズルデータをもとに各マスに色を入れていく
 			for (int i = 0; i < puzzle.y_size; i++) {
 				for (int j = 0; j < puzzle.x_size; j++) {
 					if (puzzle.puzzleData[i][j] == 0) create->colorlist[j][i] = create->white;
@@ -380,24 +376,22 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		}
 		// カレントディレクトリを元に戻す
 		SetCurrentDirectory(CurrentDir);
+		
 	}
-	//DrawBox(830, 280, 1000, 330, create->black, FALSE);
-
 
 	// パズルを保存するボタンが押されたらflagを1にし、タイトル入力画面を表示
-	if ((&mouse)->mButton == left && click((&mouse), 830, 330, 1000, 380)) {
+	if (click((&mouse), 830, 330, 1000, 380, &k) && (&mouse)->mButton == left && mouse.waitRelease == 0) {
 		flag = 1;
 	}
 	// ニックネームを入力する処理
 	if (flag == 1) {
 		DrawBox(350, 200, 800, 500, create->black, TRUE);
-		//DrawBox(370, 450, 440, 490, create->white, FALSE);
-		//DrawFormatString(400, 460, create->white, "OK");
-
 		DrawFormatString(420, 210, create->white, "タイトルを付けてください", TRUE);
 		DrawFormatString(420, 230, create->white, "(Enterキーで決定) (Escキーで作成画面に戻る)", TRUE);
+		DrawFormatString(420, 250, create->white, "半角英数字16文字, 全角は8文字まで", TRUE);
+
 		DrawBox(460, 340, 700, 370, create->white, FALSE);
-		KeyInputString(470, 350, 256, puzzle.puzzleTitle, create->white);
+		KeyInputString(470, 350, 16, puzzle.puzzleTitle, create->white);
 		
 
 		// Enterキーが押されたらニックネーム入力に移る
@@ -408,9 +402,10 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 			// タイトルに入力が無かったら名無しパズルにする処理
 			if (strlen(puzzle.puzzleTitle) == 0 || puzzle.puzzleTitle[0] == ' ') {
 			sprintf_s(puzzle.puzzleTitle, 64, "名無しパズル");
+			}
+			flag++;
 		}
-		flag++;
-		}
+
 		// Escキーが押されたら入力画面を閉じる
 		else if (CheckHitKey(KEY_INPUT_ESCAPE) == 1) {
 			flag = 0;
@@ -422,7 +417,9 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		DrawBox(460, 340, 700, 370, create->white, FALSE);
 		DrawFormatString(420, 210, create->white, "ニックネームを付けてください", TRUE);
 		DrawFormatString(420, 230, create->white, "(Enterキーで決定) (Escキーで作成画面に戻る)", TRUE);
-		KeyInputString(470, 350, 256, puzzle.puzzleMakerId, create->white);
+		DrawFormatString(420, 250, create->white, "半角英数字16文字, 全角は8文字まで", TRUE);
+
+		KeyInputString(470, 350, 16, puzzle.puzzleMakerId, create->white);
 
 		// Enterキーが押されたらflag=3に移動
 		if (CheckHitKey(KEY_INPUT_RETURN) == 1) {
@@ -434,7 +431,6 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 				sprintf_s(puzzle.puzzleMakerId, 64, "匿名");
 			}
 
-
 			// ランキング情報を更新
 			for (int i = 0; i < 10; i++) {
 				puzzle.ranking[i].flag = 0;
@@ -442,7 +438,6 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 				puzzle.ranking[i].cleartime = 0;
 			}
 			savePuzzle(&(puzzle));
-
 			flag++;
 		}
 		// Escキーが押されたら作成画面に戻る
@@ -462,9 +457,8 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 		flag = 0;
 	}
 
-
 	// 戻るボタンが押されたらメニュー画面に移動
-	if ((&mouse)->mButton == left && click((&mouse), 5, 630, 95, 720)) {
+	if (click((&mouse), 5, 630, 95, 720, &k) && (&mouse)->mButton == left && (&mouse)->waitRelease == 0) {
 		for (int j = 0; j < 20; j++) {
 			for (int i = 0; i < 20; i++) {
 				int S = create->posi + i * create->sellsize + 200; // パズルマスの横
@@ -473,11 +467,9 @@ int UpdateMakePuzzle(MakePuzzle_t* create) {
 				create->colorlist[i][j] = create->white;
 			}
 		}
-
-
 		return MenuScr;
 	}
-
+	
 	ScreenFlip();
 	return MakePuzzleScr;
 }
@@ -505,22 +497,22 @@ void FinalizeMakePuzzle(MakePuzzle_t* create) {
 *** Function		: クリック判定
 *** Return			: 成功: 1 or 失敗: 0
 ******************************/
-int click(Mouse_t* mouse, int x1, int y1, int x2, int y2) {
+int click(Mouse_t* mouse, int x1, int y1, int x2, int y2, int* k) {
 	if (mouse->mX > x1 && mouse->mX < x2 && mouse->mY > y1 && mouse->mY < y2) {
+		*k = 1;
 		return 1;
 	}
 	return 0;
 }
 
-/******************************
+/********************************************
 *** Function Name	: replace
 *** Designer		: https://programming-place.net/ppp/contents/c/rev_res/string014.html
-　　　　　　　　　　　　より参照
-*** Date			: 2020.7.18
-*** Function		: 指定された文字を除去する関数
-*** Return			: 編集された文字列
-******************************/
-
+                      より参照
+*** Date			: 2020.7.18参照
+*** Function		: 文字列を置換する
+*** Return			: 置換された文字列を返す
+********************************************/
 char* replace(char* s, const char* before, const char* after)
 {
 	assert(s != NULL);

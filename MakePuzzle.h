@@ -10,13 +10,13 @@ typedef struct MakePuzzle {
 	Button_t backButton;
 
 
-	int posi = 100;
-	int selectsize = 40;
-	int sellsize = 25; //
-	int semisize = 10;  // 
-	int x_size = 20; // 
-	int y_size = 20;// 
-	// 
+	int posi = 100;      // 余白
+	int selectsize = 40; // 色選択マスのサイズ
+	int sellsize = 25;  // パズル画面のマスのサイズ
+	int semisize = 10; //　白黒画面のマスのサイズ
+	int x_size = 20; //    パズル画面の横サイズ
+	int y_size = 20;// 　　パズル画面の縦サイズ
+	// 色宣言
 	int	white = GetColor(255, 255, 255), black = GetColor(0, 0, 0), gainsboro = GetColor(220, 220, 220),
 		blue = GetColor(0, 0, 255), aqua = GetColor(0, 255, 255),
 		green = GetColor(0, 128, 0), springgreen = GetColor(0, 255, 127),
@@ -26,13 +26,13 @@ typedef struct MakePuzzle {
 		gold = GetColor(255, 215, 0), lemonchiffon = GetColor(255, 250, 205),
 		indigo = GetColor(75, 0, 130), mediumpurple = GetColor(147, 112, 219);
 
-	//
+	// 色選択マス格納用配列
 	int	col[8][2] = { {black, gainsboro}, {blue, aqua}, {green, springgreen},{maroon, red},
 		{deeppink, pink}, {saddlebrown, orange}, {gold, lemonchiffon}, {indigo, mediumpurple} };
 
-	int colorlist[20][20] = { white }; //
+	int colorlist[20][20] = { white }; //パズルマスの色情報格納用配列
 
-	int tmp = white; //
+	int tmp = white; // 色情報一時保存用配列
 
 
 	Puzzle_t puzzle;
