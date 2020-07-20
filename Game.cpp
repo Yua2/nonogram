@@ -17,16 +17,17 @@
 
 using namespace std;
 
-/********************************************
-*** Function Name : InitializeGame
+/*****************************************************
+*** Function Name : InitializeGame (M12) 
 *** Designer      : 藤川
-*** Date          : 2020.7.7
+*** Date          : 2020.7.19
 *** Function      : 引数でとったチュートリアル/ゲームプレイ画面の
-					構造体(Game_t)のメンバ()
-*/
+					構造体(Game_t)のすべてのメンバを初期化する
+*** Return        : 次の遷移先のシーン番号(GameScr)
+******************************************************/
 int InitializeGame(Game_t* game, Puzzle_t* puzzle) {
-	Mouse_t mouse;
-	GetMouseState(&mouse);
+	Mouse_t mouse;	// ボタン設定用の一時的なマウス変数
+	GetMouseState(&mouse);	// マウス変数の状態を更新(M4)
 
 	//パズルのサイズから，パズルの左端座標と右端座標を取得
 	if (puzzle->x_size == puzzle->y_size) {	// 正方形の場合
@@ -42,201 +43,250 @@ int InitializeGame(Game_t* game, Puzzle_t* puzzle) {
 	if (puzzle->x_size == 20 || puzzle->y_size == 20) {	// 縦横どちらか一辺が20の時
 		game->puzzleGridSize = 27;	// パズルのマスのサイズ(20×20)
 	}
-	else if (puzzle->x_size == 15 || puzzle->y_size == 15) {	// 縦横どちらか一辺が15の時
+	// 縦横どちらか一辺が15の時
+	else if (puzzle->x_size == 15 || puzzle->y_size == 15) {
 		game->puzzleGridSize = 35;	// パズルのマスのサイズ(15×15)
 	}
-	else {	// 両辺とも10の時
+	// 両辺とも10の時
+	else {
 		game->puzzleGridSize = 54;	// パズルのマスのサイズ(10×10)
 	}
 
-	// 塗る場所を指示する上と右の数列を0に初期化
+	// 塗る場所を指示する上辺と左辺の数列を2重for文で0に初期化
 	for (int j = 0; j < 10; j++) {
 		for (int i = 0; i < 20; i++) {
-			game->drawGrid_H[i][j] = 0;
-			game->drawGrid_V[i][j] = 0;
+			game->drawGrid_H[i][j] = 0;	// 上辺の数列を0に初期化
+			game->drawGrid_V[i][j] = 0;	// 左辺の数列を0に初期化
 		}
 	}
 
+	// 塗る場所を指示する左辺数列を2重for文でセット
 	for (int j = 0; j < puzzle->y_size; j++) {
-		int vIndex = 0;
+		int vIndex = 0;	// 左辺数列の塗る数の塊のインデックス
 		for (int i = 0; i < puzzle->x_size; i++) {
+			// パズルデータのi行j列の値が100より大きい(濃い色)とき
 			if (puzzle->puzzleData[i][j] > 100) {
-				game->drawGrid_V[j][vIndex]++;
+				game->drawGrid_V[j][vIndex]++;	//　左辺数列の塗る数(表示する数字)をインクリメント
 			}
+			// パズルデータのi行j列の値が100より小さい(薄い色)とき
 			else if (game->drawGrid_V[j][vIndex] > 0) {
-				vIndex++;
+				vIndex++;	// 塊のひとつずらす
 			}
 		}
 	}
 
+	// 塗る場所を指示する上辺数列を2重for文でセット
 	for (int j = 0; j < puzzle->x_size; j++) {
-		int hIndex = 0;
+		int hIndex = 0;	// 上辺数列の塗る数の塊のインデックス
 		for (int i = 0; i < puzzle->y_size; i++) {
+			// パズルデータのi行j列の値が100より大きい(濃い色)とき
 			if (puzzle->puzzleData[j][i] > 100) {
-				game->drawGrid_H[j][hIndex]++;
+				game->drawGrid_H[j][hIndex]++;	// 上辺数列の塗る数(表示する数字)をインクリメント
 			}
+			// パズルデータのi行j列の値が100より小さい(薄い色)とき
 			else if (game->drawGrid_H[j][hIndex] > 0) {
-				hIndex++;
+				hIndex++;	// 塊をひとつずらす
 			}
 		}
 	}
 
+	// 塗る場所を示す数を2重for文で逆順の右詰めに直す
 	for (int i = 0; i < puzzle->y_size; i++) {
-		int tmp_V[10];
-		int tmp_H[10];
+		int tmp_V[10];	// 左辺数列を逆順に数列を格納する配列
+		int tmp_H[10];	// 上辺数列を逆順に数列を格納する配列
+		// i行の数列を逆順に格納する
 		for (int j = 0; j < 10; j++) {
-			tmp_V[j] = game->drawGrid_V[i][9 - j];
-			tmp_H[j] = game->drawGrid_H[i][9 - j];
+			tmp_V[j] = game->drawGrid_V[i][9 - j];	// 左辺行列を逆順に格納
+			tmp_H[j] = game->drawGrid_H[i][9 - j];	// 上辺行列を逆順に格納
 		}
 
-		int count_V = 0;
-		int count_H = 0;
+		int count_V = 0;	// 左辺数列の塊のインデックス番号
+		int count_H = 0;	// 上辺数列の塊のインデックス番号
+		// 各数列のi行の逆順数列を右図目に直す
 		for (int j = 0; j < 10; j++) {
+			// 左辺数列の逆順数列の塊がある(0より大きい値が入っている)とき
 			if (tmp_V[j] > 0) {
-				game->drawGrid_V[i][count_V] = tmp_V[j];
-				count_V++;
+				game->drawGrid_V[i][count_V] = tmp_V[j];	// 右詰めする
+				count_V++;	// 塊のインデックス番号をひとつずらす
 			}
+			// 左辺数列の逆順数列の塊がない(0より大きい値が入っていない)とき
 			else {
-				game->drawGrid_V[i][9 - j] = tmp_V[j];
+				game->drawGrid_V[i][9 - j] = tmp_V[j];	// 左詰めする
 			}
 
+			// 上辺数列の逆順数列の塊がある(0より大きい値が入っている)とき
 			if (tmp_H[j] > 0) {
-				game->drawGrid_H[i][count_H] = tmp_H[j];
+				game->drawGrid_H[i][count_H] = tmp_H[j];	// 右詰めする
 				count_H++;
 			}
+			// 上辺数列の逆順数列の塊がない(0より大きい値が入っていない)とき
 			else {
-				game->drawGrid_H[i][9 - j] = tmp_H[j];
+				game->drawGrid_H[i][9 - j] = tmp_H[j];	// 左詰めする
 			}
 		}
 	}
 
-	game->checkPuzzle = *puzzle;
+	game->checkPuzzle = *puzzle;	// 正誤判定用のパズルに正解パズルのランキングデータなどを格納
+
+	// 2重for文で正誤判定用パズルをすべて何も塗られていないマス(-1)に初期化
 	for (int j = 0; j < 20; j++) {
 		for (int i = 0; i < 20; i++) {
-			game->checkPuzzle.puzzleData[i][j] = -1;
+			game->checkPuzzle.puzzleData[i][j] = -1;	// 白いマス(-1)に初期化
 		}
 	}
 
-	int backImageHandle = LoadGraph("graph/backButton.bmp");
-	int hintImageHandle = LoadGraph("graph/hintButton.bmp");
-	int resetImageHandle = LoadGraph("graph/resetButton.bmp");
-	int nextImageHandle = LoadGraph("graph/nextButton.bmp");
-	int returnImageHandle = LoadGraph("graph/returnButton.bmp");
-	game->pressedPenButtonImageHandle = LoadGraph("graph/penbutton_pressed.bmp");
-	game->releasePenButtonImageHandle = LoadGraph("graph/penbutton_release.bmp");
-	game->pressedEraserButtonImageHandle = LoadGraph("graph/crossbutton_pressed.bmp");
-	game->releaseEraserButtonImageHandle = LoadGraph("graph/crossbutton_release.bmp");
-	game->puzzleTitleFontHandle = CreateFontToHandle(NULL, 30, 4);
-	game->timeFontHandle = CreateFontToHandle(NULL, 40, 4);
-	game->drawNumFontHandle = CreateFontToHandle(NULL, 8, 2);
-	game->rankingTitleFontHnadle = CreateFontToHandle(NULL, 34, 3);
-	game->rankingFontHandle = CreateFontToHandle(NULL, 35, 3);
-	game->playerRankingFontHandle = CreateFontToHandle(NULL, 30, 3);
-	game->keyHandle = MakeKeyInput(16, FALSE, FALSE, FALSE);
-	game->hintcounter = 0;
+	int backImageHandle = LoadGraph("graph/backButton.bmp");	// 「戻る」ボタンの画像をハンドルに格納
+	int hintImageHandle = LoadGraph("graph/hintButton.bmp");	// 「ヒント」ボタンの画像をハンドルに格納
+	int resetImageHandle = LoadGraph("graph/resetButton.bmp");	// 「リセット」ボタンの画像をハンドルに格納
+	int nextImageHandle = LoadGraph("graph/nextButton.bmp");	// チュートリアルの「次へ」ボタンの画像をハンドルに格納
+	int returnImageHandle = LoadGraph("graph/returnButton.bmp");	// チュートリアルの「ひとつ前に戻る」ボタンの画像をハンドルに格納
+	game->pressedPenButtonImageHandle = LoadGraph("graph/penbutton_pressed.bmp");	// 有効状態の「塗る」ボタンの画像をハンドルに格納
+	game->releasePenButtonImageHandle = LoadGraph("graph/penbutton_release.bmp");	// 無効状態の「塗る」ボタンの画像をハンドルに格納
+	game->pressedEraserButtonImageHandle = LoadGraph("graph/crossbutton_pressed.bmp");	// 有効状態の「バツをつける」ボタンの画像をハンドルに格納
+	game->releaseEraserButtonImageHandle = LoadGraph("graph/crossbutton_release.bmp");	// 無効状態の「バツをつける」ボタンの画像をハンドルに格納
+	game->puzzleTitleFontHandle = CreateFontToHandle(NULL, 30, 4);	// パズルタイトルを表示する際のフォントハンドルを格納
+	game->timeFontHandle = CreateFontToHandle(NULL, 40, 4);	// プレイ時間を表示する際のフォントハンドルを格納
+	game->drawNumFontHandle = CreateFontToHandle(NULL, 8, 2);	// 塗る場所を支持する数列を表示する際のフォントハンドルを格納
+	game->rankingTitleFontHnadle = CreateFontToHandle(NULL, 34, 3);	// ランキングタイトルを表示する際のフォントハンドルを格納
+	game->rankingFontHandle = CreateFontToHandle(NULL, 35, 3);	// ランキングを表示する際のフォントハンドルをフォントハンドルを格納
+	game->playerRankingFontHandle = CreateFontToHandle(NULL, 30, 3);	// パズルをプレイしたプレイヤーのタイムやランキングを表示する際のフォントハンドルを格納
+	game->keyHandle = MakeKeyInput(16, FALSE, FALSE, FALSE);	// キー入力用ハンドルを格納
+	game->hintcounter = 0;	// ヒント利用回数を0回に初期化
 
-	setButton(55, 435, 145, 525, backImageHandle, NULL, mouse, &(game->backButton), TRUE);
+	setButton(55, 435, 145, 525, backImageHandle, NULL, mouse, &(game->backButton), TRUE);	// 「戻る」ボタンの座標と画像と状態を設定
+	setButton(100, 315, 190, 405, game->pressedPenButtonImageHandle, NULL, mouse, &(game->penButton), TRUE);	// 「塗る」ボタンの座標と画像と状態を設定
+	setButton(250, 315, 340, 405, game->releaseEraserButtonImageHandle, NULL, mouse, &(game->eraserButton), TRUE);	// 「バツをつける」ボタンの座標と画像と状態を設定
 
+	// 遊ぶパズルがチュートリアルパズルでない(パズルIDが0でない)とき
 	if (puzzle->puzzleId != 0) {
-		setButton(175, 435, 265, 525, hintImageHandle, NULL, mouse, &(game->hintButton), TRUE);
-		setButton(295, 435, 385, 525, resetImageHandle, NULL, mouse, &(game->resetButton), TRUE);
-		setButton(100, 315, 190, 405, game->pressedPenButtonImageHandle, NULL, mouse, &(game->penButton), TRUE);
-		setButton(250, 315, 340, 405, game->releaseEraserButtonImageHandle, NULL, mouse, &(game->eraserButton), TRUE);
-		game->tutorialProcess = -1;
+		setButton(175, 435, 265, 525, hintImageHandle, NULL, mouse, &(game->hintButton), TRUE);	// 「ヒント」ボタンの座標と画像と状態を設定
+		setButton(295, 435, 385, 525, resetImageHandle, NULL, mouse, &(game->resetButton), TRUE);	// 「リセット」ボタンの座標と画像と状態を設定
+		game->tutorialProcess = -1;	// チュートリアル説明番号を説明終了に設定(チュートリアルをプレイしないので説明しなくていい)
 	}
+	// 遊ぶパズルがチュートリアルパズル(パズルIDが0)のとき
 	else {
-		setButton(175, 435, 265, 525, game->pressedPenButtonImageHandle, NULL, mouse, &(game->penButton), TRUE);
-		setButton(295, 435, 385, 525, game->releaseEraserButtonImageHandle, NULL, mouse, &(game->eraserButton), TRUE);
-		setButton(345, 370, 390, 405, nextImageHandle, NULL, mouse, &(game->nextButton), TRUE);
-		setButton(30, 375, 76, 405, returnImageHandle, NULL, mouse, &(game->returnButton), TRUE);
-		game->tutorialProcess = 0;
+		setButton(345, 370, 390, 405, nextImageHandle, NULL, mouse, &(game->nextButton), TRUE);	// チュートリアルの「ひとつ前に戻る」ボタンの座標と画像と状態を設定
+		setButton(30, 375, 76, 405, returnImageHandle, NULL, mouse, &(game->returnButton), TRUE);	// チュートリアルの「次へ」ボタンの座標と画像と状態を設定
+		game->tutorialProcess = 0;	// チュートリアル説明番号を説明開始(0)に設定
 
+		// 3重for文でチュートリアルの正解パズルのデータをセット(p:説明番号に対応した正解パズルデータ，j:パズルの行番号，i:パズルの列番号)
 		for (int p = 0; p < 13; p++) {
 			for (int j = 0; j < 10; j++) {
 				for (int i = 0; i < 10; i++) {
+					// 説明番号によりセットするパズルを分岐
 					switch (p) {
-					case 0 :
-						game->processAnswerData[p][i][j] = -1;
+					case 0 :	// 説明番号0に対応する正解データを格納
+						game->processAnswerData[p][i][j] = -1;	// 正解パズルをすべて白いマス(-1)にする
 						break;
-					case 1 :
-						game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+
+					case 1 :	// 説明番号1に対応する正解データを格納
+						game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルをコピー
 						break;
-					case 2 :
-						game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+
+					case 2 :	// 説明番号2に対応する正解データを格納
+						game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルをコピー
 						break;
-					case 3 :
+
+					case 3 :	// 説明番号1に対応する正解データを格納
+						// 上下左右辺のとき
 						if (i == 0 || i == 9 || j == 0 || j == 9) {
-							game->processAnswerData[p][i][j] = 1;
+							game->processAnswerData[p][i][j] = 1;	// 正解パズルのi行j列を黒いマス(1)にする
 						}
+						// 上下左右辺でないとき
 						else {
-							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルのi行j列をコピー
 						}
 						break;
-					case 4 :
-						game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+
+					case 4 :	// 説明番号3に対応する正解データを格納
+						game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルをコピー
 						break;
-					case 5 :
+
+					case 5 :	// 説明番号4に対応する正解データを格納
+						// 2行目の2~9列目のとき
 						if ((1 <= i && i <= 8) && j == 1) {
-							game->processAnswerData[p][i][j] = 0;
+							game->processAnswerData[p][i][j] = 0;	// 正解データのi行j列を×印付きマス(0)にする
 						}
+						// 1行目の2~4列目でないとき
 						else {
-							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルをコピー
 						}
 						break;
-					case 6:
+
+					case 6 :	// 説明番号6に対応する正解データを格納
+						// 3行目の2~4列目のとき
 						if ((1 <= i && i <= 2) && j == 2) {
-							game->processAnswerData[p][i][j] = 1;
+							game->processAnswerData[p][i][j] = 1;	// 正解パズルのi行j列を黒いマス(1)にする
 						}
+						// 3行目の2~4列目でないとき
 						else {
-							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルのi行j列をコピー
 						}
 						break;
-					case 7 :
+
+					case 7 :	// 説明番号7に対応する正解データを格納
+						// 4行目の2~6列目，または，5，6行目の2~7列目のとき
 						if ((1 <= i && i <= 5) && j == 3 || (1 <= i && i <= 6) && (4 <= j && j <= 5)) {
-							game->processAnswerData[p][i][j] = 1;
+							game->processAnswerData[p][i][j] = 1;	// 正解パズルのi行j列を黒いマス(1)にする
 						}
+						// 4行目の2~6列目，または，5，6行目の2~7列目でないとき
 						else {
-							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルのi行j列をコピー
 						}
 						break;
-					case 8 :
+
+					case 8 :	// 説明番号8に対応する正解データを格納
+						// 6行目のよりも上で，ひとつ前の正解パズルデータが白いマス(-1)のとき
 						if (j <= 5 && game->processAnswerData[p - 1][i][j] == -1) {
-							game->processAnswerData[p][i][j] = 0;
+							game->processAnswerData[p][i][j] = 0;	// 正解データのi行j列を×印付きマス(0)にする
 						}
+						// 6行目のよりも下で，ひとつ前の正解パズルデータが白いマス(-1)でないとき
 						else {
-							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルのi行j列をコピー
 						}
 						break;
-					case 9 :
+
+					case 9 :	// 説明番号9に対応する正解データを格納
+						// 8列目の8，9行目のとき
 						if (i == 7 && (7 <= j && j <= 8)) {
-							game->processAnswerData[p][i][j] = 1;
+							game->processAnswerData[p][i][j] = 1;	// 正解パズルのi行j列を黒いマス(1)にする
 						}
+						// 8列目の8，9行目でないとき
 						else {
-							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルのi行j列をコピー
 						}
 						break;
-					case 10 :
+
+					case 10 :	// 説明番号10に対応する正解データを格納
+						// 7列目の7~9行目のとき
 						if (i == 6 && (6 <= j && j <= 8)) {
-							game->processAnswerData[p][i][j] = 1;
+							game->processAnswerData[p][i][j] = 1;	// 正解パズルのi行j列を黒いマス(1)にする
 						}
+						// 7列目の7~9行目でないとき
 						else {
-							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルのi行j列をコピー
 						}
 						break;
-					case 11 :
+
+					case 11 :	// 説明番号11に対応する正解データを格納
+						// 4，5列目の7~9行目のとき
 						if ((4 <= i && i <= 5) && (6 <= j && j <= 8)) {
-							game->processAnswerData[p][i][j] = 1;
+							game->processAnswerData[p][i][j] = 1;	// 正解パズルのi行j列を黒いマス(1)にする
 						}
+						// 4，5列目の7~9行目でないとき
 						else {
-							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルのi行j列をコピー
 						}
 						break;
-					case 12 :
+
+					case 12 :	// 説明番号12に対応する正解データを格納
+						// 6行3列のとき
 						if (i == 3 && j == 6) {
-							game->processAnswerData[p][i][j] = 1;
+							game->processAnswerData[p][i][j] = 1;	// 正解パズルのi行j列を黒いマス(1)にする
 						}
+						// 6行3列でないとき
 						else {
-							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];
+							game->processAnswerData[p][i][j] = game->processAnswerData[p - 1][i][j];	// 前の正解パズルのi行j列をコピー
 						}
 						break;
 					}
@@ -245,93 +295,115 @@ int InitializeGame(Game_t* game, Puzzle_t* puzzle) {
 		}
 	}
 
-	game->penButton.mState = true;
-	game->clearFlag = true;
-	game->inputNicknameDisplayFlag = -1;
-	game->fromWhiteChangeLeft = false;
-	game->toWhiteChangeLeft = false;
-	game->fromWhiteChangeRight = false;
-	game->toWhiteChangeRight = false;
+	game->penButton.mState = true;	// 「塗る」ボタンを有効化
+	game->clearFlag = true;	// クリアフラグを立てる(パズルをクリアしていない)
+	game->inputNicknameDisplayFlag = -1;	// ランキング入力ウィンドウを未入力非表示に設定
+	game->fromWhiteChangeLeft = false;	// 左クリックによる白いマスからの変化フラグをおろす
+	game->toWhiteChangeLeft = false;	// 左クリックによる白いマスへの変化フラグをおろす
+	game->fromWhiteChangeRight = false;	// 右クリックによる白いマスからの変化フラグをおろす
+	game->toWhiteChangeRight = false;	// 右クリックによる白いマスへの変化フラグをおろす
 
+	// 2重for文で表示パズルの各マス(ボタン)の座標，色，状態をセット(j:表示時の列，i:表示時の行，k:セットする座標の右端，l:セットする座標の上端)
 	for (int j = 0, k = game->puzzleY; j < puzzle->y_size; j++, k += game->puzzleGridSize - 1) {
 		for (int i = 0, l = game->puzzleX; i < puzzle->x_size; i++, l += game->puzzleGridSize - 1) {
-			setButton(l, k, l + game->puzzleGridSize, k + game->puzzleGridSize, NULL, GetColor(255, 255, 255), mouse, &(game->puzzleGrid[i][j]), TRUE);
-			game->puzzleState[i][j] = true;
+			setButton(l, k, l + game->puzzleGridSize, k + game->puzzleGridSize, NULL, GetColor(255, 255, 255), mouse, &(game->puzzleGrid[i][j]), TRUE);	// 各マスボタンに状態セット
+			game->puzzleState[i][j] = true;	// すべてのマスを可変に設定
 		}
 	}
 
-	DrawGraph(game->backButton.mX1, game->backButton.mY1, game->backButton.mImageHandle, FALSE);
-	DrawGraph(game->hintButton.mX1, game->hintButton.mY1, game->hintButton.mImageHandle, FALSE);
-	DrawGraph(game->resetButton.mX1, game->resetButton.mY1, game->resetButton.mImageHandle, FALSE);
-	DrawGraph(game->penButton.mX1, game->penButton.mY1, game->penButton.mImageHandle, FALSE);
-	DrawGraph(game->eraserButton.mX1, game->eraserButton.mY1, game->eraserButton.mImageHandle, FALSE);
-	DrawFormatStringToHandle(70, 100, GetColor(0, 0, 0), game->timeFontHandle, "Time : 00:00");
-	int titleWidth = GetDrawFormatStringWidthToHandle(game->puzzleTitleFontHandle, puzzle->puzzleTitle);
-	DrawFormatStringToHandle(720 - (titleWidth / 2), 10, GetColor(0, 0, 0), game->puzzleTitleFontHandle, puzzle->puzzleTitle);
+	DrawGraph(game->backButton.mX1, game->backButton.mY1, game->backButton.mImageHandle, FALSE);	// 戻るボタン表示
+	DrawGraph(game->hintButton.mX1, game->hintButton.mY1, game->hintButton.mImageHandle, FALSE);	// ヒントボタン表示
+	DrawGraph(game->resetButton.mX1, game->resetButton.mY1, game->resetButton.mImageHandle, FALSE);	// リセットボタン表示
+	DrawGraph(game->penButton.mX1, game->penButton.mY1, game->penButton.mImageHandle, FALSE);	// 塗るボタン表示
+	DrawGraph(game->eraserButton.mX1, game->eraserButton.mY1, game->eraserButton.mImageHandle, FALSE);	// バツをつけるボタン表示
+	DrawFormatStringToHandle(70, 100, GetColor(0, 0, 0), game->timeFontHandle, "Time : 00:00");	// プレイ時間を0秒表示
+	int titleWidth = GetDrawFormatStringWidthToHandle(game->puzzleTitleFontHandle, puzzle->puzzleTitle);	// パズルタイトルを表示する文字列のx中心座標
+	DrawFormatStringToHandle(720 - (titleWidth / 2), 10, GetColor(0, 0, 0), game->puzzleTitleFontHandle, puzzle->puzzleTitle);	// パズルタイトル表示
 
+	// 2重for文でパズルのマス表示
 	for (int j = 0; j < puzzle->y_size; j++) {
 		for (int i = 0; i < puzzle->x_size; i++) {
-			DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
-			DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
+			DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);	// パズルマスの色でマスを塗りつぶす
+			DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);	// パズルマスを黒い枠で囲む
 		}
 	}
 
-	int index = 0;
-	DrawLine(game->puzzleX, game->puzzleY, (game->puzzleX) - 100, game->puzzleY, GetColor(0, 0, 0));
-	DrawLine(game->puzzleX, game->puzzleY, (game->puzzleX), game->puzzleY - 100, GetColor(0, 0, 0));
+
+	DrawLine(game->puzzleX, game->puzzleY, (game->puzzleX) - 100, game->puzzleY, GetColor(0, 0, 0));	// 塗る場所を指示する左辺数列を表示するための上端の横線を描画
+	DrawLine(game->puzzleX, game->puzzleY, (game->puzzleX), game->puzzleY - 100, GetColor(0, 0, 0));	// 塗る場所を指示する上辺数列を表示するための左端の縦線を描画
+	
+	// 2重for文でパズルの塗る場所を指示する線を描画
 	for (int j = 1; j <= puzzle->y_size; j++) {
 		for (int i = 1; i <= puzzle->x_size; i++) {
-			DrawLine(game->puzzleX, (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0));
-			DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY, (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0));
+			DrawLine(game->puzzleX, (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0));	// 塗る場所を指示する左辺数列を表示するための横線を描画
+			DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY, (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0));	// 塗る場所を指示する上辺数列を表示するための縦線を描画
 		}
 	}
 
+	// 2重for文で左辺数列を描画(i:行番号，j:列番号，y:文字描画のy座標，x:文字描画のx座標)
 	for (int i = 0, y = ((game->puzzleY)); i < (puzzle->y_size); i++, y += ((game->puzzleGridSize) - 1)) {
 		for (int j = 0, x = ((game->puzzleX) - 10); j < 10; j++, x -= 10) {
+			// 左辺数列のi行のj番目の値が0でないのとき
 			if ((game->drawGrid_V[i][j]) != 0) {
-				int drawY = y + (game->puzzleGridSize / 2) - 4;
-				DrawFormatStringToHandle(x, drawY, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_V[i][j]));
+				int drawY = y + (game->puzzleGridSize / 2) - 4;	// 表示する文字が各行の真ん中になるようにy座標を計算
+				DrawFormatStringToHandle(x, drawY, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_V[i][j]));	// 左辺数列の数字を表示
 			}
 		}
 	}
 
+	// 2重for文で上辺数列を描画(i:行番号，j:列番号，y:文字描画のy座標，x:文字描画のx座標)
 	for (int i = 0, x = ((game->puzzleX)); i < (puzzle->x_size); i++, x += ((game->puzzleGridSize) - 1)) {
 		for (int j = 0, y = ((game->puzzleY) - 10); j < 10; j++, y -= 10) {
+			// 上辺数列のi行のj番目の値が0でないのとき
 			if ((game->drawGrid_H[i][j]) != 0) {
-				int drawX = x + (game->puzzleGridSize / 2) - (GetDrawFormatStringWidthToHandle(game->drawNumFontHandle, "%d", game->drawGrid_H[i][j]) / 2);
-				DrawFormatStringToHandle(drawX, y, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_H[i][j]));
+				int drawX = x + (game->puzzleGridSize / 2) - (GetDrawFormatStringWidthToHandle(game->drawNumFontHandle, "%d", game->drawGrid_H[i][j]) / 2);	// 表示する文字が各行の真ん中になるようにx座標を計算
+				DrawFormatStringToHandle(drawX, y, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_H[i][j]));	// 上辺数列の数字を表示
 			}
 		}
 	}
 
-	game->startTime = GetNowCount();
+	game->startTime = GetNowCount();	// パズルプレイスタートの現在の時刻(ミリ秒)を格納
 
-	return GameScr;
+	return GameScr;	// 遷移先のシーンのシーン番号をGameScrとして返す
 }
 
-// M17:チュートリアル画面更新
+/*********************************************************
+*** Function Name : UpdateTutorial (M13)
+*** Designer      : 藤川
+*** Date          : 2020.7.19
+*** Function      : 引数でとったチュートリアル画面の構造体(Game_t)の
+					の画面の状態を更新
+*** Return        : 次の遷移先のシーン番号(GameScr)
+**********************************************************/
 int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
-	GetMouseState(mouse, TRUE);
-	Mouse_t tmpMouse = *mouse;
+	GetMouseState(mouse, TRUE);	// 引数でとったマウ変数の状態を更新(M4)
+	Mouse_t tmpMouse = *mouse;	// 戻るボタンを押したか判定するためのマウス変数
 
+	// クリアフラグが立っていたら(クリアしていない)
 	if (game->clearFlag) {
-		bool preNextButtonState = game->nextButton.mState;
-		bool preRetrunButtonState = game->returnButton.mState;
-		static bool processFlag[13];
+		bool preNextButtonState = game->nextButton.mState;	// 次へボタンの状態更新前の状態を格納
+		bool preRetrunButtonState = game->returnButton.mState;	// ひとつ前に戻るボタンの状態更新前の状態を格納
+		static bool processFlag[13];	// チュートリアルの説明の説明番号ごとの次へボタンを表示するかどうかのフラグ
 
+		// 説明番号により表示する説明文を分岐
 		switch (game->tutorialProcess) {
-		case 0 :
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-			DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
+		case 0 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+			setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+			DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+			
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 1;
+					game->tutorialProcess = 1;	// 説明番号を1にする
 				}
 			}
-			mouse->mButton = none;
 
+			mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
+
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "ようこそ、");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "ノノグラム・パズルのチュートリアルへ。");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "このゲームは、マスの周りにある数字の情報を");
@@ -341,27 +413,34 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(30, 280, GetColor(0, 0, 0), "では、実際にプレイしてみましょう。");
 
 			break;
-		case 1 :
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
-			DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
+
+		case 1 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
+			DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 2;
+					game->tutorialProcess = 2;	// 説明番号を2にする
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 0;
+					game->tutorialProcess = 0;	// 説明番号を0にする
 				}
 			}
 
-			mouse->mButton = none;
+			mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
 
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "まず、マスの周りの数字の見方を説明します。");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "右のパズルの7行目の赤枠に注目してください。");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "「1 4 1」と数字がならんでいますね。");
@@ -375,27 +454,34 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(30, 360, GetColor(0, 0, 0), "という意味を持ちます。");
 
 			break;
-		case 2:
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
-			DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
+
+		case 2:	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
+			DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 3;
+					game->tutorialProcess = 3;	// 説明番号を3にする
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 1;
+					game->tutorialProcess = 1;	// 説明番号を1にする
 				}
 			}
 
-			mouse->mButton = none;
+			mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
 
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "つまり、7行目はまだ確実に塗ることができな");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "い行ということになります。");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "これまで行についてしか説明していませんが、");
@@ -409,47 +495,59 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(30, 360, GetColor(0, 0, 0), "ることができます。");
 
 			break;
-		case 3:
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
+
+		case 3 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+
+			// 説明番号3の次へボタン表示フラグがtrueのとき
 			if (processFlag[game->tutorialProcess]) {
-				processFlag[game->tutorialProcess] = false;
-				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
-				mouse->mButton = none;
+				processFlag[game->tutorialProcess] = false;	// 説明番号3の次へボタン表示フラグをfalseにする
+				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+				mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
 			}
 
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
 
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 4;
+					game->tutorialProcess = 4;	// 説明番号を4にする
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 2;
+					game->tutorialProcess = 2;	// 説明番号を2にする
 
+					// 2重for文で正誤判定用パズルにひとつ前の正解パズルをコピー
 					for (int j = 0; j < 10; j++) {
 						for (int i = 0; i < 10; i++) {
-							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];
+							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];	// 正誤判定用パズルにひとつ前の正解パズルをコピー
 
+							// 正誤判定用パズルが黒いマス(1)のとき
 							if (game->checkPuzzle.puzzleData[i][j] == 1) {
-								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
+								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// マスの色を黒にする
 							}
+							// 正誤判定用パズルが×印つきのマス(0)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
+							// 正誤判定用パズルが白いマス(-1)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == -1) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
 						}
 					}
 				}
 			}
 
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "では、実際に青枠の部分を塗ってみましょう。");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "まず、鉛筆マークの「塗る」ボタンが有効であ");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "ることを確認してください。ボタンが水色にな");
@@ -462,43 +560,54 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(30, 340, GetColor(0, 0, 0), "ることで白いマスに戻せます。");
 
 			break;
-		case 4:
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
-			DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
+
+		case 4 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
+			DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 5;
+					game->tutorialProcess = 5;	// 説明番号を5にする
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 3;
+					game->tutorialProcess = 3;	// 説明番号を3にする
 
+					// 2重for文で正誤判定用パズルにひとつ前の正解パズルをコピー
 					for (int j = 0; j < 10; j++) {
 						for (int i = 0; i < 10; i++) {
-							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];
+							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];	// 正誤判定用パズルにひとつ前の正解パズルをコピー
 
+							// 正誤判定用パズルが黒いマス(1)のとき
 							if (game->checkPuzzle.puzzleData[i][j] == 1) {
-								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
+								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// マスの色を黒にする
 							}
+							// 正誤判定用パズルが×印つきのマス(0)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
+							// 正誤判定用パズルが白いマス(-1)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == -1) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
 						}
 					}
 				}
 			}
 
-			mouse->mButton = none;
+			mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
 
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "次に行ごとに見ていきましょう。");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "1行目は「10」で既に塗られています。");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "2行目は「1 1」で、左右の両端が塗られていま");
@@ -512,46 +621,59 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(30, 360, GetColor(0, 0, 0), "ることで、あとでパズルが見やすくなります。");
 
 			break;
-		case 5 :
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			if (processFlag[game->tutorialProcess]) {
-				processFlag[game->tutorialProcess] = false;
-				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
-				mouse->mButton = none;
-			}
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
 
+		case 5 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+
+			// 説明番号3の次へボタン表示フラグがtrueのとき
+			if (processFlag[game->tutorialProcess]) {
+				processFlag[game->tutorialProcess] = false;	// 説明番号3の次へボタン表示フラグをfalseにする
+				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+				mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
+			}
+
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
+
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 6;
+					game->tutorialProcess = 6;	// 説明番号を6にする
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 4;
+					game->tutorialProcess = 4;	// 説明番号を4にする
 
+					// 2重for文で正誤判定用パズルにひとつ前の正解パズルをコピー
 					for (int j = 0; j < 10; j++) {
 						for (int i = 0; i < 10; i++) {
-							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];
+							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];	// 正誤判定用パズルにひとつ前の正解パズルをコピー
 
+							// 正誤判定用パズルが黒いマス(1)のとき
 							if (game->checkPuzzle.puzzleData[i][j] == 1) {
-								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
+								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// マスの色を黒にする
 							}
+							// 正誤判定用パズルが×印つきのマス(0)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
+							// 正誤判定用パズルが白いマス(-1)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == -1) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
 						}
 					}
 				}
 			}
 
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "では、×印をつけてみましょう。");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "×マークの「バツをつける」ボタンを左クリッ");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "クして、有効にしてください。×ボタンが水色");
@@ -564,46 +686,59 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(30, 340, GetColor(0, 0, 0), "しても、×をつけられます。");
 
 			break;
-		case 6:
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			if (processFlag[game->tutorialProcess]) {
-				processFlag[game->tutorialProcess] = false;
-				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
-				mouse->mButton = none;
-			}
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
 
+		case 6 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+
+			// 説明番号3の次へボタン表示フラグがtrueのとき
+			if (processFlag[game->tutorialProcess]) {
+				processFlag[game->tutorialProcess] = false;	// 説明番号3の次へボタン表示フラグをfalseにする
+				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+				mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
+			}
+
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
+
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 7;
+					game->tutorialProcess = 7;	// 説明番号を7にする
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 5;
+					game->tutorialProcess = 5;	// 説明番号を5にする
 
+					// 2重for文で正誤判定用パズルにひとつ前の正解パズルをコピー
 					for (int j = 0; j < 10; j++) {
 						for (int i = 0; i < 10; i++) {
-							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];
+							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];	// 正誤判定用パズルにひとつ前の正解パズルをコピー
 
+							// 正誤判定用パズルが黒いマス(1)のとき
 							if (game->checkPuzzle.puzzleData[i][j] == 1) {
-								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
+								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// マスの色を黒にする
 							}
+							// 正誤判定用パズルが×印つきのマス(0)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
+							// 正誤判定用パズルが白いマス(-1)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == -1) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
 						}
 					}
 				}
 			}
 
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "3行目は「3 1」で、左右端が黒いマスです。");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "この場合、");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "「左端の黒いマスを含む3個の連続した黒いマ");
@@ -613,92 +748,117 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(30, 280, GetColor(0, 0, 0), "実際に塗るモードで塗ってみましょう");
 
 			break;
-		case 7:
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			if (processFlag[game->tutorialProcess]) {
-				processFlag[game->tutorialProcess] = false;
-				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
-				mouse->mButton = none;
-			}
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
 
+		case 7 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+
+			// 説明番号3の次へボタン表示フラグがtrueのとき
+			if (processFlag[game->tutorialProcess]) {
+				processFlag[game->tutorialProcess] = false;	// 説明番号3の次へボタン表示フラグをfalseにする
+				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+				mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
+			}
+
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
+
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 8;
+					game->tutorialProcess = 8;	// 説明番号を8にする
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 6;
+					game->tutorialProcess = 6;	// 説明番号を6にする
 
+					// 2重for文で正誤判定用パズルにひとつ前の正解パズルをコピー
 					for (int j = 0; j < 10; j++) {
 						for (int i = 0; i < 10; i++) {
-							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];
+							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];	// 正誤判定用パズルにひとつ前の正解パズルをコピー
 
+							// 正誤判定用パズルが黒いマス(1)のとき
 							if (game->checkPuzzle.puzzleData[i][j] == 1) {
-								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
+								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// マスの色を黒にする
 							}
+							// 正誤判定用パズルが×印つきのマス(0)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
+							// 正誤判定用パズルが白いマス(-1)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == -1) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
 						}
 					}
 				}
 			}
 
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "4行目と5行目と6行目も先ほどの3行目と同じ");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "考え方で塗ることができます。");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "青枠のマスを塗ってみましょう。");
 
 			break;
-		case 8:
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			if (processFlag[game->tutorialProcess]) {
-				processFlag[game->tutorialProcess] = false;
-				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
-				mouse->mButton = none;
-			}
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
 
+		case 8 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+
+			// 説明番号3の次へボタン表示フラグがtrueのとき
+			if (processFlag[game->tutorialProcess]) {
+				processFlag[game->tutorialProcess] = false;	// 説明番号3の次へボタン表示フラグをfalseにする
+				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+				mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
+			}
+
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
+
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 9;
+					game->tutorialProcess = 9;	// 説明番号を9にする
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 7;
+					game->tutorialProcess = 7;	// 説明番号を7にする
 
+					// 2重for文で正誤判定用パズルにひとつ前の正解パズルをコピー
 					for (int j = 0; j < 10; j++) {
 						for (int i = 0; i < 10; i++) {
-							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];
+							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];	// 正誤判定用パズルにひとつ前の正解パズルをコピー
 
+							// 正誤判定用パズルが黒いマス(1)のとき
 							if (game->checkPuzzle.puzzleData[i][j] == 1) {
-								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
+								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// マスの色を黒にする
 							}
+							// 正誤判定用パズルが×印つきのマス(0)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
+							// 正誤判定用パズルが白いマス(-1)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == -1) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
 						}
 					}
 				}
 			}
 
-
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "今赤枠で囲んであるところは完成している部");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "分です。なので、白のマスは確実に黒ではあ");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "りません。");
@@ -706,46 +866,59 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(30, 240, GetColor(0, 0, 0), "×印をつけておきましょう。");
 
 			break;
-		case 9:
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			if (processFlag[game->tutorialProcess]) {
-				processFlag[game->tutorialProcess] = false;
-				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
-				mouse->mButton = none;
-			}
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
 
+		case 9 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+
+			// 説明番号3の次へボタン表示フラグがtrueのとき
+			if (processFlag[game->tutorialProcess]) {
+				processFlag[game->tutorialProcess] = false;	// 説明番号3の次へボタン表示フラグをfalseにする
+				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+				mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
+			}
+
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
+
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 10;
+					game->tutorialProcess = 10;	// 説明番号を10にする
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 8;
+					game->tutorialProcess = 8;	// 説明番号を8にする
 
+					// 2重for文で正誤判定用パズルにひとつ前の正解パズルをコピー
 					for (int j = 0; j < 10; j++) {
 						for (int i = 0; i < 10; i++) {
-							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];
+							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];	// 正誤判定用パズルにひとつ前の正解パズルをコピー
 
+							// 正誤判定用パズルが黒いマス(1)のとき
 							if (game->checkPuzzle.puzzleData[i][j] == 1) {
-								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
+								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// マスの色を黒にする
 							}
+							// 正誤判定用パズルが×印つきのマス(0)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
+							// 正誤判定用パズルが白いマス(-1)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == -1) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
 						}
 					}
 				}
 			}
 
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "ここで列ごとに見てみましょう。");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "最も右側の9列目、10列目は完成");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "していることがわかります。");
@@ -757,46 +930,59 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(30, 320, GetColor(0, 0, 0), "う。");
 
 			break;
-		case 10:
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			if (processFlag[game->tutorialProcess]) {
-				processFlag[game->tutorialProcess] = false;
-				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
-				mouse->mButton = none;
-			}
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
 
+		case 10 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+
+			// 説明番号3の次へボタン表示フラグがtrueのとき
+			if (processFlag[game->tutorialProcess]) {
+				processFlag[game->tutorialProcess] = false;	// 説明番号3の次へボタン表示フラグをfalseにする
+				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+				mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
+			}
+
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
+
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 11;
+					game->tutorialProcess = 11;	// 説明番号を11にする
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 9;
+					game->tutorialProcess = 9;	// 説明番号を9にする
 
+					// 2重for文で正誤判定用パズルにひとつ前の正解パズルをコピー
 					for (int j = 0; j < 10; j++) {
 						for (int i = 0; i < 10; i++) {
-							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];
+							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];	// 正誤判定用パズルにひとつ前の正解パズルをコピー
 
+							// 正誤判定用パズルが黒いマス(1)のとき
 							if (game->checkPuzzle.puzzleData[i][j] == 1) {
-								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
+								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// マスの色を黒にする
 							}
+							// 正誤判定用パズルが×印つきのマス(0)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
+							// 正誤判定用パズルが白いマス(-1)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == -1) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
 						}
 					}
 				}
 			}
 
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "7列目も先ほどと似た考え方ですが");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "今の6列目の状態は「1 2 1」なの");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "で、真ん中の2つの黒いマスと下端");
@@ -807,92 +993,117 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(30, 300, GetColor(0, 0, 0), "塗るモードで塗りましょう。");
 
 			break;
-		case 11:
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			if (processFlag[game->tutorialProcess]) {
-				processFlag[game->tutorialProcess] = false;
-				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
-				mouse->mButton = none;
-			}
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
 
+		case 11 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+
+			// 説明番号3の次へボタン表示フラグがtrueのとき
+			if (processFlag[game->tutorialProcess]) {
+				processFlag[game->tutorialProcess] = false;	// 説明番号3の次へボタン表示フラグをfalseにする
+				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+				mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
+			}
+
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
+
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = 12;
+					game->tutorialProcess = 12;	// 説明番号を12にする
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 10;
+					game->tutorialProcess = 10;	// 説明番号を10にする
 
+					// 2重for文で正誤判定用パズルにひとつ前の正解パズルをコピー
 					for (int j = 0; j < 10; j++) {
 						for (int i = 0; i < 10; i++) {
-							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];
+							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];	// 正誤判定用パズルにひとつ前の正解パズルをコピー
 
+							// 正誤判定用パズルが黒いマス(1)のとき
 							if (game->checkPuzzle.puzzleData[i][j] == 1) {
-								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
+								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// マスの色を黒にする
 							}
+							// 正誤判定用パズルが×印つきのマス(0)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
+							// 正誤判定用パズルが白いマス(-1)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == -1) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
 						}
 					}
 				}
 			}
 
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "6列目と5列目も7列目と同じ考え方");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "で完成させることができます。");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "青枠のマスを黒く塗りましょう。");
 
 			break;
-		case 12:
-			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);
-			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);
-			if (processFlag[game->tutorialProcess]) {
-				processFlag[game->tutorialProcess] = false;
-				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);
-				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);
-				mouse->mButton = none;
-			}
-			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);
-			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);
 
+		case 12 :	// 説明番号が0のとき
+			DrawBox(20, 150, 400, 415, GetColor(255, 255, 255), TRUE);	// 説明文ボックスの背景表示
+			DrawBox(20, 150, 400, 415, GetColor(0, 0, 0), FALSE);	// 説明文ボックスの枠表示
+
+			// 説明番号3の次へボタン表示フラグがtrueのとき
+			if (processFlag[game->tutorialProcess]) {
+				processFlag[game->tutorialProcess] = false;	// 説明番号3の次へボタン表示フラグをfalseにする
+				setButton(344, 375, 390, 405, game->nextButton.mImageHandle, NULL, *mouse, &(game->nextButton), TRUE);	// 次へボタンの状態を更新
+				DrawGraph(344, 375, game->nextButton.mImageHandle, FALSE);	// 次へボタンを表示
+				mouse->mButton = none;	// マウスを無効化(戻るボタン以外押しても反応しなくなる)
+			}
+
+			setButton(30, 375, 76, 405, game->returnButton.mImageHandle, NULL, *mouse, &(game->returnButton), TRUE);	// ひとつ前に戻るボタンの状態を更新
+			DrawGraph(30, 375, game->returnButton.mImageHandle, FALSE);	// ひとつ前に戻るボタンを表示
+
+			// 次へボタンの状態がtrueのとき 
 			if (game->nextButton.mState) {
+				// 前の次へボタン状態がfalse(左クリックされた)のとき
 				if (!preNextButtonState) {
-					game->tutorialProcess = -1;
+					game->tutorialProcess = -1;	// 説明番号を-1にする(チュートリアル終了)
 				}
 			}
 
+			// ひとつ前に戻るボタンの状態がtrueのとき 
 			if (game->returnButton.mState) {
+				// 前のひとつ前に戻るボタン状態がfalse(左クリックされた)のとき
 				if (!preRetrunButtonState) {
-					game->tutorialProcess = 11;
+					game->tutorialProcess = 11;	// 説明番号を11にする
 
+					// 2重for文で正誤判定用パズルにひとつ前の正解パズルをコピー
 					for (int j = 0; j < 10; j++) {
 						for (int i = 0; i < 10; i++) {
-							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];
+							game->checkPuzzle.puzzleData[i][j] = game->processAnswerData[game->tutorialProcess][i][j];	// 正誤判定用パズルにひとつ前の正解パズルをコピー
 
+							// 正誤判定用パズルが黒いマス(1)のとき
 							if (game->checkPuzzle.puzzleData[i][j] == 1) {
-								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
+								game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// マスの色を黒にする
 							}
+							// 正誤判定用パズルが×印つきのマス(0)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
+							// 正誤判定用パズルが白いマス(-1)のとき
 							else if (game->checkPuzzle.puzzleData[i][j] == -1) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// マスの色を白にする
 							}
 						}
 					}
 				}
 			}
 
-
+			// 説明文表示
 			DrawFormatString(30, 160, GetColor(0, 0, 0), "4列目は「1 4 1」で、今の状態は「1 3 1」");
 			DrawFormatString(30, 180, GetColor(0, 0, 0), "です。真ん中の「3」の上に1つ黒を足すか");
 			DrawFormatString(30, 200, GetColor(0, 0, 0), "下に1つ黒を足すかで考える場面ですが、");
@@ -900,90 +1111,109 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 			DrawFormatString(30, 240, GetColor(0, 0, 0), "出来そうです。なので青枠を黒く塗ると…");
 
 			break;
-		default :
+
+		default : // 上記以外の数値のとき(-1:チュートリアル終了)
 			break;
 		}
 	
-		bool penState = game->penButton.mState;
-		bool eraserState = !penState;
+		bool penState = game->penButton.mState;	// 更新前の塗るボタンの状態を取得
+		bool eraserState = !penState;	// 更新前のバツをつけるボタンの状態を取得
 
-		setButton(55, 435, 145, 525, game->backButton.mImageHandle, NULL, tmpMouse, &(game->backButton), TRUE);
-		setButton(175, 435, 265, 525, game->penButton.mImageHandle, NULL, *mouse, &(game->penButton), TRUE);
-		setButton(295, 435, 385, 525, game->eraserButton.mImageHandle, NULL, *mouse, &(game->eraserButton), TRUE);
+		setButton(55, 435, 145, 525, game->backButton.mImageHandle, NULL, tmpMouse, &(game->backButton), TRUE);	// 戻るボタンの状態更新(いつでもメニュー画面に戻れるようにするため引数のマウスを無効化されないものにしている)
+		setButton(175, 435, 265, 525, game->penButton.mImageHandle, NULL, *mouse, &(game->penButton), TRUE);	// 塗るボタンの状態更新
+		setButton(295, 435, 385, 525, game->eraserButton.mImageHandle, NULL, *mouse, &(game->eraserButton), TRUE);	// バツをつけるボタンの状態更新
 
+		// 更新前の塗るボタンの状態がtrueのとき
 		if (penState) {
+			// 更新後のバツをつけるボタンの状態がtrueの時
 			if (game->eraserButton.mState) {
-				game->eraserButton.mState = true;
-				game->penButton.mState = false;
+				game->eraserButton.mState = true;	// バツをつけるボタンを有効化
+				game->penButton.mState = false;	// 塗るボタンを無効化
 			}
+			// 更新前のバツをつけるボタンの状態がfalseのとき
 			else {
-				game->penButton.mState = true;
-				game->eraserButton.mState = false;
+				game->penButton.mState = true;	// 塗るボタンを有効にしたままにする
+				game->eraserButton.mState = false;	// バツをつけるボタンを無効にしたままにする
 			}
 		}
+		// 更新前の塗るボタンの状態がfalse(バツをつけるボタンの状態がtrue)のとき
 		else {
+			// 更新後の塗るボタンの状態がtrueのとき
 			if (game->penButton.mState) {
-				game->penButton.mState = true;
-				game->eraserButton.mState = false;
+				game->penButton.mState = true;	// 塗るボタンを有効化
+				game->eraserButton.mState = false;	// バツをつけるボタンを無効化
 			}
+			// 更新後の塗るボタンの状態がfalseの時
 			else {
-				game->eraserButton.mState = true;
-				game->penButton.mState = false;
+				game->eraserButton.mState = true;	// バツをつけるボタンを有効にしたままにする
+				game->penButton.mState = false;	// 塗るボタンを無効にしたままにする
 			}
 		}
 
+		// 塗るボタンが有効(バツをつけるボタンが無効)なとき
 		if (game->penButton.mState) {
-			game->penButton.mImageHandle = game->pressedPenButtonImageHandle;
-			game->eraserButton.mImageHandle = game->releaseEraserButtonImageHandle;
+			game->penButton.mImageHandle = game->pressedPenButtonImageHandle;	// 塗るボタンの有効状態のイメージハンドルにする
+			game->eraserButton.mImageHandle = game->releaseEraserButtonImageHandle;	// バツをつけるボタンの無効状態のイメージハンドルにする
 		}
+		// バツをつけるボタンが有効(塗るボタンが無効)なとき
 		else if (game->eraserButton.mState) {
-			game->eraserButton.mImageHandle = game->pressedEraserButtonImageHandle;
-			game->penButton.mImageHandle = game->releasePenButtonImageHandle;
+			game->eraserButton.mImageHandle = game->pressedEraserButtonImageHandle;	// バツをつけるボタンの有効状態のイメージハンドルにする
+			game->penButton.mImageHandle = game->releasePenButtonImageHandle;	// 塗るボタンの無効状態のイメージハンドルにする
 		}
 
+		// 戻るボタンが押されて，メニュー画面から遷移してからマウスの左クリックが押され続けていなければ
 		if (game->backButton.mState && mouse->waitRelease == 0) {
-			mouse->waitRelease = 1;
-			return MenuScr;
+			mouse->waitRelease = 1;	// マウスのボタンを押し続けているという風にセット
+			return MenuScr;	// 遷移先のシーンをシーン番号MenuScrに設定
 		}
 
-		int nowMiliSec = GetNowCount();
-		int sec = ((nowMiliSec - (game->startTime)) % 60000) / 1000;
-		int minute = (nowMiliSec - (game->startTime)) / 60000;
-		DrawGraph(game->backButton.mX1, game->backButton.mY1, game->backButton.mImageHandle, FALSE);
-		DrawGraph(game->penButton.mX1, game->penButton.mY1, game->penButton.mImageHandle, FALSE);
-		DrawGraph(game->eraserButton.mX1, game->eraserButton.mY1, game->eraserButton.mImageHandle, FALSE);
-		DrawFormatStringToHandle(70, 100, GetColor(0, 0, 0), game->timeFontHandle, "Time : %02d:%02d", minute, sec);
-		int titleWidth = GetDrawFormatStringWidthToHandle(game->puzzleTitleFontHandle, puzzle->puzzleTitle);
-		DrawFormatStringToHandle(720 - (titleWidth / 2), 10, GetColor(0, 0, 0), game->puzzleTitleFontHandle, puzzle->puzzleTitle);
+		int nowMiliSec = GetNowCount();	// 現在時刻(ミリ秒)の取得
+		int sec = ((nowMiliSec - (game->startTime)) % 60000) / 1000;	// ゲームスタートしてから現在までの秒単位の時間
+		int minute = (nowMiliSec - (game->startTime)) / 60000;	// ゲームスタートしてから現在までの分単位の時間
+		DrawGraph(game->backButton.mX1, game->backButton.mY1, game->backButton.mImageHandle, FALSE);	// 戻るボタン描画
+		DrawGraph(game->penButton.mX1, game->penButton.mY1, game->penButton.mImageHandle, FALSE);	// 塗るボタン描画
+		DrawGraph(game->eraserButton.mX1, game->eraserButton.mY1, game->eraserButton.mImageHandle, FALSE);	// バツをつけるボタン描画
+		DrawFormatStringToHandle(70, 100, GetColor(0, 0, 0), game->timeFontHandle, "Time : %02d:%02d", minute, sec);	// ゲームプレイ経過時間(〇〇:〇〇)描画
+		int titleWidth = GetDrawFormatStringWidthToHandle(game->puzzleTitleFontHandle, puzzle->puzzleTitle);	// パズルタイトルを表示する文字列のx中心座標
+		DrawFormatStringToHandle(720 - (titleWidth / 2), 10, GetColor(0, 0, 0), game->puzzleTitleFontHandle, puzzle->puzzleTitle);	// パズルタイトル描画	
 
+		// 2重for文でパズルの描画とパズルの各マスの状態更新
 		for (int j = 0; j < puzzle->y_size; j++) {
 			for (int i = 0; i < puzzle->x_size; i++) {
-				Button_t preState = game->puzzleGrid[i][j];
+				Button_t preState = game->puzzleGrid[i][j];	// i行j列のマスボタンの更新前の状態を格納
+				// 難易度・パズル選択シーンから遷移した時にマウスが押されっぱなしでなければ
 				if (mouse->waitRelease != 1) {
-					setButton(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, NULL, game->puzzleGrid[i][j].mColor, *mouse, &(game->puzzleGrid[i][j]));
+					setButton(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, NULL, game->puzzleGrid[i][j].mColor, *mouse, &(game->puzzleGrid[i][j]));	// マウスの左ボタンの押されているいないだけの判定でマス状態を更新
 				}
 
+				// i行j列のマスボタンの座標上で，マウスの右ボタンが押されていたら
 				if (mouse->mX > game->puzzleGrid[i][j].mX1 && mouse->mX < game->puzzleGrid[i][j].mX2 && mouse->mY > game->puzzleGrid[i][j].mY1 && mouse->mY < game->puzzleGrid[i][j].mY2 && mouse->mButton == mButtonState::right) {
-					game->puzzleGrid[i][j].mState = true;
+					game->puzzleGrid[i][j].mState = true;	// i行j列のマスの状態を変更される状態に更新
 				}
 
+				// i行j列のマスが変更される状態で，そのマスボタンが変更可の場合
 				if (game->puzzleGrid[i][j].mState && game->puzzleState[i][j]) {
+					//マウスの状態によって分岐
 					switch (mouse->mState) {
-					case leftClick:
+					case leftClick :	// 左クリック状態の場合
+						// i行j列の正誤判定用パズルが白いマス(-1)のとき
 						if (game->checkPuzzle.puzzleData[i][j] == -1) {
+							// 塗るボタンが有効状態の場合
 							if (game->penButton.mState) {
-								game->checkPuzzle.puzzleData[i][j] = 1;
-								game->fromWhiteChangeLeft = true;
-								game->toWhiteChangeLeft = false;
+								game->checkPuzzle.puzzleData[i][j] = 1;	// 正誤判定用のパズルのi行j列を黒いマス(1)にする
+								game->fromWhiteChangeLeft = true;	// 左クリックによる白いマスからの変化フラグをtrueにする
+								game->toWhiteChangeLeft = false;	// 左クリックによる白いマスへの変化フラグをfalseにする
 							}
+							// バツをつけるボタンが有効な場合
 							else if (game->eraserButton.mState) {
-								game->checkPuzzle.puzzleData[i][j] = 0;
-								game->fromWhiteChangeLeft = true;
-								game->toWhiteChangeLeft = false;
+								game->checkPuzzle.puzzleData[i][j] = 0;	// 正誤判定用のパズルのi行j列を×印付きのマス(0)にする
+								game->fromWhiteChangeLeft = true;	// 左クリックによる白いマスからの変化フラグをtrueにする
+								game->toWhiteChangeLeft = false;	// 左クリックによる白いマスへの変化フラグをfalseにする
 							}
 						}
+						// i行j列の正誤判定用のパズルが白いマス(-1)でないとき
 						else {
-							game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+							game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列のマスボタンの色を白にする
 							game->checkPuzzle.puzzleData[i][j] = -1;
 							game->fromWhiteChangeLeft = false;
 							game->toWhiteChangeLeft = true;
@@ -1717,24 +1947,24 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 		DrawFormatStringToHandle(drawPlayerRankingTimeX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "%d秒", time);
 
 		if (game->inputNicknameDisplayFlag == 0 && game->hintcounter == 0) {
-			DrawBox(330, 200, 820, 500, GetColor(200, 200, 200), TRUE);
-			DrawBox(330, 200, 820, 500, GetColor(0, 0, 0), FALSE);
-			DrawBox(370, 450, 440, 490, GetColor(255, 255, 255), TRUE);
-			DrawBox(370, 450, 440, 490, GetColor(0, 0, 0), FALSE);
-			DrawFormatString(395, 465, GetColor(0, 0, 0), "OK");
+			DrawBox(320, 200, 830, 500, GetColor(200, 200, 200), TRUE);
+			DrawBox(320, 200, 830, 500, GetColor(0, 0, 0), FALSE);
+			DrawBox(330, 450, 400, 490, GetColor(255, 255, 255), TRUE);
+			DrawBox(330, 450, 400, 490, GetColor(0, 0, 0), FALSE);
+			DrawFormatString(355, 465, GetColor(0, 0, 0), "OK");
 
-			int str1X = 330 + (820 - 330) / 2 - GetDrawFormatStringWidth("ランキングTOP10入りおめでとうございます!!") / 2;
-			int str2X = 330 + (820 - 330) / 2 - GetDrawFormatStringWidth("ランキングに乗せるニックネームを入力してください") / 2;
-			int str3X = 330 + (820 - 330) / 2 - GetDrawFormatStringWidth("(半角英数字7文字，全角3文字まで。半角空白は使えません)") / 2;
+			int str1X = 320 + (830 - 320) / 2 - GetDrawFormatStringWidth("ランキングTOP10入りおめでとうございます!!") / 2;
+			int str2X = 320 + (830 - 320) / 2 - GetDrawFormatStringWidth("ランキングに乗せるニックネームを入力してください") / 2;
+			int str3X = 320 + (830 - 320) / 2 - GetDrawFormatStringWidth("(半角英数字7文字 全角3文字まで。全角半角空白は使えません)") / 2;
 			DrawFormatString(str1X, 210, GetColor(0, 0, 0), "ランキングTOP10入りおめでとうございます!!");
 			DrawFormatString(str2X, 230, GetColor(0, 0, 0), "ランキングに乗せるニックネームを入力してください");
-			DrawFormatString(str3X, 250, GetColor(0, 0, 0), "(半角英数字7文字，全角3文字まで。半角空白は使えません)");
+			DrawFormatString(str3X, 250, GetColor(0, 0, 0), "(半角英数字16文字 全角8文字まで。全角半角空白は使えません)");
 
 			DrawBox(460, 340, 700, 370, GetColor(0, 0, 0), FALSE);
 
 			static Button_t tmpButton;
 			bool preTmpButtonState = tmpButton.mState;
-			setButton(370, 450, 440, 490, NULL, NULL, *mouse, &tmpButton, TRUE);
+			setButton(330, 450, 400, 490, NULL, NULL, *mouse, &tmpButton, TRUE);
 			char player0[1024];
 			GetKeyInputString(player0, game->keyHandle);
 
