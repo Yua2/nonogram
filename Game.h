@@ -50,10 +50,10 @@ struct Game_t {
 int InitializeGame(Game_t* game, Puzzle_t* puzzle);
 
 // M17:チュートリアル画面更新
-int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key);
+int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse);
 
 // M18:ゲームプレイ更新
-int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key);
+int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse);
 
 // M19:チュートリアル/ゲームプレイ終了処理
 void FinalizeGame(Game_t* game, Puzzle_t* puzzle);

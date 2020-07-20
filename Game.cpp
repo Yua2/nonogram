@@ -328,7 +328,6 @@ int InitializeGame(Game_t* game, Puzzle_t* puzzle) {
 		}
 	}
 
-
 	DrawLine(game->puzzleX, game->puzzleY, (game->puzzleX) - 100, game->puzzleY, GetColor(0, 0, 0));	// 塗る場所を指示する左辺数列を表示するための上端の横線を描画
 	DrawLine(game->puzzleX, game->puzzleY, (game->puzzleX), game->puzzleY - 100, GetColor(0, 0, 0));	// 塗る場所を指示する上辺数列を表示するための左端の縦線を描画
 	
@@ -375,8 +374,7 @@ int InitializeGame(Game_t* game, Puzzle_t* puzzle) {
 					の画面の状態を更新
 *** Return        : 次の遷移先のシーン番号(GameScr)
 **********************************************************/
-int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
-	GetMouseState(mouse, TRUE);	// 引数でとったマウ変数の状態を更新(M4)
+int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse) {
 	Mouse_t tmpMouse = *mouse;	// 戻るボタンを押したか判定するためのマウス変数
 
 	// クリアフラグが立っていたら(クリアしていない)
@@ -1214,111 +1212,137 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 						// i行j列の正誤判定用のパズルが白いマス(-1)でないとき
 						else {
 							game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列のマスボタンの色を白にする
-							game->checkPuzzle.puzzleData[i][j] = -1;
-							game->fromWhiteChangeLeft = false;
-							game->toWhiteChangeLeft = true;
+							game->checkPuzzle.puzzleData[i][j] = -1;	// 正誤判定用のパズルのi行j列を白いマス(-1)にする
+							game->fromWhiteChangeLeft = false;	// 左クリックによる白いマスからの変化フラグをfalseにする
+							game->toWhiteChangeLeft = true;	// 左クリックによる白いマスへの変化フラグをtrueにする
 						}
 						break;
 
-					case leftDrag:
+					case leftDrag :	// 左ドラッグ状態の場合
+						// i行j列の正誤判定用パズルが白いマス(-1)のとき
 						if (game->checkPuzzle.puzzleData[i][j] == -1) {
+							// 左クリックしよる白いマスからの変化フラグがたっているとき
 							if (game->fromWhiteChangeLeft) {
+								// 塗るボタンが有効なら
 								if (game->penButton.mState) {
-									game->checkPuzzle.puzzleData[i][j] = 1;
+									game->checkPuzzle.puzzleData[i][j] = 1;	// 正誤判定用のパズルのi行j列を黒いマス(1)にする
 								}
+								// バツをつけるボタンが有効なら
 								else if (game->eraserButton.mState) {
-									game->checkPuzzle.puzzleData[i][j] = 0;
+									game->checkPuzzle.puzzleData[i][j] = 0;	// 正誤判定用のパズルのi行j列を×印付きのマス(0)にする
 								}
 							}
 						}
+						// i行j列の正誤判定用のパズルが白いマス(-1)でないとき
 						else {
+							// 左クリックによる白いマスへの変化フラグが立っているとき
 							if (game->toWhiteChangeLeft) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
-								game->checkPuzzle.puzzleData[i][j] = -1;
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列のマスボタンの色を白にする
+								game->checkPuzzle.puzzleData[i][j] = -1;	// 正誤判定用のパズルのi行j列を白いマス(-1)にする
 							}
 						}
 						break;
 
-					case rightClick:
+					case rightClick :	// 右クリック状態のとき
+						// i行j列の正誤判定用パズルが白いマス(-1)のとき
 						if (game->checkPuzzle.puzzleData[i][j] == -1) {
-							game->checkPuzzle.puzzleData[i][j] = 0;
-							game->fromWhiteChangeRight = true;
-							game->toWhiteChangeRight = false;
+							game->checkPuzzle.puzzleData[i][j] = 0;	// 正誤判定用のパズルのi行j列を×印付きのマス(0)にする
+							game->fromWhiteChangeRight = true;	// 右クリックによる白いマスからの変化フラグをtrueにする
+							game->toWhiteChangeRight = false;	// 右クリックによる白いマスへの変化フラグをfalseにする
 						}
+						// i行j列の正誤判定用のパズルが白いマス(-1)でないとき
 						else {
-							game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
-							game->checkPuzzle.puzzleData[i][j] = -1;
-							game->fromWhiteChangeRight = false;
-							game->toWhiteChangeRight = true;
+							game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列のマスボタンの色を白にする
+							game->checkPuzzle.puzzleData[i][j] = -1;	// 正誤判定用のパズルのi行j列を白いマス(-1)にする
+							game->fromWhiteChangeRight = false;	// 右クリックによる白いマスからの変化フラグをfalseにする
+							game->toWhiteChangeRight = true;	// 右クリックによる白いマスへの変化フラグをtrueにする
 						}
 						break;
 
-					case rightDrag:
+					case rightDrag :	// 右ドラッグ状態のとき	
+						// i行j列の正誤判定用パズルが白いマス(-1)のとき
 						if (game->checkPuzzle.puzzleData[i][j] == -1) {
+							// 右クリックしよる白いマスからの変化フラグがたっているとき
 							if (game->fromWhiteChangeRight) {
-								game->checkPuzzle.puzzleData[i][j] = 0;
+								game->checkPuzzle.puzzleData[i][j] = 0;	// 正誤判定用のパズルのi行j列を×印付きのマス(0)にする
 							}
 						}
+						// i行j列の正誤判定用のパズルが白いマス(-1)でないとき
 						else {
+							// 右クリックによる白いマスへの変化フラグが立っているとき
 							if (game->toWhiteChangeRight) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
-								game->checkPuzzle.puzzleData[i][j] = -1;
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列のマスボタンの色を白にする
+								game->checkPuzzle.puzzleData[i][j] = -1;	// 正誤判定用のパズルのi行j列を白いマス(-1)にする
 							}
 						}
 						break;
 
-					case none:
-						game->fromWhiteChangeRight = false;
-						game->toWhiteChangeRight = false;
+					case none :	// マウスがクリックもドラッグもしてないとき
+						game->fromWhiteChangeLeft = false;	// 左クリックによる白いマスからの変化フラグをfalseにする
+						game->toWhiteChangeLeft = false;	// 左クリックによる白いマスへの変化フラグをfalseにする
+						game->fromWhiteChangeRight = false;	// 右クリックによる白いマスからの変化フラグをfalseにする
+						game->toWhiteChangeRight = false;	// 右クリックによる白いマスへの変化フラグをfalseにする
 						break;
 					}
 				}
 
+				// 正誤判定用のパズルのi行j列が黒いマス(1)のとき
 				if (game->checkPuzzle.puzzleData[i][j] == 1) {
-					game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
+					game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// i行j列のマスボタンの色を黒に近い灰色(ほぼ黒)にする
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);	// マスボタンの色塗りつぶしたでマスを描画
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);	// マスを黒い資格で囲む
 				}
+				// 正誤判定用のパズルのi行j列がバツ印付きのマス(0)のとき
 				else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-					game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
+					game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列のマスボタンの色を白にする
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);	// マスボタンの色塗りつぶしたでマスを描画
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);	// マスを黒い資格で囲む
+					// 以下の2文でバツ印を描く
 					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), 1);
 					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, GetColor(0, 0, 0), 1);
 				}
+				// 正誤判定用のパズルのi行j列が白いマス(-1)のとき
 				else {
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);	// マスボタンの色塗りつぶしたでマスを描画
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);	// マスを黒い資格で囲む
 				}
 			}
 		}
 
+		// 2重for文でパズルの塗る場所を指示する線を描画
 		for (int j = 0; j <= puzzle->y_size; j++) {
 			for (int i = 0; i <= puzzle->x_size; i++) {
-				DrawLine(game->puzzleX, (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0));
-				DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY, (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0));
+				DrawLine(game->puzzleX, (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0));	// 塗る場所を指示する左辺数列を表示するための横線を描画
+				DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY, (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0));	// 塗る場所を指示する上辺数列を表示するための縦線を描画
 
+				// 5で割り切れる行数のとき
 				if (j % 5 == 0) {
-					DrawLine(game->puzzleX + ((game->puzzleGridSize) * (puzzle->x_size)) - (puzzle->x_size), (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0), 3);
+					DrawLine(game->puzzleX + ((game->puzzleGridSize) * (puzzle->x_size)) - (puzzle->x_size), (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0), 3);	// 太い横線を描画
 				}
 
+				// 5で割り切れる列数のとき
 				if (i % 5 == 0) {
-					DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY + ((game->puzzleGridSize) * (puzzle->y_size)) - (puzzle->y_size), (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0), 3);
+					DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY + ((game->puzzleGridSize) * (puzzle->y_size)) - (puzzle->y_size), (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0), 3);	// 太い縦線を描画
 				}
 			}
 		}
 
+		// 説明番号が1のとき
 		if (game->tutorialProcess == 1) {
+			// 以下の4つの文で7行目の数列を太さ3の赤い四角で囲む
 			DrawLine(game->puzzleX - 100, game->puzzleY + (game->puzzleGridSize - 1) * 6, game->puzzleX, game->puzzleY + (game->puzzleGridSize - 1) * 6, GetColor(255, 0, 0), 3);
 			DrawLine(game->puzzleX, game->puzzleY + (game->puzzleGridSize - 1) * 6, game->puzzleX, game->puzzleY + (game->puzzleGridSize - 1) * 7, GetColor(255, 0, 0), 3);
 			DrawLine(game->puzzleX, game->puzzleY + (game->puzzleGridSize - 1) * 7, game->puzzleX - 100, game->puzzleY + (game->puzzleGridSize - 1) * 7, GetColor(255, 0, 0), 3);
 			DrawLine(game->puzzleX - 100, game->puzzleY + (game->puzzleGridSize - 1) * 7, game->puzzleX - 100, game->puzzleY + (game->puzzleGridSize - 1) * 6, GetColor(255, 0, 0), 3);
 		}
-
+		// 説明番号が2のとき
 		else if (game->tutorialProcess == 2) {
+			// 2重for文で説明文に対応する箇所のマスをを青枠で囲む
 			for (int j = 0; j < puzzle->y_size; j++) {
 				for (int i = 0; i < puzzle->x_size; i++) {
+					// i行j列のマスが上下左右辺上のマスのとき
 					if (i == 0 || j == 0 || i ==puzzle->x_size - 1 || j == puzzle->y_size - 1 ) {
+						// 以下の4つの文でi行j列のマスを太さ3の青い四角で囲む
 						DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, GetColor(0, 0, 255), 3);
 						DrawLine(game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 255), 3);
 						DrawLine(game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 255), 3);
@@ -1327,133 +1351,173 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 				}
 			}
 		}
-
+		// 説明番号が4のとき
 		else if (game->tutorialProcess == 4) {
+			// 説明文に対応する箇所のマスをを青枠で囲む
 			for (int i = 1; i < puzzle->x_size - 1; i++) {
+				// 以下の4つの文でi行j列のマスを太さ3の青い四角で囲む
 				DrawLine(game->puzzleGrid[i][1].mX1, game->puzzleGrid[i][1].mY1, game->puzzleGrid[i][1].mX2, game->puzzleGrid[i][1].mY1, GetColor(0, 0, 255), 3);
 				DrawLine(game->puzzleGrid[i][1].mX2, game->puzzleGrid[i][1].mY1, game->puzzleGrid[i][1].mX2, game->puzzleGrid[i][1].mY2, GetColor(0, 0, 255), 3);
 				DrawLine(game->puzzleGrid[i][1].mX2, game->puzzleGrid[i][1].mY2, game->puzzleGrid[i][1].mX1, game->puzzleGrid[i][1].mY2, GetColor(0, 0, 255), 3);
 				DrawLine(game->puzzleGrid[i][1].mX1, game->puzzleGrid[i][1].mY2, game->puzzleGrid[i][1].mX1, game->puzzleGrid[i][1].mY1, GetColor(0, 0, 255), 3);
 			}
 		}
-
+		// 説明番号が上記以外で-1でないとき
 		else if (game->tutorialProcess != -1) {
-			int processCounter = 0;
+			int processCounter = 0;	// 説明番号に対応する正解パズルとの類似度
+			// 2重for文で説明番号に対応する正解パズルと異なるところは青枠で囲み，一致する場所では類似度をインクリメント
 			for (int j = 0; j < puzzle->y_size; j++) {
 				for (int i = 0; i < puzzle->x_size; i++) {
+					// 正誤判定用パズルのi行j列のマスが説明番号に対応する正解パズルと異なるとき
 					if (game->checkPuzzle.puzzleData[i][j] != game->processAnswerData[game->tutorialProcess][i][j]) {
+						// 以下の4つの文でi行j列のマスを太さ3の青い四角で囲む
 						DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, GetColor(0, 0, 255), 3);
 						DrawLine(game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 255), 3);
 						DrawLine(game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 255), 3);
 						DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, GetColor(0, 0, 255), 3);
 					}
+					// 正誤判定用パズルのi行j列のマスが説明番号に対応する正解パズルと一致するとき
 					else if (game->checkPuzzle.puzzleData[i][j] == game->processAnswerData[game->tutorialProcess][i][j]) {
-						processCounter++;
+						processCounter++;	// 類似度を加算
 					}
 				}
 			}
 
+			// 類似度が100(正誤判定用パズルが説明番号に対応する正解パズルと完全に一致)のとき
 			if (processCounter == 100) {
-				processFlag[game->tutorialProcess] = true;
+				processFlag[game->tutorialProcess] = true;	// 説明番号に対応する次ボタンの表示フラグを立てる
 			}
+			// 類似度が100(正誤判定用パズルが説明番号に対応する正解パズルと完全に一致)でないとき
 			else {
-				processFlag[game->tutorialProcess] = false;
+				processFlag[game->tutorialProcess] = false;	// 説明番号に対応する次ボタンの表示フラグをおろす
 			}
 		}
 
+		// 2重for文で左辺数列を描画(i:行番号，j:列番号，y:文字描画のy座標，x:文字描画のx座標)
 		for (int i = 0, y = ((game->puzzleY)); i < (puzzle->y_size); i++, y += ((game->puzzleGridSize) - 1)) {
 			for (int j = 0, x = ((game->puzzleX) - 10); j < 10; j++, x -= 10) {
+				// 左辺数列のi行のj番目の値が0でないのとき
 				if ((game->drawGrid_V[i][j]) != 0) {
-					int drawY = y + (game->puzzleGridSize / 2) - 4;
-					DrawFormatStringToHandle(x, drawY, GetColor(0, 0, 0), game->drawNumFontHandle, "%2d", (game->drawGrid_V[i][j]));
+					int drawY = y + (game->puzzleGridSize / 2) - 4;	// 表示する文字が各行の真ん中になるようにy座標を計算
+					DrawFormatStringToHandle(x, drawY, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_V[i][j]));	// 左辺数列の数字を表示
 				}
 			}
 		}
 
+		// 2重for文で上辺数列を描画(i:行番号，j:列番号，y:文字描画のy座標，x:文字描画のx座標)
 		for (int i = 0, x = ((game->puzzleX)); i < (puzzle->x_size); i++, x += ((game->puzzleGridSize) - 1)) {
 			for (int j = 0, y = ((game->puzzleY) - 10); j < 10; j++, y -= 10) {
+				// 上辺数列のi行のj番目の値が0でないのとき
 				if ((game->drawGrid_H[i][j]) != 0) {
-					int drawX = x + (game->puzzleGridSize / 2) - (GetDrawFormatStringWidthToHandle(game->drawNumFontHandle, "%2d", game->drawGrid_H[i][j]) / 2);
-					DrawFormatStringToHandle(drawX, y, GetColor(0, 0, 0), game->drawNumFontHandle, "%2d", (game->drawGrid_H[i][j]));
+					int drawX = x + (game->puzzleGridSize / 2) - (GetDrawFormatStringWidthToHandle(game->drawNumFontHandle, "%d", game->drawGrid_H[i][j]) / 2);	// 表示する文字が各行の真ん中になるようにx座標を計算
+					DrawFormatStringToHandle(drawX, y, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_H[i][j]));	// 上辺数列の数字を表示
 				}
 			}
 		}
 
-		int diff = 0;
+		int diff = 0;	// 正誤判定用パズルと正解パズルとの相違度
+		// 2重for文で正解データとの相違度を計算
 		for (int j = 0; j < puzzle->y_size; j++) {
 			for (int i = 0; i < puzzle->x_size; i++) {
+				// 正解パズルデータのi行j列の値が100より大きい(濃い色)とき
 				if (puzzle->puzzleData[i][j] > 100) {
+					// 正誤判定用のパズルのi行j列が1(黒色)でないとき
 					if (game->checkPuzzle.puzzleData[i][j] != 1) {
-						diff++;
+						diff++;	// 相違度を加算
 					}
 				}
+				// 正解パズルデータのi行j列の値が100より小さい(薄い色)とき
 				else if (puzzle->puzzleData[i][j] < 100) {
+					// 正誤判定用のパズルのi行j列が1(黒色)のとき
 					if (game->checkPuzzle.puzzleData[i][j] == 1) {
-						diff++;
+						diff++;	// 相違度を加算
 					}
 				}
 			}
 		}
 
+		// 正誤判定用のパズルと正解パズルが完全一致(相違度が0)かつ，チュートリアルが終了している(説明番号が-1)とき
 		if (diff == 0 && game->tutorialProcess == -1) {
-			game->clearFlag = false;
-			game->finishTime = GetNowCount();
+			game->clearFlag = false;	// クリアフラグを下す(クリアした)
+			game->finishTime = GetNowCount();	// ゲームプレイ終了時刻(ミリ秒)を取得
 		}
 	}
+	// クリアフラグが下りていたら(クリアした)
 	else {
-		MakePuzzle_t color;
+		MakePuzzle_t color;	// MakePuzzle_t構造体の中にある色の変数を使うための変数
+		// 2重for文で表示パズルのマスボタンの色を正解パズルのカラー絵に変える
 		for (int j = 0; j < puzzle->y_size; j++) {
 			for (int i = 0; i < puzzle->x_size; i++) {
-				if (puzzle->puzzleData[i][j] == 0) {
-					game->puzzleGrid[i][j].mColor = color.white;
-				}
-				else if (puzzle->puzzleData[i][j] == 1) {
-					game->puzzleGrid[i][j].mColor = color.gainsboro;
-				}
-				else if (puzzle->puzzleData[i][j] == 2) {
-					game->puzzleGrid[i][j].mColor = color.aqua;
-				}
-				else if (puzzle->puzzleData[i][j] == 3) {
-					game->puzzleGrid[i][j].mColor = color.springgreen;
-				}
-				else if (puzzle->puzzleData[i][j] == 4) {
-					game->puzzleGrid[i][j].mColor = color.red;
-				}
-				else if (puzzle->puzzleData[i][j] == 5) {
-					game->puzzleGrid[i][j].mColor = color.pink;
-				}
-				else if (puzzle->puzzleData[i][j] == 6) {
-					game->puzzleGrid[i][j].mColor = color.orange;
-				}
-				else if (puzzle->puzzleData[i][j] == 7) {
-					game->puzzleGrid[i][j].mColor = color.lemonchiffon;
-				}
-				else if (puzzle->puzzleData[i][j] == 8) {
-					game->puzzleGrid[i][j].mColor = color.mediumpurple;
-				}
-				else if (puzzle->puzzleData[i][j] == 101) {
-					game->puzzleGrid[i][j].mColor = color.black;
-				}
-				else if (puzzle->puzzleData[i][j] == 102) {
-					game->puzzleGrid[i][j].mColor = color.blue;
-				}
-				else if (puzzle->puzzleData[i][j] == 103) {
-					game->puzzleGrid[i][j].mColor = color.green;
-				}
-				else if (puzzle->puzzleData[i][j] == 104) {
-					game->puzzleGrid[i][j].mColor = color.maroon;
-				}
-				else if (puzzle->puzzleData[i][j] == 105) {
-					game->puzzleGrid[i][j].mColor = color.deeppink;
-				}
-				else if (puzzle->puzzleData[i][j] == 106) {
-					game->puzzleGrid[i][j].mColor = color.saddlebrown;
-				}
-				else if (puzzle->puzzleData[i][j] == 107) {
-					game->puzzleGrid[i][j].mColor = color.gold;
-				}
-				else if (puzzle->puzzleData[i][j] == 108) {
-					game->puzzleGrid[i][j].mColor = color.indigo;
+				// 正解パズルのi行j列の値によって分岐
+				switch(puzzle->puzzleData[i][j]) {
+				case 0 :	// 0のとき
+					game->puzzleGrid[i][j].mColor = color.white;	// 表示パズルのマスボタンの色をwhite(白)にする
+					break;
+
+				case 1 :	// 1のとき
+					game->puzzleGrid[i][j].mColor = color.gainsboro;	// 表示パズルのマスボタンの色をgainsboro(明るい灰色)にする
+					break;
+
+				case 2 :	// 2のとき
+					game->puzzleGrid[i][j].mColor = color.aqua;	// 表示パズルのマスボタンの色をaqua(水色)にする
+					break;
+
+				case 3 :	// 3のとき
+					game->puzzleGrid[i][j].mColor = color.springgreen;	// 表示パズルのマスボタンの色をspringgreen(新緑色)にする
+					break;
+
+				case 4 :	// 4のとき
+					game->puzzleGrid[i][j].mColor = color.red;	// 表示パズルのマスボタンの色をred(赤色)にする
+					break;
+
+				case 5 :	//5のとき
+					game->puzzleGrid[i][j].mColor = color.pink;	// 表示パズルのマスボタンの色をpink(ピンク色)にする
+					break;
+
+				case 6 :	//6のとき
+					game->puzzleGrid[i][j].mColor = color.orange;	// 表示パズルのマスボタンの色をorange(オレンジ色)にする
+					break;
+
+				case 7 :	//7のとき
+					game->puzzleGrid[i][j].mColor = color.lemonchiffon;	// 表示パズルのマスボタンの色をlemonchiffon(淡い黄色)にする
+					break;
+
+				case 8 :	//8のとき
+					game->puzzleGrid[i][j].mColor = color.mediumpurple;	// 表示パズルのマスボタンの色をmediumpurple(淡い紫色)にする 
+					break;
+
+				case 101 :	//101のとき
+					game->puzzleGrid[i][j].mColor = color.black;	// 表示パズルのマスボタンの色をblack(黒色)にする
+					break;
+
+				case 102 :	//102のとき
+					game->puzzleGrid[i][j].mColor = color.blue;	// 表示パズルのマスボタンの色をblue(青色)にする
+					break;
+
+				case 103 :	//103のとき
+					game->puzzleGrid[i][j].mColor = color.green;	// 表示パズルのマスボタンの色をgreen(緑色)にする
+					break;
+					
+				case 104 :	//104のとき
+					game->puzzleGrid[i][j].mColor = color.maroon;	// 表示パズルのマスボタンの色をmaroon(栗色)にする
+					break;
+
+				case 105 :	//105のとき
+					game->puzzleGrid[i][j].mColor = color.deeppink;	// 表示パズルのマスボタンの色をdeeppink(深ピンク色)にする
+					break;
+
+				case 106 :	//106のとき
+					game->puzzleGrid[i][j].mColor = color.saddlebrown;	// 表示パズルのマスボタンの色をsaddlebrown(鞍色)にする 
+					break;
+
+				case 107 :	//107のとき
+					game->puzzleGrid[i][j].mColor = color.gold;	// 表示パズルのマスボタンの色をgold(金色)にする
+					break;
+
+				case 108 :	//108のとき
+					game->puzzleGrid[i][j].mColor = color.indigo;	// 表示パズルのマスボタンの色を
+					break;
+
 				}
 
 				DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
@@ -1487,8 +1551,7 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 }
 
 // M18:ゲームプレイ更新
-int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
-	GetMouseState(mouse, TRUE);
+int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse) {
 
 	if (game->clearFlag) {
 		bool penState = game->penButton.mState;
@@ -1696,37 +1759,45 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse, int* key) {
 						}
 						break;
 
-					case rightClick:
+					case rightClick:	// 右クリック状態のとき
+						// i行j列の正誤判定用パズルが白いマス(-1)のとき
 						if (game->checkPuzzle.puzzleData[i][j] == -1) {
-							game->checkPuzzle.puzzleData[i][j] = 0;
-							game->fromWhiteChangeRight = true;
-							game->toWhiteChangeRight = false;
+							game->checkPuzzle.puzzleData[i][j] = 0;	// 正誤判定用のパズルのi行j列を×印付きのマス(0)にする
+							game->fromWhiteChangeRight = true;	// 右クリックによる白いマスからの変化フラグをtrueにする
+							game->toWhiteChangeRight = false;	// 右クリックによる白いマスへの変化フラグをfalseにする
 						}
+						// i行j列の正誤判定用のパズルが白いマス(-1)でないとき
 						else {
-							game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
-							game->checkPuzzle.puzzleData[i][j] = -1;
-							game->fromWhiteChangeRight = false;
-							game->toWhiteChangeRight = true;
+							game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列のマスボタンの色を白にする
+							game->checkPuzzle.puzzleData[i][j] = -1;	// 正誤判定用のパズルのi行j列を白いマス(-1)にする
+							game->fromWhiteChangeRight = false;	// 右クリックによる白いマスからの変化フラグをfalseにする
+							game->toWhiteChangeRight = true;	// 右クリックによる白いマスへの変化フラグをtrueにする
 						}
 						break;
 
-					case rightDrag:
+					case rightDrag:	// 右ドラッグ状態のとき	
+						// i行j列の正誤判定用パズルが白いマス(-1)のとき
 						if (game->checkPuzzle.puzzleData[i][j] == -1) {
+							// 右クリックしよる白いマスからの変化フラグがたっているとき
 							if (game->fromWhiteChangeRight) {
-								game->checkPuzzle.puzzleData[i][j] = 0;
+								game->checkPuzzle.puzzleData[i][j] = 0;	// 正誤判定用のパズルのi行j列を×印付きのマス(0)にする
 							}
 						}
+						// i行j列の正誤判定用のパズルが白いマス(-1)でないとき
 						else {
+							// 右クリックによる白いマスへの変化フラグが立っているとき
 							if (game->toWhiteChangeRight) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
-								game->checkPuzzle.puzzleData[i][j] = -1;
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列のマスボタンの色を白にする
+								game->checkPuzzle.puzzleData[i][j] = -1;	// 正誤判定用のパズルのi行j列を白いマス(-1)にする
 							}
 						}
 						break;
 
-					case none:
-						game->fromWhiteChangeRight = false;
-						game->toWhiteChangeRight = false;
+					case none:	// マウスがクリックもドラッグもしてないとき
+						game->fromWhiteChangeLeft = false;	// 左クリックによる白いマスからの変化フラグをfalseにする
+						game->toWhiteChangeLeft = false;	// 左クリックによる白いマスへの変化フラグをfalseにする
+						game->fromWhiteChangeRight = false;	// 右クリックによる白いマスからの変化フラグをfalseにする
+						game->toWhiteChangeRight = false;	// 右クリックによる白いマスへの変化フラグをfalseにする
 						break;
 					}
 				}

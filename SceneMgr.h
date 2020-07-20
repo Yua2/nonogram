@@ -30,7 +30,7 @@ typedef struct SCR_MGR {
 
 int InitializeScene(int, ScrMgr_t*, Puzzle_t*);
 
-int UpdateScene(int, ScrMgr_t*, Mouse_t*, int*, Puzzle_t*);
+int UpdateScene(int, ScrMgr_t*, Mouse_t*, Puzzle_t*);
 
 void FinalizeScene(int, ScrMgr_t*, Puzzle_t*);
 

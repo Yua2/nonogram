@@ -28,7 +28,7 @@ int InitializeScene(int nextScene, ScrMgr_t* scrMgr, Puzzle_t* puzzle) {
 }
 
 // M2:ă‚·ăĽăłć›´ć–°ĺ‡¦ç?
-int UpdateScene(int scene, ScrMgr_t* scrMgr, Mouse_t* mouse, int* key, Puzzle_t* puzzle) {
+int UpdateScene(int scene, ScrMgr_t* scrMgr, Mouse_t* mouse, Puzzle_t* puzzle) {
 	int nextScene = 1;
 
 	switch (scene) {
@@ -43,10 +43,10 @@ int UpdateScene(int scene, ScrMgr_t* scrMgr, Mouse_t* mouse, int* key, Puzzle_t*
 		break;
 	case(GameScr):
 		if (puzzle->puzzleId == 0) {
-			nextScene = UpdateTutorial(&(scrMgr->mGame), puzzle, mouse, key);
+			nextScene = UpdateTutorial(&(scrMgr->mGame), puzzle, mouse);
 		}
 		else {
-			nextScene = UpdateGame(&(scrMgr->mGame), puzzle, mouse, key);
+			nextScene = UpdateGame(&(scrMgr->mGame), puzzle, mouse);
 		}
 		break;
 	case(MakePuzzleScr):
