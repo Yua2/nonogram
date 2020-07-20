@@ -28,6 +28,8 @@ using namespace std;
 int InitializeGame(Game_t* game, Puzzle_t* puzzle) {
 	Mouse_t mouse;	// ボタン設定用の一時的なマウス変数
 	GetMouseState(&mouse);	// マウス変数の状態を更新(M4)
+	mouse.mButton = none;	// ボタンを反応させるわけではないのでマウスボタンは何も押していないことにする
+	mouse.mState = none;	// ボタンを反応させるわけではないのでマウスの状態はは何もしていないことにする
 
 	//パズルのサイズから，パズルの左端座標と右端座標を取得
 	if (puzzle->x_size == puzzle->y_size) {	// 正方形の場合
@@ -150,7 +152,7 @@ int InitializeGame(Game_t* game, Puzzle_t* puzzle) {
 	game->rankingTitleFontHnadle = CreateFontToHandle(NULL, 34, 3);	// ランキングタイトルを表示する際のフォントハンドルを格納
 	game->rankingFontHandle = CreateFontToHandle(NULL, 35, 3);	// ランキングを表示する際のフォントハンドルをフォントハンドルを格納
 	game->playerRankingFontHandle = CreateFontToHandle(NULL, 30, 3);	// パズルをプレイしたプレイヤーのタイムやランキングを表示する際のフォントハンドルを格納
-	game->keyHandle = MakeKeyInput(16, FALSE, FALSE, FALSE);	// キー入力用ハンドルを格納
+	game->keyHandle = MakeKeyInput(16, FALSE, FALSE, FALSE);	// キー入力用ハンドルを入力もs字数制限16で格納
 	game->hintcounter = 0;	// ヒント利用回数を0回に初期化
 
 	setButton(55, 435, 145, 525, backImageHandle, NULL, mouse, &(game->backButton), TRUE);	// 「戻る」ボタンの座標と画像と状態を設定
@@ -1368,7 +1370,7 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse) {
 			// 2重for文で説明番号に対応する正解パズルと異なるところは青枠で囲み，一致する場所では類似度をインクリメント
 			for (int j = 0; j < puzzle->y_size; j++) {
 				for (int i = 0; i < puzzle->x_size; i++) {
-					// 正誤判定用パズルのi行j列のマスが説明番号に対応する正解パズルと異なるとき
+					// シーン遷移後にマウスが押しっぱなしでなかったら
 					if (game->checkPuzzle.puzzleData[i][j] != game->processAnswerData[game->tutorialProcess][i][j]) {
 						// 以下の4つの文でi行j列のマスを太さ3の青い四角で囲む
 						DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, GetColor(0, 0, 255), 3);
@@ -1517,87 +1519,105 @@ int UpdateTutorial(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse) {
 				case 108 :	//108のとき
 					game->puzzleGrid[i][j].mColor = color.indigo;	// 表示パズルのマスボタンの色を
 					break;
-
 				}
 
-				DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
-				DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
+				DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);	// カラーマス描画
 			}
 		}
 
-		DrawGraph(215, 610, game->backButton.mImageHandle, FALSE);
-		setButton(215, 610, 305, 700, game->backButton.mImageHandle, NULL, *mouse, &(game->backButton), TRUE);
+		DrawGraph(215, 610, game->backButton.mImageHandle, FALSE);	// 戻るボタン表示
+		setButton(215, 610, 305, 700, game->backButton.mImageHandle, NULL, *mouse, &(game->backButton), TRUE);	// 戻るボタンの状態更新
 
+		// 戻るボタンが押されていて，マウスが押しっぱなしでないとき
 		if (game->backButton.mState && mouse->waitRelease == 0) {
-			mouse->waitRelease = 1;
-			return MenuScr;
+			mouse->waitRelease = 1;	// マウスを押しっぱなしにする
+			return MenuScr;	// 遷移先のシーンのシーン番号をMenuScrにする
 		}
 
-		DrawBox(game->puzzleX, game->puzzleY - 100, game->puzzleX + 400, game->puzzleY - 20, GetColor(255, 255, 255), TRUE);
-		DrawBox(game->puzzleX, game->puzzleY - 100, game->puzzleX + 400, game->puzzleY - 20, GetColor(0, 0, 0), FALSE);
-		int drawPlayerRankingRightLineX = game->puzzleX + 400 - 10 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "9999秒");
-		DrawLine(drawPlayerRankingRightLineX, game->puzzleY - 100, drawPlayerRankingRightLineX, game->puzzleY - 20, GetColor(0, 0, 0), 1);
-		int time = (game->finishTime / 1000) - (game->startTime / 1000);
-		int drawPlayerRankingNameX = drawPlayerRankingRightLineX - (drawPlayerRankingRightLineX - game->puzzleX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "あなた") / 2;
-		int drawPlayerRankingTimeX = drawPlayerRankingRightLineX + (game->puzzleX + 400 - drawPlayerRankingRightLineX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "%d秒", time) / 2;
-		DrawFormatStringToHandle(drawPlayerRankingNameX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "あなた");
-		DrawFormatStringToHandle(drawPlayerRankingTimeX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "%d秒", time);
+		DrawBox(game->puzzleX, game->puzzleY - 100, game->puzzleX + 400, game->puzzleY - 20, GetColor(255, 255, 255), TRUE);	// プレイ時間を表示するタグの表示
+		DrawBox(game->puzzleX, game->puzzleY - 100, game->puzzleX + 400, game->puzzleY - 20, GetColor(0, 0, 0), FALSE);	// 表示するタグを囲む
+		int drawPlayerRankingRightLineX = game->puzzleX + 400 - 10 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "9999秒");	// 描画する縦線のx座標
+		DrawLine(drawPlayerRankingRightLineX, game->puzzleY - 100, drawPlayerRankingRightLineX, game->puzzleY - 20, GetColor(0, 0, 0), 1);	// 線を描画
+		int time = (game->finishTime - game->startTime) / 1000;	// プレイにかかった秒数(ミリ秒切り捨て)
+		int drawPlayerRankingNameX = drawPlayerRankingRightLineX - (drawPlayerRankingRightLineX - game->puzzleX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "あなた") / 2;	// 「あなた」という名前を表示するx座標
+		int drawPlayerRankingTimeX = drawPlayerRankingRightLineX + (game->puzzleX + 400 - drawPlayerRankingRightLineX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "%d秒", time) / 2;	// クリアタイムを表示するx座標	
+		DrawFormatStringToHandle(drawPlayerRankingNameX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "あなた");	// 「あなた」という文字列の表示
+		DrawFormatStringToHandle(drawPlayerRankingTimeX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "%d秒", time);	// クリアタイム表示
 
+		// 以下の2文のチュートリアルクリアメッセージの表示
 		DrawString(50, 340, "クリアおめでとうございます。", GetColor(0, 0, 0));
 		DrawString(50, 380, "他のパズルや、自分で作ったパズルも遊んでみてください。", GetColor(0, 0, 0));
 	}
 
-	return GameScr;
+	return GameScr;	// 遷移先のシーンのシーン番号をGameScrにする
 }
 
-// M18:ゲームプレイ更新
+/*****************************************************
+*** Function Name : UpdateGame (M14)
+*** Designer      : 藤川
+*** Date          : 2020.7.20
+*** Function      : 引数でとったゲーム画面の構造体(Game_t)の
+					の画面の状態を更新
+*** Return        : 次の遷移先のシーン番号(GameScr)
+*****************************************************/
 int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse) {
-
+	// クリアフラグが立っていたら(クリアしていない)
 	if (game->clearFlag) {
-		bool penState = game->penButton.mState;
-		bool eraserState = !penState;
+		bool penState = game->penButton.mState;	// 更新前の塗るボタンの状態を取得
+		bool eraserState = !penState;	// 更新前のバツをつけるボタンの状態を取得
+		bool hintState = game->hintButton.mState;	// 更新前のヒントボタンの状態を取得
 
-		bool hintState = game->hintButton.mState;
+		// 正誤判定用パズルのi行j列のマスが説明番号に対応する正解パズルと異なるとき
+		if (mouse->waitRelease != 1) {
+			setButton(55, 435, 145, 525, game->backButton.mImageHandle, NULL, *mouse, &(game->backButton), TRUE);	// 戻るボタンの状態を更新
+			setButton(175, 435, 265, 525, game->hintButton.mImageHandle, NULL, *mouse, &(game->hintButton), TRUE);	// ヒントボタンの状態を更新
+			setButton(295, 435, 385, 525, game->resetButton.mImageHandle, NULL, *mouse, &(game->resetButton), TRUE);	// リセットボタンの状態を更新
+			setButton(100, 315, 190, 405, game->penButton.mImageHandle, NULL, *mouse, &(game->penButton), TRUE);	// 塗るボタンの状態を更新
+			setButton(250, 315, 340, 405, game->eraserButton.mImageHandle, NULL, *mouse, &(game->eraserButton), TRUE);	// バツをつけるボタンの状態を更新
+		}
 
-		setButton(55, 435, 145, 525, game->backButton.mImageHandle, NULL, *mouse, &(game->backButton), TRUE);
-		setButton(175, 435, 265, 525, game->hintButton.mImageHandle, NULL, *mouse, &(game->hintButton), TRUE);
-		setButton(295, 435, 385, 525, game->resetButton.mImageHandle, NULL, *mouse, &(game->resetButton), TRUE);
-		setButton(100, 315, 190, 405, game->penButton.mImageHandle, NULL, *mouse, &(game->penButton), TRUE);
-		setButton(250, 315, 340, 405, game->eraserButton.mImageHandle, NULL, *mouse, &(game->eraserButton), TRUE);
-
+		// 更新前の塗るボタンの状態がtrueのとき
 		if (penState) {
+			// 更新後のバツをつけるボタンの状態がtrueの時
 			if (game->eraserButton.mState) {
-				game->eraserButton.mState = true;
-				game->penButton.mState = false;
+				game->eraserButton.mState = true;	// バツをつけるボタンを有効化
+				game->penButton.mState = false;	// 塗るボタンを無効化
 			}
+			// 更新前のバツをつけるボタンの状態がfalseのとき
 			else {
-				game->penButton.mState = true;
-				game->eraserButton.mState = false;
+				game->penButton.mState = true;	// 塗るボタンを有効にしたままにする
+				game->eraserButton.mState = false;	// バツをつけるボタンを無効にしたままにする
 			}
 		}
+		// 更新前の塗るボタンの状態がfalse(バツをつけるボタンの状態がtrue)のとき
 		else {
+			// 更新後の塗るボタンの状態がtrueのとき
 			if (game->penButton.mState) {
-				game->penButton.mState = true;
-				game->eraserButton.mState = false;
+				game->penButton.mState = true;	// 塗るボタンを有効化
+				game->eraserButton.mState = false;	// バツをつけるボタンを無効化
 			}
+			// 更新後の塗るボタンの状態がfalseの時
 			else {
-				game->eraserButton.mState = true;
-				game->penButton.mState = false;
+				game->eraserButton.mState = true;	// バツをつけるボタンを有効にしたままにする
+				game->penButton.mState = false;	// 塗るボタンを無効にしたままにする
 			}
 		}
 
+		// 塗るボタンが有効(バツをつけるボタンが無効)なとき
 		if (game->penButton.mState) {
-			game->penButton.mImageHandle = game->pressedPenButtonImageHandle;
-			game->eraserButton.mImageHandle = game->releaseEraserButtonImageHandle;
+			game->penButton.mImageHandle = game->pressedPenButtonImageHandle;	// 塗るボタンの有効状態のイメージハンドルにする
+			game->eraserButton.mImageHandle = game->releaseEraserButtonImageHandle;	// バツをつけるボタンの無効状態のイメージハンドルにする
 		}
+		// バツをつけるボタンが有効(塗るボタンが無効)なとき
 		else if (game->eraserButton.mState) {
-			game->eraserButton.mImageHandle = game->pressedEraserButtonImageHandle;
-			game->penButton.mImageHandle = game->releasePenButtonImageHandle;
+			game->eraserButton.mImageHandle = game->pressedEraserButtonImageHandle;	// バツをつけるボタンの有効状態のイメージハンドルにする
+			game->penButton.mImageHandle = game->releasePenButtonImageHandle;	// 塗るボタンの無効状態のイメージハンドルにする
 		}
 
+		// 戻るボタンが押されて，メニュー画面から遷移してからマウスの左クリックが押され続けていなければ
 		if (game->backButton.mState && mouse->waitRelease == 0) {
-			mouse->waitRelease = 1;
-			return SelectionScr;
+			mouse->waitRelease = 1;	// マウスのボタンを押し続けているという風にセット
+			return MenuScr;	// 遷移先のシーンをシーン番号MenuScrに設定
 		}
 		
 		// ヒントボタンが押された場合
@@ -1682,79 +1702,96 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse) {
 			}
 		}
 
-
+		// リセットボタンが押されていたら
 		if (game->resetButton.mState) {
+			// 2重for文で正誤判定用のパズルをすべて白いマス(-1)に戻す
 			for (int j = 0; j < puzzle->y_size; j++) {
 				for (int i = 0; i < puzzle->x_size; i++) {
+					// i行j列のマスが可変のマスだったら
 					if (game->puzzleState[i][j]) {
-						game->checkPuzzle.puzzleData[i][j] = -1;
-						game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
+						game->checkPuzzle.puzzleData[i][j] = -1;	// 正誤判定用のパズルのi行j列を白のマス(-1)にする
+						game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列マスボタンを白にする
 					}
 				}
 			}
 		}
 
-		int nowMiliSec = GetNowCount();
-		int sec = ((nowMiliSec - (game->startTime)) % 60000) / 1000;
-		int minute = (nowMiliSec - (game->startTime)) / 60000;
-		DrawGraph(game->backButton.mX1, game->backButton.mY1, game->backButton.mImageHandle, FALSE);
-		DrawGraph(game->hintButton.mX1, game->hintButton.mY1, game->hintButton.mImageHandle, FALSE);
-		DrawGraph(game->resetButton.mX1, game->resetButton.mY1, game->resetButton.mImageHandle, FALSE);
-		DrawGraph(game->penButton.mX1, game->penButton.mY1, game->penButton.mImageHandle, FALSE);
-		DrawGraph(game->eraserButton.mX1, game->eraserButton.mY1, game->eraserButton.mImageHandle, FALSE);
-		DrawFormatStringToHandle(70, 100, GetColor(0, 0, 0), game->timeFontHandle, "Time : %02d:%02d", minute, sec);
-		int titleWidth = GetDrawFormatStringWidthToHandle(game->puzzleTitleFontHandle, puzzle->puzzleTitle);
-		DrawFormatStringToHandle(720 - (titleWidth / 2), 10, GetColor(0, 0, 0), game->puzzleTitleFontHandle, puzzle->puzzleTitle);
+		int nowMiliSec = GetNowCount();	// 現在時刻(ミリ秒)の取得
+		int sec = ((nowMiliSec - (game->startTime)) % 60000) / 1000;	// ゲームスタートしてから現在までの秒単位の時間
+		int minute = (nowMiliSec - (game->startTime)) / 60000;	// ゲームスタートしてから現在までの分単位の時間
+		DrawGraph(game->backButton.mX1, game->backButton.mY1, game->backButton.mImageHandle, FALSE);	// 戻るボタン描画
+		DrawGraph(game->hintButton.mX1, game->hintButton.mY1, game->hintButton.mImageHandle, FALSE);	// ヒントボタンの描画
+		DrawGraph(game->resetButton.mX1, game->resetButton.mY1, game->resetButton.mImageHandle, FALSE);	// リセットボタンの描画
+		DrawGraph(game->penButton.mX1, game->penButton.mY1, game->penButton.mImageHandle, FALSE);	// 塗るボタン描画
+		DrawGraph(game->eraserButton.mX1, game->eraserButton.mY1, game->eraserButton.mImageHandle, FALSE);	// バツをつけるボタン描画
+		DrawFormatStringToHandle(70, 100, GetColor(0, 0, 0), game->timeFontHandle, "Time : %02d:%02d", minute, sec);	// ゲームプレイ経過時間(〇〇:〇〇)描画
+		int titleWidth = GetDrawFormatStringWidthToHandle(game->puzzleTitleFontHandle, puzzle->puzzleTitle);	// パズルタイトルを表示する文字列のx中心座標
+		DrawFormatStringToHandle(720 - (titleWidth / 2), 10, GetColor(0, 0, 0), game->puzzleTitleFontHandle, puzzle->puzzleTitle);	// パズルタイトル描画
 
+		// 2重for文でパズルの描画とパズルの各マスの状態更新
 		for (int j = 0; j < puzzle->y_size; j++) {
 			for (int i = 0; i < puzzle->x_size; i++) {
-				Button_t preState = game->puzzleGrid[i][j];
+				Button_t preState = game->puzzleGrid[i][j];	// i行j列のマスボタンの更新前の状態を格納
+				// 難易度・パズル選択シーンから遷移した時にマウスが押されっぱなしでなければ
 				if (mouse->waitRelease != 1) {
-					setButton(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, NULL, game->puzzleGrid[i][j].mColor, *mouse, &(game->puzzleGrid[i][j]));
+					setButton(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, NULL, game->puzzleGrid[i][j].mColor, *mouse, &(game->puzzleGrid[i][j]));	// マウスの左ボタンの押されているいないだけの判定でマス状態を更新
 				}
 
+				// i行j列のマスボタンの座標上で，マウスの右ボタンが押されていたら
 				if (mouse->mX > game->puzzleGrid[i][j].mX1 && mouse->mX < game->puzzleGrid[i][j].mX2 && mouse->mY > game->puzzleGrid[i][j].mY1 && mouse->mY < game->puzzleGrid[i][j].mY2 && mouse->mButton == mButtonState::right) {
-					game->puzzleGrid[i][j].mState = true;
+					game->puzzleGrid[i][j].mState = true;	// i行j列のマスの状態を変更される状態に更新
 				}
 
+				// i行j列のマスが変更される状態で，そのマスボタンが変更可の場合
 				if (game->puzzleGrid[i][j].mState && game->puzzleState[i][j]) {
+					//マウスの状態によって分岐
 					switch (mouse->mState) {
-					case leftClick:
+					case leftClick:	// 左クリック状態の場合
+						// i行j列の正誤判定用パズルが白いマス(-1)のとき
 						if (game->checkPuzzle.puzzleData[i][j] == -1) {
+							// 塗るボタンが有効状態の場合
 							if (game->penButton.mState) {
-								game->checkPuzzle.puzzleData[i][j] = 1;
-								game->fromWhiteChangeLeft = true;
-								game->toWhiteChangeLeft = false;
+								game->checkPuzzle.puzzleData[i][j] = 1;	// 正誤判定用のパズルのi行j列を黒いマス(1)にする
+								game->fromWhiteChangeLeft = true;	// 左クリックによる白いマスからの変化フラグをtrueにする
+								game->toWhiteChangeLeft = false;	// 左クリックによる白いマスへの変化フラグをfalseにする
 							}
+							// バツをつけるボタンが有効な場合
 							else if (game->eraserButton.mState) {
-								game->checkPuzzle.puzzleData[i][j] = 0;
-								game->fromWhiteChangeLeft = true;
-								game->toWhiteChangeLeft = false;
+								game->checkPuzzle.puzzleData[i][j] = 0;	// 正誤判定用のパズルのi行j列を×印付きのマス(0)にする
+								game->fromWhiteChangeLeft = true;	// 左クリックによる白いマスからの変化フラグをtrueにする
+								game->toWhiteChangeLeft = false;	// 左クリックによる白いマスへの変化フラグをfalseにする
 							}
 						}
+						// i行j列の正誤判定用のパズルが白いマス(-1)でないとき
 						else {
-							game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
-							game->checkPuzzle.puzzleData[i][j] = -1;
-							game->fromWhiteChangeLeft = false;
-							game->toWhiteChangeLeft = true;
+							game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列のマスボタンの色を白にする
+							game->checkPuzzle.puzzleData[i][j] = -1;	// 正誤判定用のパズルのi行j列を白いマス(-1)にする
+							game->fromWhiteChangeLeft = false;	// 左クリックによる白いマスからの変化フラグをfalseにする
+							game->toWhiteChangeLeft = true;	// 左クリックによる白いマスへの変化フラグをtrueにする
 						}
 						break;
 
-					case leftDrag:
+					case leftDrag:	// 左ドラッグ状態の場合
+						// i行j列の正誤判定用パズルが白いマス(-1)のとき
 						if (game->checkPuzzle.puzzleData[i][j] == -1) {
+							// 左クリックしよる白いマスからの変化フラグがたっているとき
 							if (game->fromWhiteChangeLeft) {
+								// 塗るボタンが有効なら
 								if (game->penButton.mState) {
-									game->checkPuzzle.puzzleData[i][j] = 1;
+									game->checkPuzzle.puzzleData[i][j] = 1;	// 正誤判定用のパズルのi行j列を黒いマス(1)にする
 								}
+								// バツをつけるボタンが有効なら
 								else if (game->eraserButton.mState) {
-									game->checkPuzzle.puzzleData[i][j] = 0;
+									game->checkPuzzle.puzzleData[i][j] = 0;	// 正誤判定用のパズルのi行j列を×印付きのマス(0)にする
 								}
 							}
 						}
+						// i行j列の正誤判定用のパズルが白いマス(-1)でないとき
 						else {
+							// 左クリックによる白いマスへの変化フラグが立っているとき
 							if (game->toWhiteChangeLeft) {
-								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
-								game->checkPuzzle.puzzleData[i][j] = -1;
+								game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列のマスボタンの色を白にする
+								game->checkPuzzle.puzzleData[i][j] = -1;	// 正誤判定用のパズルのi行j列を白いマス(-1)にする
 							}
 						}
 						break;
@@ -1802,61 +1839,75 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse) {
 					}
 				}
 
+				// 正誤判定用のパズルのi行j列が黒いマス(1)のとき
 				if (game->checkPuzzle.puzzleData[i][j] == 1) {
-					game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
+					game->puzzleGrid[i][j].mColor = GetColor(50, 50, 50);	// i行j列のマスボタンの色を黒に近い灰色(ほぼ黒)にする
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);	// マスボタンの色塗りつぶしたでマスを描画
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);	// マスを黒い資格で囲む
 				}
+				// 正誤判定用のパズルのi行j列がバツ印付きのマス(0)のとき
 				else if (game->checkPuzzle.puzzleData[i][j] == 0) {
-					game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
+					game->puzzleGrid[i][j].mColor = GetColor(255, 255, 255);	// i行j列のマスボタンの色を白にする
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);	// マスボタンの色塗りつぶしたでマスを描画
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);	// マスを黒い資格で囲む
+					// 以下の2文でバツ印を描く
 					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), 1);
 					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, GetColor(0, 0, 0), 1);
 				}
+				// 正誤判定用のパズルのi行j列が白いマス(-1)のとき
 				else {
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
-					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);	// マスボタンの色塗りつぶしたでマスを描画
+					DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);	// マスを黒い資格で囲む
 				}
 			}
 		}
 
+		// 2重for文でパズルの塗る場所を指示する線を描画
 		for (int j = 0; j <= puzzle->y_size; j++) {
 			for (int i = 0; i <= puzzle->x_size; i++) {
-				DrawLine(game->puzzleX, (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0));
-				DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY, (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0));
-				
+				DrawLine(game->puzzleX, (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0));	// 塗る場所を指示する左辺数列を表示するための横線を描画
+				DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY, (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0));	// 塗る場所を指示する上辺数列を表示するための縦線を描画
+
+				// 5で割り切れる行数のとき
 				if (j % 5 == 0) {
-					DrawLine(game->puzzleX + ((game->puzzleGridSize) * (puzzle->x_size)) - (puzzle->x_size), (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0), 3);
+					DrawLine(game->puzzleX + ((game->puzzleGridSize) * (puzzle->x_size)) - (puzzle->x_size), (game->puzzleY) + (game->puzzleGridSize - 1) * j, (game->puzzleX) - 100, (game->puzzleY) + (game->puzzleGridSize - 1) * j, GetColor(0, 0, 0), 3);	// 太い横線を描画
 				}
 
+				// 5で割り切れる列数のとき
 				if (i % 5 == 0) {
-					DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY + ((game->puzzleGridSize) * (puzzle->y_size)) - (puzzle->y_size), (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0), 3);
+					DrawLine(game->puzzleX + (game->puzzleGridSize - 1) * i, game->puzzleY + ((game->puzzleGridSize) * (puzzle->y_size)) - (puzzle->y_size), (game->puzzleX) + (game->puzzleGridSize - 1) * i, (game->puzzleY) - 100, GetColor(0, 0, 0), 3);	// 太い縦線を描画
 				}
 			}
 		}
 
+		// 2重for文で左辺数列を描画(i:行番号，j:列番号，y:文字描画のy座標，x:文字描画のx座標)
 		for (int i = 0, y = ((game->puzzleY)); i < (puzzle->y_size); i++, y += ((game->puzzleGridSize) - 1)) {
 			for (int j = 0, x = ((game->puzzleX) - 10); j < 10; j++, x -= 10) {
+				// 左辺数列のi行のj番目の値が0でないのとき
 				if ((game->drawGrid_V[i][j]) != 0) {
-					int drawY = y + (game->puzzleGridSize / 2) - 4;
-					DrawFormatStringToHandle(x, drawY, GetColor(0, 0, 0), game->drawNumFontHandle, "%2d", (game->drawGrid_V[i][j]));
+					int drawY = y + (game->puzzleGridSize / 2) - 4;	// 表示する文字が各行の真ん中になるようにy座標を計算
+					DrawFormatStringToHandle(x, drawY, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_V[i][j]));	// 左辺数列の数字を表示
 				}
 			}
 		}
 
+		// 2重for文で上辺数列を描画(i:行番号，j:列番号，y:文字描画のy座標，x:文字描画のx座標)
 		for (int i = 0, x = ((game->puzzleX)); i < (puzzle->x_size); i++, x += ((game->puzzleGridSize) - 1)) {
 			for (int j = 0, y = ((game->puzzleY) - 10); j < 10; j++, y -= 10) {
+				// 上辺数列のi行のj番目の値が0でないのとき
 				if ((game->drawGrid_H[i][j]) != 0) {
-					int drawX = x + (game->puzzleGridSize / 2) - (GetDrawFormatStringWidthToHandle(game->drawNumFontHandle, "%2d", game->drawGrid_H[i][j]) / 2);
-					DrawFormatStringToHandle(drawX, y, GetColor(0, 0, 0), game->drawNumFontHandle, "%2d", (game->drawGrid_H[i][j]));
+					int drawX = x + (game->puzzleGridSize / 2) - (GetDrawFormatStringWidthToHandle(game->drawNumFontHandle, "%d", game->drawGrid_H[i][j]) / 2);	// 表示する文字が各行の真ん中になるようにx座標を計算
+					DrawFormatStringToHandle(drawX, y, GetColor(0, 0, 0), game->drawNumFontHandle, "%d", (game->drawGrid_H[i][j]));	// 上辺数列の数字を表示
 				}
 			}
 		}
 
+		// 2重for文で不変のマスを赤枠で囲んで表示する
 		for (int j = 0; j < puzzle->y_size; j++) {
 			for (int i = 0; i < puzzle->x_size; i++) {
+				// i行j列のマスが不変のマスなら
 				if (game->puzzleState[i][j] == false) {
+					// 以下の4行で不変のマスを赤枠で囲む
 					DrawLine(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, GetColor(255, 0, 0), 3);
 					DrawLine(game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(255, 0, 0), 3);
 					DrawLine(game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY2, GetColor(255, 0, 0), 3);
@@ -1865,229 +1916,284 @@ int UpdateGame(Game_t* game, Puzzle_t* puzzle, Mouse_t* mouse) {
 			}
 		}
 
-		int diff = 0;
+		int diff = 0;	// 正誤判定用パズルと正解パズルとの相違度
+		// 2重for文で正解データとの相違度を計算
 		for (int j = 0; j < puzzle->y_size; j++) {
 			for (int i = 0; i < puzzle->x_size; i++) {
+				// 正解パズルデータのi行j列の値が100より大きい(濃い色)とき
 				if (puzzle->puzzleData[i][j] > 100) {
+					// 正誤判定用のパズルのi行j列が1(黒色)でないとき
 					if (game->checkPuzzle.puzzleData[i][j] != 1) {
-						diff++;
+						diff++;	// 相違度を加算
 					}
 				}
+				// 正解パズルデータのi行j列の値が100より小さい(薄い色)とき
 				else if (puzzle->puzzleData[i][j] < 100) {
+					// 正誤判定用のパズルのi行j列が1(黒色)のとき
 					if (game->checkPuzzle.puzzleData[i][j] == 1) {
-						diff++;
+						diff++;	// 相違度を加算
 					}
 				}
 			}
 		}
 
+		// 正誤判定用のパズルと正解パズルが完全一致(相違度が0)していたら
 		if (diff == 0) {
-			game->clearFlag = false;
-			game->finishTime = GetNowCount();
+			game->clearFlag = false;	// クリアフラグを下す(クリアした)
+			game->finishTime = GetNowCount();	// ゲームプレイ終了時刻(ミリ秒)を取得
 		}
 	}
+	// クリアフラグが下りていたら(クリアした)
 	else {
-		MakePuzzle_t color;
+		MakePuzzle_t color;	// MakePuzzle_t構造体の中にある色の変数を使うための変数
+		// 2重for文で表示パズルのマスボタンの色を正解パズルのカラー絵に変える
 		for (int j = 0; j < puzzle->y_size; j++) {
 			for (int i = 0; i < puzzle->x_size; i++) {
-				if (puzzle->puzzleData[i][j] == 0) {
-					game->puzzleGrid[i][j].mColor = color.white;
-				}
-				else if (puzzle->puzzleData[i][j] == 1) {
-					game->puzzleGrid[i][j].mColor = color.gainsboro;
-				}
-				else if (puzzle->puzzleData[i][j] == 2) {
-					game->puzzleGrid[i][j].mColor = color.aqua;
-				}
-				else if (puzzle->puzzleData[i][j] == 3) {
-					game->puzzleGrid[i][j].mColor = color.springgreen;
-				}
-				else if (puzzle->puzzleData[i][j] == 4) {
-					game->puzzleGrid[i][j].mColor = color.red;
-				}
-				else if (puzzle->puzzleData[i][j] == 5) {
-					game->puzzleGrid[i][j].mColor = color.pink;
-				}
-				else if (puzzle->puzzleData[i][j] == 6) {
-					game->puzzleGrid[i][j].mColor = color.orange;
-				}
-				else if (puzzle->puzzleData[i][j] == 7) {
-					game->puzzleGrid[i][j].mColor = color.lemonchiffon;
-				}
-				else if (puzzle->puzzleData[i][j] == 8) {
-					game->puzzleGrid[i][j].mColor = color.mediumpurple;
-				}
-				else if (puzzle->puzzleData[i][j] == 101) {
-					game->puzzleGrid[i][j].mColor = color.black;
-				}
-				else if (puzzle->puzzleData[i][j] == 102) {
-					game->puzzleGrid[i][j].mColor = color.blue;
-				}
-				else if (puzzle->puzzleData[i][j] == 103) {
-					game->puzzleGrid[i][j].mColor = color.green;
-				}
-				else if (puzzle->puzzleData[i][j] == 104) {
-					game->puzzleGrid[i][j].mColor = color.maroon;
-				}
-				else if (puzzle->puzzleData[i][j] == 105) {
-					game->puzzleGrid[i][j].mColor = color.deeppink;
-				}
-				else if (puzzle->puzzleData[i][j] == 106) {
-					game->puzzleGrid[i][j].mColor = color.saddlebrown;
-				}
-				else if (puzzle->puzzleData[i][j] == 107) {
-					game->puzzleGrid[i][j].mColor = color.gold;
-				}
-				else if (puzzle->puzzleData[i][j] == 108) {
-					game->puzzleGrid[i][j].mColor = color.indigo;
-				}
+				// 正解パズルのi行j列の値によって分岐
+				switch (puzzle->puzzleData[i][j]) {
+				case 0:	// 0のとき
+					game->puzzleGrid[i][j].mColor = color.white;	// 表示パズルのマスボタンの色をwhite(白)にする
+					break;
 
-				DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);
-				DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, GetColor(0, 0, 0), FALSE);
-			}
-		}
+				case 1:	// 1のとき
+					game->puzzleGrid[i][j].mColor = color.gainsboro;	// 表示パズルのマスボタンの色をgainsboro(明るい灰色)にする
+					break;
 
-		int titleWidth = GetDrawFormatStringWidthToHandle(game->puzzleTitleFontHandle, puzzle->puzzleTitle);
-		DrawFormatStringToHandle(720 - (titleWidth / 2), 10, GetColor(0, 0, 0), game->puzzleTitleFontHandle, puzzle->puzzleTitle);
+				case 2:	// 2のとき
+					game->puzzleGrid[i][j].mColor = color.aqua;	// 表示パズルのマスボタンの色をaqua(水色)にする
+					break;
 
-		DrawBox(20, 20, 500, 590, GetColor(255, 255, 255), TRUE);
-		DrawBox(20, 20, 500, 590, GetColor(0, 0, 0), FALSE);
-		for (int i = 0; i < 10; i++) {
-			DrawLine(20, 50 + (54 * i), 500, 50 + (54 * i), GetColor(0, 0, 0), 1);
-		}
-		int drawRankingLeftLineX = 24 + GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%2d", 10);
-		int drawRankingRightLineX = 496 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "9999秒");
-		DrawLine(drawRankingLeftLineX, 50, drawRankingLeftLineX, 590, GetColor(0, 0, 0), 1);
-		DrawLine(drawRankingRightLineX, 50, drawRankingRightLineX, 590, GetColor(0, 0, 0), 1);
+				case 3:	// 3のとき
+					game->puzzleGrid[i][j].mColor = color.springgreen;	// 表示パズルのマスボタンの色をspringgreen(新緑色)にする
+					break;
 
-		int drawTitleX = 270 - (GetDrawFormatStringWidthToHandle(game->rankingTitleFontHnadle, "ランキング") / 2);
-		DrawFormatStringToHandle(drawTitleX, 21, GetColor(0, 0, 0), game->puzzleTitleFontHandle, "ランキング");
-		for (int i = 0; i < 10; i++) {
-			if (puzzle->ranking[i].flag != 0) {
-				int drawRankingNumX = drawRankingLeftLineX - 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%2d", 10) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%d", i + 1) / 2;
-				DrawFormatStringToHandle(drawRankingNumX, 52 + (54 * i) + 5, GetColor(0, 0, 0), game->rankingFontHandle, "%d", i + 1);
-				int drawRankingNameX = drawRankingRightLineX - (drawRankingRightLineX - drawRankingLeftLineX) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, puzzle->ranking[i].playerId) / 2;
-				DrawFormatStringToHandle(drawRankingNameX, 52 + (54 * i) + 5, GetColor(0, 0, 0), game->rankingFontHandle, puzzle->ranking[i].playerId);
-				int drawRankingTimeX = drawRankingRightLineX + 2 + (500 - drawRankingRightLineX) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%d秒", puzzle->ranking[i].cleartime) / 2;
-				DrawFormatStringToHandle(drawRankingTimeX, 52 + (54 * i) + 5, GetColor(0, 0, 0), game->rankingFontHandle, "%d秒", puzzle->ranking[i].cleartime);
-			}
-		}
+				case 4:	// 4のとき
+					game->puzzleGrid[i][j].mColor = color.red;	// 表示パズルのマスボタンの色をred(赤色)にする
+					break;
 
-		DrawGraph(215, 610, game->backButton.mImageHandle, FALSE);
-		setButton(215, 610, 305, 700, game->backButton.mImageHandle, NULL, *mouse, &(game->backButton), TRUE);
+				case 5:	//5のとき
+					game->puzzleGrid[i][j].mColor = color.pink;	// 表示パズルのマスボタンの色をpink(ピンク色)にする
+					break;
 
-		if (game->backButton.mState && mouse->waitRelease == 0) {
-			mouse->waitRelease = 1;
-			return MenuScr;
-		}
+				case 6:	//6のとき
+					game->puzzleGrid[i][j].mColor = color.orange;	// 表示パズルのマスボタンの色をorange(オレンジ色)にする
+					break;
 
-		DrawBox(game->puzzleX, game->puzzleY - 100, game->puzzleX + 400, game->puzzleY - 20, GetColor(255, 255, 255), TRUE);
-		DrawBox(game->puzzleX, game->puzzleY - 100, game->puzzleX + 400, game->puzzleY - 20, GetColor(0, 0, 0), FALSE);
-		int drawPlayerRankingLeftLineX = game->puzzleX + 10 + GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "ランク外");
-		int drawPlayerRankingRightLineX = game->puzzleX + 400 - 10 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "9999秒");
-		DrawLine(drawPlayerRankingLeftLineX, game->puzzleY - 100, drawPlayerRankingLeftLineX, game->puzzleY - 20, GetColor(0, 0, 0), 1);
-		DrawLine(drawPlayerRankingRightLineX, game->puzzleY - 100, drawPlayerRankingRightLineX, game->puzzleY - 20, GetColor(0, 0, 0), 1);
-		int time = (game->finishTime - game->startTime) / 1000;
-		int rank = 0;
-		for (int i = 0; i < 10; i++) {
-			if (puzzle->ranking[i].flag == 0 || puzzle->ranking[i].cleartime > time) {
-				if (game->inputNicknameDisplayFlag == -1) {
-					game->inputNicknameDisplayFlag = 0;
-					SetActiveKeyInput(game->keyHandle);
+				case 7:	//7のとき
+					game->puzzleGrid[i][j].mColor = color.lemonchiffon;	// 表示パズルのマスボタンの色をlemonchiffon(淡い黄色)にする
+					break;
+
+				case 8:	//8のとき
+					game->puzzleGrid[i][j].mColor = color.mediumpurple;	// 表示パズルのマスボタンの色をmediumpurple(淡い紫色)にする 
+					break;
+
+				case 101:	//101のとき
+					game->puzzleGrid[i][j].mColor = color.black;	// 表示パズルのマスボタンの色をblack(黒色)にする
+					break;
+
+				case 102:	//102のとき
+					game->puzzleGrid[i][j].mColor = color.blue;	// 表示パズルのマスボタンの色をblue(青色)にする
+					break;
+
+				case 103:	//103のとき
+					game->puzzleGrid[i][j].mColor = color.green;	// 表示パズルのマスボタンの色をgreen(緑色)にする
+					break;
+
+				case 104:	//104のとき
+					game->puzzleGrid[i][j].mColor = color.maroon;	// 表示パズルのマスボタンの色をmaroon(栗色)にする
+					break;
+
+				case 105:	//105のとき
+					game->puzzleGrid[i][j].mColor = color.deeppink;	// 表示パズルのマスボタンの色をdeeppink(深ピンク色)にする
+					break;
+
+				case 106:	//106のとき
+					game->puzzleGrid[i][j].mColor = color.saddlebrown;	// 表示パズルのマスボタンの色をsaddlebrown(鞍色)にする 
+					break;
+
+				case 107:	//107のとき
+					game->puzzleGrid[i][j].mColor = color.gold;	// 表示パズルのマスボタンの色をgold(金色)にする
+					break;
+
+				case 108:	//108のとき
+					game->puzzleGrid[i][j].mColor = color.indigo;	// 表示パズルのマスボタンの色を
 					break;
 				}
-				rank = i + 1;
+
+				DrawBox(game->puzzleGrid[i][j].mX1, game->puzzleGrid[i][j].mY1, game->puzzleGrid[i][j].mX2, game->puzzleGrid[i][j].mY2, game->puzzleGrid[i][j].mColor, TRUE);	// カラーマス描画
+			}
+		}
+
+		int titleWidth = GetDrawFormatStringWidthToHandle(game->puzzleTitleFontHandle, puzzle->puzzleTitle);	// パズルタイトルを表示するときのx座標
+		DrawFormatStringToHandle(720 - (titleWidth / 2), 10, GetColor(0, 0, 0), game->puzzleTitleFontHandle, puzzle->puzzleTitle);	// パズルタイトルの表示
+
+		DrawBox(20, 20, 500, 590, GetColor(255, 255, 255), TRUE);	// ランキング表の背景を表示
+		DrawBox(20, 20, 500, 590, GetColor(0, 0, 0), FALSE);	// ランキング表の背景を黒枠で囲む
+		// ランキング表に線を引いていく
+		for (int i = 0; i < 10; i++) {
+			DrawLine(20, 50 + (54 * i), 500, 50 + (54 * i), GetColor(0, 0, 0), 1);	//ランキング表の線を引く
+		}
+		int drawRankingLeftLineX = 24 + GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%2d", 10);	// ランキングの左の縦線のx座標
+		int drawRankingRightLineX = 496 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "9999秒");	// ランキングの右の座標のy座標
+		DrawLine(drawRankingLeftLineX, 50, drawRankingLeftLineX, 590, GetColor(0, 0, 0), 1);	// ランキング表の左の縦線を描く
+		DrawLine(drawRankingRightLineX, 50, drawRankingRightLineX, 590, GetColor(0, 0, 0), 1);	// ランキング表の右の縦線を描く
+
+		int drawTitleX = 270 - (GetDrawFormatStringWidthToHandle(game->rankingTitleFontHnadle, "ランキング") / 2);	// ランキングのタイトルのx座標
+		DrawFormatStringToHandle(drawTitleX, 21, GetColor(0, 0, 0), game->puzzleTitleFontHandle, "ランキング");	// ランキングタイトルの表示
+		// ランキングの内容を表示
+		for (int i = 0; i < 10; i++) {
+			// パズルランキング情報のランキングのフラグが0でない(誰かがプレイした)とき
+			if (puzzle->ranking[i].flag != 0) {
+				int drawRankingNumX = drawRankingLeftLineX - 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%2d", 10) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%d", i + 1) / 2;	// 順位のx座標
+				DrawFormatStringToHandle(drawRankingNumX, 52 + (54 * i) + 5, GetColor(0, 0, 0), game->rankingFontHandle, "%d", i + 1);	// 順位を表示
+				int drawRankingNameX = drawRankingRightLineX - (drawRankingRightLineX - drawRankingLeftLineX) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, puzzle->ranking[i].playerId) / 2;	// プレイしたプレイヤー名のx座標
+				DrawFormatStringToHandle(drawRankingNameX, 52 + (54 * i) + 5, GetColor(0, 0, 0), game->rankingFontHandle, puzzle->ranking[i].playerId);	// プレイヤー名を表示
+				int drawRankingTimeX = drawRankingRightLineX + 2 + (500 - drawRankingRightLineX) / 2 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "%d秒", puzzle->ranking[i].cleartime) / 2;	// クリアしたプレイヤーの時間のx座標
+				DrawFormatStringToHandle(drawRankingTimeX, 52 + (54 * i) + 5, GetColor(0, 0, 0), game->rankingFontHandle, "%d秒", puzzle->ranking[i].cleartime);	// クリアタイム表示
+			}
+		}
+
+		DrawGraph(215, 610, game->backButton.mImageHandle, FALSE);	// 戻るボタン表示
+		// ニックネーム入力ウィンド表示中でないなら
+		if (game->inputNicknameDisplayFlag != 0) {
+			setButton(215, 610, 305, 700, game->backButton.mImageHandle, NULL, *mouse, &(game->backButton), TRUE);	// 戻るボタンの状態を更新
+		}
+
+		// 戻るボタンが押されていて，マウスが遷移してから押しっぱなしでなければ
+		if (game->backButton.mState && mouse->waitRelease == 0) {
+			mouse->waitRelease = 1;	// マウスを押しっぱなしにする
+			return MenuScr;	// 遷移先のシーンをシーン番号MenuScrに設定
+		}
+
+		DrawBox(game->puzzleX, game->puzzleY - 100, game->puzzleX + 400, game->puzzleY - 20, GetColor(255, 255, 255), TRUE);	// プレイ時間と順位を表示するタグの表示
+		DrawBox(game->puzzleX, game->puzzleY - 100, game->puzzleX + 400, game->puzzleY - 20, GetColor(0, 0, 0), FALSE);	// 表示するタグを囲む
+		int drawPlayerRankingLeftLineX = game->puzzleX + 10 + GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "ランク外");		// タグの左の縦線のx座標
+		int drawPlayerRankingRightLineX = game->puzzleX + 400 - 10 - GetDrawFormatStringWidthToHandle(game->rankingFontHandle, "9999秒");	// タグの右の縦線のx座標
+		DrawLine(drawPlayerRankingLeftLineX, game->puzzleY - 100, drawPlayerRankingLeftLineX, game->puzzleY - 20, GetColor(0, 0, 0), 1);	// 右の線の描画
+		DrawLine(drawPlayerRankingRightLineX, game->puzzleY - 100, drawPlayerRankingRightLineX, game->puzzleY - 20, GetColor(0, 0, 0), 1);	// 左の線の描画
+		int time = (game->finishTime - game->startTime) / 1000;	// ゲームプレイ時間
+		int rank = 0;	// プレイヤーのランク
+		// ランキングの計算をする
+		for (int i = 0; i < 10; i++) {
+			// パズルランキング情報のランキングのフラグが0，またはランキングのクリアタイムよりもゲームプレイ時間が小さいとき
+			if (puzzle->ranking[i].flag == 0 || puzzle->ranking[i].cleartime > time) {
+				// ニックネーム入力ウィンドウが未入力非表示のとき
+				if (game->inputNicknameDisplayFlag == -1) {
+					game->inputNicknameDisplayFlag = 0;	// ニックネーム入力ウィンドウを入力中に変える
+					SetActiveKeyInput(game->keyHandle);	// キーハンドルを有効化
+					break;
+				}
+				rank = i + 1;	// プレイヤーのランクを代入
 				break;
 			}
 		}
 
+		// ニックネーム入力画面が入力済み状態の時
 		if (game->inputNicknameDisplayFlag == 1) {
-			rank--;
+			rank--;	// ランクを1引いて表示する
 		}
 
-		int drawPlayerRankingNumX = drawPlayerRankingLeftLineX - (drawPlayerRankingLeftLineX - game->puzzleX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "%d", rank) / 2;
-		int drawPlayerRankingNameX = drawPlayerRankingRightLineX - (drawPlayerRankingRightLineX - drawPlayerRankingLeftLineX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "あなた") / 2;
-		int drawPlayerRankingTimeX = drawPlayerRankingRightLineX + (game->puzzleX + 400 - drawPlayerRankingRightLineX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "%d秒", time) / 2;
+		int drawPlayerRankingNumX = drawPlayerRankingLeftLineX - (drawPlayerRankingLeftLineX - game->puzzleX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "%d", rank) / 2;	// プレイヤーのランキングのx座標
+		int drawPlayerRankingNameX = drawPlayerRankingRightLineX - (drawPlayerRankingRightLineX - drawPlayerRankingLeftLineX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "あなた") / 2;	// プレイヤーの名前「あなた」のx座標
+		int drawPlayerRankingTimeX = drawPlayerRankingRightLineX + (game->puzzleX + 400 - drawPlayerRankingRightLineX) / 2 - GetDrawFormatStringWidthToHandle(game->playerRankingFontHandle, "%d秒", time) / 2;	// ゲームプレイ時間のx座標
+		// プレイヤーのランキングが10位内のとき 
 		if (1 <= rank && rank <= 10) {
-			DrawFormatStringToHandle(drawPlayerRankingNumX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "%d", rank);
+			DrawFormatStringToHandle(drawPlayerRankingNumX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "%d", rank);	// ランキングを表示
 		}
+		// プレイヤーのランキング外のとき
 		else {
-			DrawFormatStringToHandle(game->puzzleX + 5, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "ランク外");
+			DrawFormatStringToHandle(game->puzzleX + 5, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "ランク外");		// 「ランク外」と表示
 		}
-		DrawFormatStringToHandle(drawPlayerRankingNameX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "あなた");
-		DrawFormatStringToHandle(drawPlayerRankingTimeX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "%d秒", time);
+		DrawFormatStringToHandle(drawPlayerRankingNameX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "あなた");	// 「あなた」と表示
+		DrawFormatStringToHandle(drawPlayerRankingTimeX, game->puzzleY - 75, GetColor(0, 0, 0), game->playerRankingFontHandle, "%d秒", time);	// ゲームプレイ時間を表示
 
+		// ニックネーム入力ウィンドウが入力中でヒント使用回数が0の時
 		if (game->inputNicknameDisplayFlag == 0 && game->hintcounter == 0) {
-			DrawBox(320, 200, 830, 500, GetColor(200, 200, 200), TRUE);
-			DrawBox(320, 200, 830, 500, GetColor(0, 0, 0), FALSE);
-			DrawBox(330, 450, 400, 490, GetColor(255, 255, 255), TRUE);
-			DrawBox(330, 450, 400, 490, GetColor(0, 0, 0), FALSE);
-			DrawFormatString(355, 465, GetColor(0, 0, 0), "OK");
+			DrawBox(320, 200, 830, 500, GetColor(200, 200, 200), TRUE);	// ニックネーム入力ウィンドウの背景表示
+			DrawBox(320, 200, 830, 500, GetColor(0, 0, 0), FALSE);	// ニックネーム入力ウィンドウの枠表示
+			DrawBox(330, 450, 400, 490, GetColor(255, 255, 255), TRUE);	// 入力完了ボタンの背景の表示
+			DrawBox(330, 450, 400, 490, GetColor(0, 0, 0), FALSE);	// 入力完了ボタンの枠表示
+			DrawFormatString(355, 465, GetColor(0, 0, 0), "OK");	// 「OK」という文字を表示
 
-			int str1X = 320 + (830 - 320) / 2 - GetDrawFormatStringWidth("ランキングTOP10入りおめでとうございます!!") / 2;
-			int str2X = 320 + (830 - 320) / 2 - GetDrawFormatStringWidth("ランキングに乗せるニックネームを入力してください") / 2;
-			int str3X = 320 + (830 - 320) / 2 - GetDrawFormatStringWidth("(半角英数字7文字 全角3文字まで。全角半角空白は使えません)") / 2;
-			DrawFormatString(str1X, 210, GetColor(0, 0, 0), "ランキングTOP10入りおめでとうございます!!");
-			DrawFormatString(str2X, 230, GetColor(0, 0, 0), "ランキングに乗せるニックネームを入力してください");
-			DrawFormatString(str3X, 250, GetColor(0, 0, 0), "(半角英数字16文字 全角8文字まで。全角半角空白は使えません)");
+			int str1X = 320 + (830 - 320) / 2 - GetDrawFormatStringWidth("ランキングTOP10入りおめでとうございます!!") / 2;	// TOP10入りのメッセージ1のx座標
+			int str2X = 320 + (830 - 320) / 2 - GetDrawFormatStringWidth("ランキングに乗せるニックネームを入力してください") / 2;	// TOP10入りのメッセージ2のx座標
+			int str3X = 320 + (830 - 320) / 2 - GetDrawFormatStringWidth("(半角英数字7文字 全角3文字まで。全角半角空白は使えません)") / 2;	// TOP10入りのメッセージ3のx座標
+			DrawFormatString(str1X, 210, GetColor(0, 0, 0), "ランキングTOP10入りおめでとうございます!!");	// TOP10入りのメッセージ1の表示
+			DrawFormatString(str2X, 230, GetColor(0, 0, 0), "ランキングに乗せるニックネームを入力してください");	// TOP10入りのメッセージ2の表示
+			DrawFormatString(str3X, 250, GetColor(0, 0, 0), "(半角英数字16文字 全角8文字まで。全角半角空白は使えません)");	// TOP10入りのメッセージ3の表示
 
-			DrawBox(460, 340, 700, 370, GetColor(0, 0, 0), FALSE);
+			DrawBox(460, 340, 700, 370, GetColor(0, 0, 0), FALSE);	// キー入力するテキストの枠を表示
 
-			static Button_t tmpButton;
-			bool preTmpButtonState = tmpButton.mState;
-			setButton(330, 450, 400, 490, NULL, NULL, *mouse, &tmpButton, TRUE);
-			char player0[1024];
-			GetKeyInputString(player0, game->keyHandle);
+			static Button_t tmpButton;	// 一時的な入力完了ボタンの配置
+			bool preTmpButtonState = tmpButton.mState;	// 更新前の入力完了ボタンの状態取得
+			setButton(330, 450, 400, 490, NULL, NULL, *mouse, &tmpButton, TRUE);	// 入力完了ボタンの状態を更新
+			char player0[1024];	// キー入力された文字列を格納する変数
+			GetKeyInputString(player0, game->keyHandle);	// キーハンドルに入力されている文字列取得
 
-			string str = string(player0);
+			string str = string(player0);	// 文字列をstringクラスに変換
 			
+			// 文字列がからでなければ
 			if (!str.empty()) {
+				// 半角空白が文字列の末尾にあれば
 				if (str.find(" ") == str.length() - 1) {
-					str.pop_back();
+					str.pop_back();	// 末尾文字を削除
 				}
 
+				// 全角空白があったら
 				if (str.find("　") != -1) {
-					str.pop_back();
-					str.pop_back();
+					str.pop_back();	// 末尾文字を削除
+					str.pop_back();	// 末尾文字を削除
 				}
 			}
 
-			char player[17];
-			strcpy_s(player, 17, str.c_str());
+			char player[17];	// 全角半角空白を削除した文字列を格納する変数
+			strcpy_s(player, 17, str.c_str());	// 空白を削除した文字列を格納
 
+			// 格納された文字列の末尾がヌル文字でないとき
 			if (player[16] != '\0') {
-				player[16] = '\0';
+				player[16] = '\0';	// 末尾をヌル文字にする
 			}
 
-			SetKeyInputString(player, game->keyHandle);
-			GetKeyInputString((char*)player, game->keyHandle);
+			SetKeyInputString(player, game->keyHandle);	// キーハンドルに空白を削除した文字列を格納
+			GetKeyInputString((char*)player, game->keyHandle);	// キーハンドルから再取得
 
+			// 入力完了ボタンが押されている，または，Enterキーが押されたとき
 			if (tmpButton.mState || CheckHitKey(KEY_INPUT_RETURN) == 1) {
+				// 更新前の入力完了ボタンが押されていない，または，Enterキーが押されたとき
 				if (!preTmpButtonState || CheckHitKey(KEY_INPUT_RETURN) == 1) {
-					game->inputNicknameDisplayFlag = 1;
+					game->inputNicknameDisplayFlag = 1;	// ニックネーム入力済みに変更
 
+					// 入力されたものがヌル文字(未入力)だったとき
 					if (strcmp(player, "") == 0) {
-						strcpy_s((char*)player, 7, "匿名");
+						strcpy_s((char*)player, 7, "匿名");	// プレイヤー名を匿名とする
 					}
 
-					updateRanking(puzzle, (char*)player, time);
-					DeleteKeyInput(game->keyHandle);
+					updateRanking(puzzle, (char*)player, time);	// ランキングをアップデートする(C4:M3)
+					DeleteKeyInput(game->keyHandle);	// 入力キーハンドルを無効化
 				}
 			}
+			// 入力完了ボタンが押されている，または，Enterキーが押されていないとき
 			else {
-				int black = GetColor(0, 0, 0);
-				int white = GetColor(255, 255, 255);
-				SetKeyInputStringColor(black, black, white, black, black, white, black);
-				DrawKeyInputString(462, 344, game->keyHandle);
+				int black = GetColor(0, 0, 0);	// 黒色変数
+				int white = GetColor(255, 255, 255);	// 白色変数
+				SetKeyInputStringColor(black, black, white, black, black, white, black);	// キー入力の表示の色の設定
+				DrawKeyInputString(462, 344, game->keyHandle);	// キーの中身出力
 			}
 		}
 	}
 
-	return GameScr;
+	return GameScr;	// 遷移先のシーンのシーン番号をGameScrにする
 }
 
-// M19:チュートリアル/ゲームプレイ終了処理
+/*****************************************************
+*** Function Name : FinalizeGame (M15)
+*** Designer      : 藤川
+*** Date          : 2020.6.30
+*** Function      : 引数でとったゲーム画面の構造体(Game_t)の
+					のフォントハンドルと画像ハンドルの削除
+*** Return        : void -- 戻り値なし
+*****************************************************/
 void FinalizeGame(Game_t* game, Puzzle_t* puzzle) {
-	InitGraph();
-	InitFontToHandle();
+	InitGraph();	// 全画像ハンドルの削除
+	InitFontToHandle();	// 全フォントハンドルの削除
 }
