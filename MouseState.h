@@ -11,15 +11,15 @@
 
 #include "DxLib.h"
 
-enum mButtonState { none, left, right, middle, rightDrag, leftDrag, rightClick, leftClick };
+enum mButtonState { none, left, right, middle, rightDrag, leftDrag, rightClick, leftClick };	//ボタンの状態を示す列挙体
 
 typedef struct MOUSE {
-	int mButton;
-	int mWheel;
-	int mX;
-	int mY;
-	int waitRelease;
-	int mState;
+	int mButton;	//マウスクリックの状態
+	int mWheel;	//マウスホイールの回転量
+	int mX;		//マウスのX座標
+	int mY;		//マウスのY座標
+	int waitRelease;//マウスのボタンが離されたかどうかを保持する
+	int mState;	//マウスがドラックされている場合に状態を保持する
 } Mouse_t;
 
 // M4:マウス処理
