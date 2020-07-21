@@ -9,15 +9,21 @@
 ***Return	:void	--戻り値なし
 *********************************/
 void GetMouseState(Mouse_t* mouse, int getState) {
+	//マウスが左クリックされている場合
 	if (GetMouseInput() & MOUSE_INPUT_LEFT) mouse->mButton = left;
+	//マウスが右クリックされている場合
 	else if (GetMouseInput() & MOUSE_INPUT_RIGHT) mouse->mButton = right;
+	//マウスのホイール(または中央のボタン)がクリックされている場合
 	else if (GetMouseInput() & MOUSE_INPUT_MIDDLE) mouse->mButton = middle;
+	//マウスがクリックされていない場合
 	else mouse->mButton = none;
-	//mouse->mButton = GetMouseInput();			// マウスの入力状態取得
-	mouse->mWheel = GetMouseWheelRotVol();		// マウスのホイール回転量取得
-	GetMousePoint(&(mouse->mX), &(mouse->mY));	// マウスの座標取得
-	static int preState = none;
+	
+	//mouse->mButton = GetMouseInput();
+	mouse->mWheel = GetMouseWheelRotVol();
+	GetMousePoint(&(mouse->mX), &(mouse->mY));
+	static int preState = none;	//
 
+	//
 	if (getState == TRUE) {
 		if (mouse->mButton == none) {
 			preState = none;
