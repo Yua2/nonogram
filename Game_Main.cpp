@@ -1,7 +1,7 @@
 /******************************************
-*** Designer : 摗愳
+*** Designer : 藤川
 *** Date     : 2020.6.12
-*** Purpose  : 儊僀儞張棟
+*** Purpose  : メイン処理
 *******************************************/
 
 #include "DxLib.h"
@@ -11,47 +11,47 @@
 
 /*****************************************************
 *** Function Name : WinMain
-*** Designer      : 摗愳
+*** Designer      : 藤川
 *** Date          : 2020.7.20
-*** Function      : 儊僀儞娭悢
-*** Return        : 0 (僾儘僌儔儉偺惓忢廔椆)
+*** Function      : メイン関数
+*** Return        : 0 (プログラムの正常終了)
 ******************************************************/
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	SetGraphMode(1080, 720, 16);	// 僂傿儞僪僂僒僀僘傪1080亊720偵愝掕
-	ChangeWindowMode(TRUE);	// 僂傿儞僪僂儌乕僪偵愝掕
-	DxLib_Init();	// DxLib弶婜壔
-	SetDrawScreen(DX_SCREEN_BACK);	// 棤夋柺偵愝掕
-	SetBackgroundColor(222, 184, 135);	// 攚宨怓傪(R, G, B) = (222, 184, 135)偵愝掕
-	
-	ScrMgr_t scrMgr;	// 昞帵偡傞僔乕儞傪帩偮僔乕儞峔憿懱偺曄悢
+	SetGraphMode(1080, 720, 16);	// ウィンドウサイズを1080×720に設定
+	ChangeWindowMode(TRUE);	// ウィンドウモードに設定
+	DxLib_Init();	// DxLib初期化
+	SetDrawScreen(DX_SCREEN_BACK);	// 裏画面に設定
+	SetBackgroundColor(222, 184, 135);	// 背景色を(R, G, B) = (222, 184, 135)に設定
 
-	int scene = None;	// 尰嵼偺僔乕儞斣崋傪奿擺偡傞曄悢
-	int nextScene = InputNickNameScr;	// 師偺慗堏愭偺僔乕儞傪奿擺偡傞曄悢
+	ScrMgr_t scrMgr;	// 表示するシーンを持つシーン構造体の変数
 
-	Mouse_t mouse;	// 巊傢傟偰偄傞儅僂僗偵懳墳偡傞儅僂僗曄悢
+	int scene = None;	// 現在のシーン番号を格納する変数
+	int nextScene = MenuScr;	// 次の遷移先のシーンを格納する変数
 
-	Puzzle_t pz;	// 梀傇僷僘儖偺僷僘儖曄悢
+	Mouse_t mouse;	// 使われているマウスに対応するマウス変数
 
-	// 儊僀儞儖乕僾
+	Puzzle_t pz;	// 遊ぶパズルのパズル変数
+
+	// メインループ
 	while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0) {
-		GetMouseState(&mouse, TRUE);	// 儅僂僗偺忬懺峏怴(C1:M4)
+		GetMouseState(&mouse, TRUE);	// マウスの状態更新(C1:M4)
 
-		// 儅僂僗偺儃僞儞偑墴偝傟偰偄側偗傟偽
+		// マウスのボタンが押されていなければ
 		if (mouse.mButton == none) {
-			mouse.waitRelease = 0;	// 墴偟偭傁側偟忬懺偐傜曄峏
+			mouse.waitRelease = 0;	// 押しっぱなし状態から変更
 		}
 
-		SetDrawScreen(DX_SCREEN_BACK);	// 棤夋柺偵愝掕
+		SetDrawScreen(DX_SCREEN_BACK);	// 裏画面に設定
 
-		// 尰嵼偺僔乕儞偲師偺僔乕儞偑堎側偭偰偄偨傜
+		// 現在のシーンと次のシーンが異なっていたら
 		if (scene != nextScene) {
-			FinalizeScene(scene, &scrMgr, &pz);	// 尰嵼偺僔乕儞偵懳偟偰廔椆張棟(C1:M3)
-			scene = InitializeScene(nextScene, &scrMgr, &pz);// 師偺僔乕儞傪弶婜壔(C1:M1)偟偰尰嵼偺僔乕儞偵僙僢僩
+			FinalizeScene(scene, &scrMgr, &pz);	// 現在のシーンに対して終了処理(C1:M3)
+			scene = InitializeScene(nextScene, &scrMgr, &pz,&mouse);// 次のシーンを初期化(C1:M1)して現在のシーンにセット
 		}
 
-		nextScene = UpdateScene(scene, &scrMgr, &mouse, &pz);	// 尰嵼偺僔乕儞傪峏怴(C1:M2)偟偰師偺僔乕儞偵僙僢僩
+		nextScene = UpdateScene(scene, &scrMgr, &mouse, &pz);	// 現在のシーンを更新(C1:M2)して次のシーンにセット
 	}
 
-	DxLib_End();	// DxLib庪椔
-	return 0;	// 惓忢廔椆
+	DxLib_End();	// DxLib狩猟
+	return 0;	// 正常終了
 }
