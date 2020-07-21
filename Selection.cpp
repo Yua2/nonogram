@@ -11,16 +11,16 @@
 *** Function：mSelection構造体を更新する．
 *** Return: Escene
 *******************************************************/
-void updatemSelection(Selection_t* mSelection, const char filename[256], const char filename2[256]) {
-	int error, i;
-	FILE* fp;
+void updatemSelection(Selection_t* mSelection,const char filename[256],const char filename2[256]) {
+	int error,i;												
+	FILE* fp;													//ファイル構造体
 	error = fopen_s(&fp, filename2, "r");
 	fscanf_s(fp, "%d", &mSelection->num);
 	fclose(fp);
 	error = fopen_s(&fp, filename, "r");
 	mSelection->Spz = (SimplePuzzle_t*)malloc(mSelection->num * sizeof(SimplePuzzle_t));
-	for (i = 0; i < mSelection->num; i++) {
-		fscanf_s(fp, "%d %s %s %s %d %d", &(mSelection->Spz[i].puzzleId), &(mSelection->Spz[i].puzzleTitle), 256, &(mSelection->Spz[i].puzzleMakerName), 256, &(mSelection->Spz[i].fastestId), 256, &(mSelection->Spz[i].fastestTime), &(mSelection->Spz[i].flag));
+	for (i = 0; i < mSelection->num; i++) {                     //パズル一覧を読み出す
+		fscanf_s(fp, "%d %s %s %s %d %d", &(mSelection->Spz[i].puzzleId), &(mSelection->Spz[i].puzzleTitle),256, &(mSelection->Spz[i].puzzleMakerName),256, &(mSelection->Spz[i].fastestId),256, &(mSelection->Spz[i].fastestTime),&(mSelection->Spz[i].flag));
 	}
 	fclose(fp);
 }
@@ -62,8 +62,8 @@ int InitializeSelection(Selection_t* mSelection) {
 *** Return: Escene
 *******************************************************/
 int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
-	int i, scrollsize, scrollBarLength, scrolldy, k;
-	char min[20], No[20], filename[64];
+	int i, scrollsize, scrollBarLength, scrolldy,k;//ループカウンタ，スクロールできる上限，スクロールバーの長さ，スクロールした量，マウスクリック位置
+	char min[20],No[20],filename[64];//時間，パズル番号，ファイルパス
 	k = 0;
 
 	if (mSelection->scrollbar_on == 0) {
@@ -99,32 +99,31 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 		}
 	}
 	switch (mSelection->size) {
-	case(1010):	DrawGraph(140, 80, mSelection->HandleS1, TRUE);  break;
-	case(1510): DrawGraph(140, 80, mSelection->HandleS2, TRUE);  break;
-	case(1515):	DrawGraph(140, 80, mSelection->HandleS3, TRUE);  break;
-	case(2015):	DrawGraph(140, 80, mSelection->HandleS4, TRUE);  break;
-	case(2020): DrawGraph(140, 80, mSelection->HandleS5, TRUE);  break;
-	default:	break;
+		case(1010):	DrawGraph(140, 80, mSelection->HandleS1, TRUE);  break;
+		case(1510): DrawGraph(140, 80, mSelection->HandleS2, TRUE);  break;
+		case(1515):	DrawGraph(140, 80, mSelection->HandleS3, TRUE);  break;
+		case(2015):	DrawGraph(140, 80, mSelection->HandleS4, TRUE);  break;
+		case(2020): DrawGraph(140, 80, mSelection->HandleS5, TRUE);  break;
+		default:	break;
 
 	}
-
+	
 	DrawFormatString(200, 100, GetColor(0, 0, 0), "10*10");
 	DrawFormatString(360, 100, GetColor(0, 0, 0), "15*10");
 	DrawFormatString(520, 100, GetColor(0, 0, 0), "15*15");
 	DrawFormatString(680, 100, GetColor(0, 0, 0), "20*15");
 	DrawFormatString(840, 100, GetColor(0, 0, 0), "20*20");
-	if (mouse->mX < 114 && mouse->mX < 114 >0 && mouse->mY>661 && mouse->mY < 720) {
+	if (mouse->mX < 114 && mouse->mX < 114 >0 && mouse->mY>661 && mouse->mY <720) {
 		DrawGraph(-1, 661, mSelection->HandleR2, TRUE);
 		k = 1;
-		if (mouse->mButton == left && mouse->waitRelease == 0)
+		if (mouse->mButton == left && mouse->waitRelease ==0)
 			return MenuScr;
-	}
-	else
+	}else
 		DrawGraph(-1, 661, mSelection->HandleR1, TRUE);
-
-
+	
+	
 	DrawFormatString(29, 681, GetColor(0, 0, 0), "return");
-
+	
 	if (mSelection->num > 3) {
 		scrollsize = 430 - mSelection->num * 160;
 		mSelection->scroll += mouse->mWheel * 20;											//マウスホイール制御
@@ -155,7 +154,7 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 		scrollBarLength = 460 * 496 / (mSelection->num * 160 + 66);
 		DrawBox(920, 158 + 460 * mSelection->scroll / (scrollsize - 496), 940, 158 + 460 * mSelection->scroll / (scrollsize - 496) + scrollBarLength, GetColor(0, 0, 0), FALSE);
 
-		if (mouse->waitRelease == 0 && mouse->mX > 920 && mouse->mX < 940 && mouse->mY >158 + 460 * mSelection->scroll / (scrollsize - 496) && mouse->mY < 158 + 460 * mSelection->scroll / (scrollsize - 496) + scrollBarLength || mSelection->scrollbar_on == 1) {
+		if (mouse->waitRelease == 0 &&mouse->mX > 920 && mouse->mX < 940 && mouse->mY >158 + 460 * mSelection->scroll / (scrollsize - 496) && mouse->mY < 158 + 460 * mSelection->scroll / (scrollsize - 496) + scrollBarLength || mSelection->scrollbar_on == 1) {
 			if (mouse->mButton == left) {
 				mSelection->scrollbar_on = 1;
 				if (mSelection->scroll_mouse_y != NULL) {
@@ -171,38 +170,38 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 			}
 		}
 	}
-	SetDrawArea(143, 140, 941, 636);
+		SetDrawArea(143, 140, 941, 636);
 
-	for (i = 0; i < mSelection->num; i++) {
-		if (mouse->mX > 200 && mouse->mX < 880 && mouse->mY >170 + mSelection->scroll + 160 * i && mouse->mY < 280 + mSelection->scroll + 160 * i && mouse->mY >140 && mouse->mY < 636) {
-			DrawGraph(200, 170 + mSelection->scroll + 160 * i, mSelection->HandleP2, TRUE);
-			k = 1;
-			if (mouse->mButton == left && mouse->waitRelease != 1) {
-				sprintf_s(filename, 64, "PuzzleInfo/%d/Puzzle%d.csv", mSelection->size, mSelection->Spz[i].puzzleId);
-				readPuzzle(Puzzle, filename);
-				mouse->waitRelease = 1;
-				return GameScr;
+		for (i = 0; i < mSelection->num; i++) {                                     //パズル一覧の描画
+			if (mouse->mX > 200 && mouse->mX < 880 && mouse->mY >170 + mSelection->scroll + 160 * i && mouse->mY < 280 + mSelection->scroll + 160 * i && mouse->mY >140 && mouse->mY < 636) {
+				DrawGraph(200, 170 + mSelection->scroll + 160 * i, mSelection->HandleP2, TRUE);
+				k = 1;
+				if (mouse->mButton == left && mouse->waitRelease != 1) {
+					sprintf_s(filename, 64, "PuzzleInfo/%d/Puzzle%d.csv", mSelection->size, mSelection->Spz[i].puzzleId);
+					readPuzzle(Puzzle, filename);
+					mouse->waitRelease = 1;
+					return GameScr;
+				}
 			}
-		}
-		else
-			DrawGraph(200, 170 + mSelection->scroll + 160 * i, mSelection->HandleP1, TRUE);
-		sprintf_s(No, 20, "No.%d", mSelection->Spz[i].puzzleId);
-		DrawStringToHandle(220, 205 + mSelection->scroll + 160 * i, No, GetColor(0, 0, 0), mSelection->Font1);
-		DrawStringToHandle(360, 205 + mSelection->scroll + 160 * i, mSelection->Spz[i].puzzleTitle, GetColor(0, 0, 0), mSelection->Font1);
-		DrawStringToHandle(460, 250 + mSelection->scroll + 160 * i, "by", GetColor(0, 0, 0), mSelection->Font2);
-		DrawStringToHandle(490, 250 + mSelection->scroll + 160 * i, mSelection->Spz[i].puzzleMakerName, GetColor(0, 0, 0), mSelection->Font2);
-		if (mSelection->Spz[i].flag == 1) {
-			DrawStringToHandle(750, 250 + mSelection->scroll + 160 * i, mSelection->Spz[i].fastestId, GetColor(0, 0, 0), mSelection->Font2);
-			DrawStringToHandle(600, 180 + mSelection->scroll + 160 * i, "BEST TIME", GetColor(0, 0, 0), mSelection->Font2);
-			if (mSelection->Spz[i].fastestTime % 60 >= 10)
-				sprintf_s(min, 20, "%d:%d", mSelection->Spz[i].fastestTime / 60, mSelection->Spz[i].fastestTime % 60);
 			else
-				sprintf_s(min, 20, "%d:0%d", mSelection->Spz[i].fastestTime / 60, mSelection->Spz[i].fastestTime % 60);
-			DrawStringToHandle(680, 205 + mSelection->scroll + 160 * i, min, GetColor(0, 0, 0), mSelection->Font1);
-		}
+				DrawGraph(200, 170 + mSelection->scroll + 160 * i, mSelection->HandleP1, TRUE);
+			sprintf_s(No, 20, "No.%d", mSelection->Spz[i].puzzleId);
+			DrawStringToHandle(220, 205 + mSelection->scroll + 160 * i, No, GetColor(0, 0, 0), mSelection->Font1);
+			DrawStringToHandle(360, 205 + mSelection->scroll + 160 * i, mSelection->Spz[i].puzzleTitle, GetColor(0, 0, 0), mSelection->Font1);
+			DrawStringToHandle(460, 250 + mSelection->scroll + 160 * i, "by", GetColor(0, 0, 0), mSelection->Font2);
+			DrawStringToHandle(490, 250 + mSelection->scroll + 160 * i, mSelection->Spz[i].puzzleMakerName, GetColor(0, 0, 0), mSelection->Font2);
+			if (mSelection->Spz[i].flag == 1) {
+				DrawStringToHandle(800, 250 + mSelection->scroll + 160 * i, mSelection->Spz[i].fastestId, GetColor(0, 0, 0), mSelection->Font2);
+				DrawStringToHandle(600, 180 + mSelection->scroll + 160 * i, "BEST TIME", GetColor(0, 0, 0), mSelection->Font2);
+				if (mSelection->Spz[i].fastestTime % 60 >= 10)
+					sprintf_s(min, 20, "%d:%d", mSelection->Spz[i].fastestTime / 60, mSelection->Spz[i].fastestTime % 60);
+				else
+					sprintf_s(min, 20, "%d:0%d", mSelection->Spz[i].fastestTime / 60, mSelection->Spz[i].fastestTime % 60);
+				DrawStringToHandle(680, 205 + mSelection->scroll + 160 * i, min, GetColor(0, 0, 0), mSelection->Font1);
+			}
 	}
-	if (k == 0 && mouse->mButton == left)
-		mouse->waitRelease = 1;
+		if (k == 0 && mouse->mButton == left)
+			mouse->waitRelease = 1;
 	ScreenFlip();
 	return SelectionScr;
 }

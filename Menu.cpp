@@ -16,22 +16,22 @@
 *** Function:メニュー画面を初期化する．
 *** Return: Escene
 *******************************************************/
-int InitializeMenu(Menu_t* mMenu) {
+int InitializeMenu(Menu_t *mMenu) {
 	int i, j;
 	*mMenu = { 520,100,"MENU",{{ 100,300,400,500,165,440,"TUTORIAL"},                               //メニュー画面初期化
 						{ 440,640,400,500,520,440,"START" },
 						{ 780,980,400,500,830,440,"MAKE PUZZLE" } } };
-	DrawFormatString(mMenu->x, mMenu->y, GetColor(0, 0, 0), mMenu->name);                     //タイトル描画
+	DrawFormatString(mMenu->x, mMenu->y, GetColor(0,0,0), mMenu->name);                     //タイトル描画
 	for (i = 0; i < 3; i++) {                                                                       //ボタンの描画
 		for (j = mMenu->b[i].leftx; j < mMenu->b[i].rightx; j++) {
 			DrawPixel(j, mMenu->b[i].upy, GetColor(0, 0, 0));
 			DrawPixel(j, mMenu->b[i].downy, GetColor(0, 0, 0));
 		}
 		for (j = mMenu->b[i].upy; j < mMenu->b[i].downy; j++) {
-			DrawPixel(mMenu->b[i].leftx, j, GetColor(0, 0, 0));
-			DrawPixel(mMenu->b[i].rightx, j, GetColor(0, 0, 0));
+			DrawPixel(mMenu->b[i].leftx,j, GetColor(0, 0, 0));
+			DrawPixel(mMenu->b[i].rightx,j, GetColor(0, 0, 0));
 		}
-		DrawFormatString(mMenu->b[i].charx, mMenu->b[i].chary, GetColor(0, 0, 0), mMenu->b[i].name);
+		DrawFormatString(mMenu->b[i].charx, mMenu->b[i].chary, GetColor(0,0,0), mMenu->b[i].name);
 	}
 	ScreenFlip();
 	return MenuScr;
@@ -43,9 +43,9 @@ int InitializeMenu(Menu_t* mMenu) {
 *** Function:メニュー画面を更新する．
 *** Return: Escene
 *******************************************************/
-int UpdateMenu(Menu_t* mMenu, Mouse_t* mouse, Puzzle_t* puzzle) {
-	int i, j, k, color[3];
-	char name[64] = "puzzleInfo/Puzzle0.csv";
+int UpdateMenu(Menu_t* mMenu,Mouse_t* mouse,Puzzle_t* puzzle) {
+	int i,j,k,color[3];
+	char name[64]="puzzleInfo/Puzzle0.csv";  //チュートリアルパズルのファイルのパス
 	k = 0;
 	for (i = 0; i < 3; i++) {                                                                       //マウスが置かれているボタンを判定
 		if (mouse->mX > mMenu->b[i].leftx && mouse->mX<mMenu->b[i].rightx && mouse->mY>mMenu->b[i].upy && mouse->mY < mMenu->b[i].downy) {
@@ -53,36 +53,37 @@ int UpdateMenu(Menu_t* mMenu, Mouse_t* mouse, Puzzle_t* puzzle) {
 			if (mouse->mButton == left && mouse->waitRelease != 1) {
 				mouse->waitRelease = 1;
 				switch (i) {
-				case(0): readPuzzle(puzzle, name); return GameScr;
+				case(0): readPuzzle(puzzle,name); return GameScr;
 				case(1):return SelectionScr;
 				case(2):return MakePuzzleScr;
 				fault: break;
 				}
 			}
 			k = 1;
-		}
+		}	
 		else
-			color[i] = GetColor(0, 0, 0);
+			color[i] = GetColor(0,0,0);	
 	}
 
 	if (k == 0 && mouse->mButton == left)
 		mouse->waitRelease = 1;
 
-	DrawFormatString(mMenu->x, mMenu->y, GetColor(0, 0, 0), mMenu->name);
-	for (i = 0; i < 3; i++) {
+	DrawFormatString(mMenu->x, mMenu->y, GetColor(0,0,0), mMenu->name);
+	for (i = 0; i < 3; i++) {																		//マウスが置かれているボタンの色を変える
 		for (j = mMenu->b[i].leftx; j < mMenu->b[i].rightx; j++) {
-			DrawPixel(j, mMenu->b[i].upy, GetColor(0, 0, 0));
-			DrawPixel(j, mMenu->b[i].downy, GetColor(0, 0, 0));
+			DrawPixel(j, mMenu->b[i].upy, GetColor(0,0,0));
+			DrawPixel(j, mMenu->b[i].downy, GetColor(0,0,0));
 		}
 		for (j = mMenu->b[i].upy; j < mMenu->b[i].downy; j++) {
-			DrawPixel(mMenu->b[i].leftx, j, GetColor(0, 0, 0));
-			DrawPixel(mMenu->b[i].rightx, j, GetColor(0, 0, 0));
+			DrawPixel(mMenu->b[i].leftx, j, GetColor(0,0,0));
+			DrawPixel(mMenu->b[i].rightx, j, GetColor(0,0,0));
 		}
-		DrawFormatString(mMenu->b[i].charx, mMenu->b[i].chary, color[i], mMenu->b[i].name);
+		DrawFormatString(mMenu->b[i].charx, mMenu->b[i].chary,color[i], mMenu->b[i].name);
 	}
 	ScreenFlip();
 	return MenuScr;
 }
 void FinalizeMenu(Menu_t* mMenu) {
-
+	InitGraph();
+	InitFontToHandle();
 }
