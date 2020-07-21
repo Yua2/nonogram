@@ -5,7 +5,7 @@
 ***Function Name: GetMouseState
 ***Designer	: 笹川
 ***Date		: 2020.7.21
-***Function	: 
+***Function	: マウスの状態(クリックとドラッグ)を調べ、Mouse_t構造体のデータを更新する
 ***Return	:void	--戻り値なし
 *********************************/
 void GetMouseState(Mouse_t* mouse, int getState) {
