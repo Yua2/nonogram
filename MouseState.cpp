@@ -1,6 +1,13 @@
 ﻿#include "DxLib.h"
 #include "MouseState.h"
 
+/*********************************
+***Function Name: GetMouseState
+***Designer	: 笹川
+***Date		: 2020.7.21
+***Function	: 
+***Return	:void	--戻り値なし
+*********************************/
 void GetMouseState(Mouse_t* mouse, int getState) {
 	if (GetMouseInput() & MOUSE_INPUT_LEFT) mouse->mButton = left;
 	else if (GetMouseInput() & MOUSE_INPUT_RIGHT) mouse->mButton = right;
