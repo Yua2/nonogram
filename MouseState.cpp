@@ -25,10 +25,13 @@ void GetMouseState(Mouse_t* mouse, int getState) {
 
 	//
 	if (getState == TRUE) {
+		//マウスが押されていない場合
 		if (mouse->mButton == none) {
 			preState = none;
 		}
+		//マウスが押されている場合
 		else {
+			//今のマウスの状態が以前のマウスの状態と一致していない場合
 			if (mouse->mButton != preState) {
 				switch (mouse->mButton)
 				{
@@ -44,6 +47,8 @@ void GetMouseState(Mouse_t* mouse, int getState) {
 				}
 				preState = mouse->mButton;
 			}
+			//今のマウスの状態が以前のマウスの状態と一致している場合
+			//(マウスのボタンが長押しされている場合)
 			else {
 				switch (mouse->mButton)
 				{
