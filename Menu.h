@@ -1,4 +1,9 @@
-﻿#pragma once
+﻿/******************************************************
+*** Designer      : 陳
+*** Date          : 2020.6.23
+*** Purpose       : W1 メニュー画面に関する情報
+*******************************************************/
+#pragma once
 #include "MouseState.h"
 #include "Information.h"
 typedef struct {

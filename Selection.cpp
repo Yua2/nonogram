@@ -1,4 +1,9 @@
-﻿#include "Selection.h"
+﻿/******************************************************
+*** Designer      : 陳
+*** Date          : 2020.7.5
+*** Purpose       : W2 パズルサイズ・パズル選択画面に関する処理
+*******************************************************/
+#include "Selection.h"
 #include "SceneMgr.h"
 #include "DxLib.h"
 #include <stdio.h>
