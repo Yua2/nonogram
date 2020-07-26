@@ -16,16 +16,20 @@
 *** Function:メニュー画面を初期化する．
 *** Return: Escene
 *******************************************************/
+static int first = 0;
 int InitializeMenu(Menu_t *mMenu,Mouse_t *mouse) {
 	int i, j;
 	*mMenu = {LoadGraph("graph/menu.png"),{{ 100,300,400,500,165,440,"TUTORIAL"},                               //メニュー画面初期化
 						{ 440,640,400,500,520,440,"START" },
 						{ 780,980,400,500,830,440,"MAKE PUZZLE" } } };
 	DrawGraph(0, 0, mMenu->handle, TRUE);
-	DrawFormatString(480, 400, GetColor(255, 255, 255), "PRESS ANY KEY");
-	ScreenFlip();
-	WaitKey();
-	mouse->waitRelease = 1;
+	if (first == 0) {
+		DrawFormatString(480, 400, GetColor(255, 255, 255), "PRESS ANY KEY");
+		ScreenFlip();
+		WaitKey();
+		first = 1;
+		mouse->waitRelease = 1;
+	}
 	return MenuScr;
 }
 /******************************************************
