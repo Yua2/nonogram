@@ -62,31 +62,37 @@ int InitializeSelection(Selection_t* mSelection) {
 *** Return: Escene
 *******************************************************/
 int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
-	int i, scrollsize, scrollBarLength, scrolldy;
+	int i, scrollsize, scrollBarLength, scrolldy,k;
 	char min[20],No[20],filename[64];
+	k = 0;
 
 	if (mSelection->scrollbar_on == 0) {
-		if (mouse->mX > 140 && mouse->mX < 300 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left) {
+		if (mouse->mX > 140 && mouse->mX < 300 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {
+			k = 1;
 			mSelection->size = 1010;
 			mSelection->scroll = 0;
 			updatemSelection(mSelection, "PuzzleInfo/1010/simpleInformation.csv", "PuzzleInfo/1010/puzzlenum.csv");
 		}
-		else if (mouse->mX > 300 && mouse->mX < 460 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left) {
+		else if (mouse->mX > 300 && mouse->mX < 460 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {
+			k = 1;
 			mSelection->size = 1510;
 			mSelection->scroll = 0;
 			updatemSelection(mSelection, "PuzzleInfo/1510/simpleInformation.csv", "PuzzleInfo/1510/puzzlenum.csv");
 		}
-		else if (mouse->mX > 460 && mouse->mX < 620 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left) {
+		else if (mouse->mX > 460 && mouse->mX < 620 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {
+			k = 1;
 			mSelection->size = 1515;
 			mSelection->scroll = 0;
 			updatemSelection(mSelection, "PuzzleInfo/1515/simpleInformation.csv", "PuzzleInfo/1515/puzzlenum.csv");
 		}
-		else if (mouse->mX > 620 && mouse->mX < 780 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left) {
+		else if (mouse->mX > 620 && mouse->mX < 780 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {
+			k = 1;
 			mSelection->size = 2015;
 			mSelection->scroll = 0;
 			updatemSelection(mSelection, "PuzzleInfo/2015/simpleInformation.csv", "PuzzleInfo/2015/puzzlenum.csv");
 		}
-		else if (mouse->mX > 780 && mouse->mX < 940 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left) {
+		else if (mouse->mX > 780 && mouse->mX < 940 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {
+			k = 1;
 			mSelection->size = 2020;
 			mSelection->scroll = 0;
 			updatemSelection(mSelection, "PuzzleInfo/2020/simpleInformation.csv", "PuzzleInfo/2020/puzzlenum.csv");
@@ -109,7 +115,8 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 	DrawFormatString(840, 100, GetColor(0, 0, 0), "20*20");
 	if (mouse->mX < 114 && mouse->mX < 114 >0 && mouse->mY>661 && mouse->mY <720) {
 		DrawGraph(-1, 661, mSelection->HandleR2, TRUE);
-		if (mouse->mButton == left)
+		k = 1;
+		if (mouse->mButton == left && mouse->waitRelease ==0)
 			return MenuScr;
 	}else
 		DrawGraph(-1, 661, mSelection->HandleR1, TRUE);
@@ -125,7 +132,7 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 		if (mSelection->scroll < scrollsize)
 			mSelection->scroll = scrollsize;
 		DrawBox(920, 139, 940, 159, GetColor(0, 0, 0), FALSE);								//スクロールアロー制御
-		if (mouse->mX > 920 && mouse->mX < 940 && mouse->mY >139 && mouse->mY < 159) {
+		if (mouse->mX > 920 && mouse->mX < 940 && mouse->mY >139 && mouse->mY < 159 && mouse->waitRelease == 0) {
 			DrawBox(921, 140, 939, 158, GetColor(192, 192, 192), TRUE);
 			if (mouse->mButton == left && mSelection->scroll < 0)
 				mSelection->scroll += 20;
@@ -133,7 +140,7 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 		else
 			DrawBox(921, 140, 939, 158, GetColor(255, 255, 255), TRUE);
 		DrawBox(920, 617, 940, 637, GetColor(0, 0, 0), FALSE);
-		if (mouse->mX > 920 && mouse->mX < 940 && mouse->mY >617 && mouse->mY < 637) {
+		if (mouse->mX > 920 && mouse->mX < 940 && mouse->mY >617 && mouse->mY < 637 && mouse->waitRelease == 0) {
 			DrawBox(921, 618, 939, 636, GetColor(192, 192, 192), TRUE);
 			if (mouse->mButton == left && mSelection->scroll > scrollsize)
 				mSelection->scroll -= 20;
@@ -147,7 +154,7 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 		scrollBarLength = 460 * 496 / (mSelection->num * 160 + 66);
 		DrawBox(920, 158 + 460 * mSelection->scroll / (scrollsize - 496), 940, 158 + 460 * mSelection->scroll / (scrollsize - 496) + scrollBarLength, GetColor(0, 0, 0), FALSE);
 
-		if (mouse->mX > 920 && mouse->mX < 940 && mouse->mY >158 + 460 * mSelection->scroll / (scrollsize - 496) && mouse->mY < 158 + 460 * mSelection->scroll / (scrollsize - 496) + scrollBarLength || mSelection->scrollbar_on == 1) {
+		if (mouse->waitRelease == 0 &&mouse->mX > 920 && mouse->mX < 940 && mouse->mY >158 + 460 * mSelection->scroll / (scrollsize - 496) && mouse->mY < 158 + 460 * mSelection->scroll / (scrollsize - 496) + scrollBarLength || mSelection->scrollbar_on == 1) {
 			if (mouse->mButton == left) {
 				mSelection->scrollbar_on = 1;
 				if (mSelection->scroll_mouse_y != NULL) {
@@ -168,6 +175,7 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 		for (i = 0; i < mSelection->num; i++) {
 			if (mouse->mX > 200 && mouse->mX < 880 && mouse->mY >170 + mSelection->scroll + 160 * i && mouse->mY < 280 + mSelection->scroll + 160 * i && mouse->mY >140 && mouse->mY < 636) {
 				DrawGraph(200, 170 + mSelection->scroll + 160 * i, mSelection->HandleP2, TRUE);
+				k = 1;
 				if (mouse->mButton == left && mouse->waitRelease != 1) {
 					sprintf_s(filename, 64, "PuzzleInfo/%d/Puzzle%d.csv", mSelection->size, mSelection->Spz[i].puzzleId);
 					readPuzzle(Puzzle, filename);
@@ -192,7 +200,8 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 				DrawStringToHandle(680, 205 + mSelection->scroll + 160 * i, min, GetColor(0, 0, 0), mSelection->Font1);
 			}
 	}
-
+		if (k == 0 && mouse->mButton == left)
+			mouse->waitRelease = 1;
 	ScreenFlip();
 	return SelectionScr;
 }

@@ -1,4 +1,4 @@
-#include "DxLib.h"
+﻿#include "DxLib.h"
 #include "KeyboardState.h"
 
 void GetKeyBoardState(int* key) {

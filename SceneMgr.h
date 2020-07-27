@@ -1,4 +1,4 @@
-#ifndef SCENEMGR_H_
+﻿#ifndef SCENEMGR_H_
 #define SCENEMGR_H_
 
 #include "InputNickName.h"

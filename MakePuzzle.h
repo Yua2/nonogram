@@ -1,4 +1,4 @@
-#ifndef MAKEPUZZLE_H_
+ï»¿#ifndef MAKEPUZZLE_H_
 #define MAKEPUZZLE_H_
 #include "Controller.h"
 #include "Information.h"
@@ -10,14 +10,14 @@ typedef struct MakePuzzle {
 	Button_t backButton;
 
 
-	int posi = 100; // Óà°×
-	int selectsize = 40; // É«ßx’k¥Ş¥¹1‚€¤Î¥µ¥¤¥º
-	int sellsize = 25; // ¥Ñ¥º¥ë¥Ş¥¹£±‚€¤Î¥µ¥¤¥º
-	int semisize = 10;  // ¿sĞ¡¥Ñ¥º¥ë¥Ş¥¹1‚€¤Î¥µ¥¤¥º
-	int x_size = 20; // ¥Ñ¥º¥ë»­Ãæ¤Îºá¥µ¥¤¥º
-	int y_size = 20;// ¥Ñ¥º¥ë»­Ãæ¤Î¿k¥µ¥¤¥º 
+	int posi = 100; // ä½™ç™½
+	int selectsize = 40; // è‰²é¸æŠãƒã‚¹1å€‹ã®ã‚µã‚¤ã‚º
+	int sellsize = 25; // ãƒ‘ã‚ºãƒ«ãƒã‚¹ï¼‘å€‹ã®ã‚µã‚¤ã‚º
+	int semisize = 10;  // ç¸®å°ãƒ‘ã‚ºãƒ«ãƒã‚¹1å€‹ã®ã‚µã‚¤ã‚º
+	int x_size = 20; // ãƒ‘ã‚ºãƒ«ç”»é¢ã®æ¨ªã‚µã‚¤ã‚º
+	int y_size = 20;// ãƒ‘ã‚ºãƒ«ç”»é¢ã®ç¸¦ã‚µã‚¤ã‚º 
 
-	// É«ĞûÑÔ
+	// è‰²å®£è¨€
 	int	white = GetColor(255, 255, 255), black = GetColor(0, 0, 0), gainsboro = GetColor(220, 220, 220),
 		blue = GetColor(0, 0, 255), aqua = GetColor(0, 255, 255),
 		green = GetColor(0, 128, 0), springgreen = GetColor(0, 255, 127),
@@ -27,13 +27,13 @@ typedef struct MakePuzzle {
 		gold = GetColor(255, 215, 0), lemonchiffon = GetColor(255, 250, 205),
 		indigo = GetColor(75, 0, 130), mediumpurple = GetColor(147, 112, 219);
 
-	// É«ßx’k¥Ş¥¹¤ÎÅäÁĞ
+	// è‰²é¸æŠãƒã‚¹ã®é…åˆ—
 	int	col[8][2] = { {black, gainsboro}, {blue, aqua}, {green, springgreen},{maroon, red},
 		{deeppink, pink}, {saddlebrown, orange}, {gold, lemonchiffon}, {indigo, mediumpurple} };
 
-	int colorlist[20][20] = { white }; //¥Ñ¥º¥ë¥Ş¥¹¤ÎÉ«Çéˆó¸ñ¼{ÓÃÅäÁĞ ³õÆÚ¤ÏÈ«²¿°×
+	int colorlist[20][20] = { white }; //ãƒ‘ã‚ºãƒ«ãƒã‚¹ã®è‰²æƒ…å ±æ ¼ç´ç”¨é…åˆ— åˆæœŸã¯å…¨éƒ¨ç™½
 
-	int tmp = white; // colorlistÒ»•r¸ñ¼{ÓÃ
+	int tmp = white; // colorlistä¸€æ™‚æ ¼ç´ç”¨
 
 
 	Puzzle_t puzzle;

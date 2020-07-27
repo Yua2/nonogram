@@ -1,13 +1,13 @@
-#include "Information.h"
+ï»¿#include "Information.h"
 #include "Selection.h"
 #include <stdio.h>
 #include <stdlib.h>
 /******************************************************
 *** Function Name: readPuzzle
-*** Designer: ê
+*** Designer: é™³
 *** Date: 2020.7.6
-*** Function£ºcsv¥Õ¥¡¥¤¥ëÄÚ¤Î¥Ñ¥º¥ëÇéˆó¤òÕi¤ßÈ¡¤Ã¤ÆPuzzle_t˜‹ÔìÌå¤Ë¸ñ¼{¤¹¤ë
-*** Return: ¤Ê¤·
+*** Functionï¼šcsvãƒ•ã‚¡ã‚¤ãƒ«å†…ã®ãƒ‘ã‚ºãƒ«æƒ…å ±ã‚’èª­ã¿å–ã£ã¦Puzzle_tæ§‹é€ ä½“ã«æ ¼ç´ã™ã‚‹
+*** Return: ãªã—
 *******************************************************/
 void readPuzzle(Puzzle_t* pz, char filename[64]) {
     FILE* fp;
@@ -29,10 +29,10 @@ void readPuzzle(Puzzle_t* pz, char filename[64]) {
 }
 /******************************************************
 *** Function Name: savePuzzle
-*** Designer: ê
+*** Designer: é™³
 *** Date: 2020.7.10
-*** Function£ºÐÂ¤·¤¯×÷¤Ã¤¿¥Ñ¥º¥ë¤ò¥Õ¥¡¥¤¥ë¤Ë³öÁ¦¤¹¤ë
-*** Return: ¤Ê¤·
+*** Functionï¼šæ–°ã—ãä½œã£ãŸãƒ‘ã‚ºãƒ«ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã«å‡ºåŠ›ã™ã‚‹
+*** Return: ãªã—
 *******************************************************/
 void savePuzzle(Puzzle_t* pz) {
 	FILE *fp;
@@ -95,15 +95,17 @@ void updatesimpleRanking(Puzzle_t* pz, char* name, int time) {
 	fclose(fp);
 }
 void updateRanking(Puzzle_t* pz, char playerId[256], int time) {
-	int i, j, rank;
+	int i, j, rank=1;
 	char filename[64];
 	FILE* fp;
 
 	for (i = 0; pz->ranking[i].cleartime <= time; i++) {
+		rank++;
 		if (pz->ranking[i].flag == 0) {
 			pz->ranking[i].flag = 1;
 			sprintf_s(pz->ranking[i].playerId, 256, "%s", playerId);
 			pz->ranking[i].cleartime = time;
+			rank = i + 1;
 			i = 10;
 			break;
 		}
@@ -113,7 +115,7 @@ void updateRanking(Puzzle_t* pz, char playerId[256], int time) {
 		}
 
 	}
-	rank = i + 1;
+
 	if (i <= 9) {
 		for (j = 9; j > i; j--) {
 			sprintf_s(pz->ranking[j].playerId, 256, "%s", pz->ranking[j - 1].playerId);
@@ -142,3 +144,4 @@ void updateRanking(Puzzle_t* pz, char playerId[256], int time) {
 		updatesimpleRanking(pz, playerId, time);
 	}
 }
+
