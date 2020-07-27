@@ -44,8 +44,9 @@ int InitializeMenu(Menu_t *mMenu) {
 *** Return: Escene
 *******************************************************/
 int UpdateMenu(Menu_t* mMenu,Mouse_t* mouse,Puzzle_t* puzzle) {
-	int i,j,color[3];
+	int i,j,k,color[3];
 	char name[64]="puzzleInfo/Puzzle0.csv";
+	k = 0;
 	for (i = 0; i < 3; i++) {                                                                       //マウスが置かれているボタンを判定
 		if (mouse->mX > mMenu->b[i].leftx && mouse->mX<mMenu->b[i].rightx && mouse->mY>mMenu->b[i].upy && mouse->mY < mMenu->b[i].downy) {
 			color[i] = GetColor(120, 120, 120);
@@ -58,10 +59,14 @@ int UpdateMenu(Menu_t* mMenu,Mouse_t* mouse,Puzzle_t* puzzle) {
 				fault: break;
 				}
 			}
+			k = 1;
 		}	
 		else
-			color[i] = GetColor(0,0,0);
+			color[i] = GetColor(0,0,0);	
 	}
+
+	if (k == 0 && mouse->mButton == left)
+		mouse->waitRelease = 1;
 
 	DrawFormatString(mMenu->x, mMenu->y, GetColor(0,0,0), mMenu->name);
 	for (i = 0; i < 3; i++) {

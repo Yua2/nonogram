@@ -1,13 +1,13 @@
-#include "Information.h"
+ï»¿#include "Information.h"
 #include "Selection.h"
 #include <stdio.h>
 #include <stdlib.h>
 /******************************************************
 *** Function Name: readPuzzle
-*** Designer: ê
+*** Designer: é™³
 *** Date: 2020.7.6
-*** Function£ºcsv¥Õ¥¡¥¤¥ëÄÚ¤Î¥Ñ¥º¥ëÇéˆó¤òÕi¤ßÈ¡¤Ã¤ÆPuzzle_t˜‹ÔìÌå¤Ë¸ñ¼{¤¹¤ë
-*** Return: ¤Ê¤·
+*** Functionï¼šcsvãƒ•ã‚¡ã‚¤ãƒ«å†…ã®ãƒ‘ã‚ºãƒ«æƒ…å ±ã‚’èª­ã¿å–ã£ã¦Puzzle_tæ§‹é€ ä½“ã«æ ¼ç´ã™ã‚‹
+*** Return: ãªã—
 *******************************************************/
 void readPuzzle(Puzzle_t* pz, char filename[64]) {
     FILE* fp;
@@ -29,10 +29,10 @@ void readPuzzle(Puzzle_t* pz, char filename[64]) {
 }
 /******************************************************
 *** Function Name: savePuzzle
-*** Designer: ê
+*** Designer: é™³
 *** Date: 2020.7.10
-*** Function£ºĞÂ¤·¤¯×÷¤Ã¤¿¥Ñ¥º¥ë¤ò¥Õ¥¡¥¤¥ë¤Ë³öÁ¦¤¹¤ë
-*** Return: ¤Ê¤·
+*** Functionï¼šæ–°ã—ãä½œã£ãŸãƒ‘ã‚ºãƒ«ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã«å‡ºåŠ›ã™ã‚‹
+*** Return: ãªã—
 *******************************************************/
 void savePuzzle(Puzzle_t* pz) {
 	FILE *fp;
@@ -144,3 +144,4 @@ void updateRanking(Puzzle_t* pz, char playerId[256], int time) {
 		updatesimpleRanking(pz, playerId, time);
 	}
 }
+
