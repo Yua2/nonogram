@@ -40,9 +40,9 @@ void readPuzzle(Puzzle_t* pz, char filename[64]) {
 *** Return: なし
 *******************************************************/
 void savePuzzle(Puzzle_t* pz) {
-	FILE* fp;
-	int i, j, x = pz->x_size, y = pz->y_size, newId;
-	char filename[64];
+	FILE* fp;																			//ファイルのポインタ
+	int i, j, x = pz->x_size, y = pz->y_size, newId;									//i,j:ループカウンタ,x:パズルの横のサイズ,y:パズルの縦のサイズ,newId:新しく保存されるパズルの番号
+	char filename[64];																	//ファイルパス
 	sprintf_s(filename, 64, "PuzzleInfo/%d%d/puzzlenum.csv", pz->x_size, pz->y_size);
 	fopen_s(&fp, filename, "r+");
 	fscanf_s(fp, "%d", &newId);
@@ -81,10 +81,10 @@ void savePuzzle(Puzzle_t* pz) {
 *** Return: なし
 *******************************************************/
 void updatesimpleRanking(Puzzle_t* pz, char* name, int time) {
-	FILE* fp;
-	char filename[64];
-	int puzzleNum, i;
-	SimplePuzzle_t* spt;
+	FILE* fp;																//ファイルのポインタ
+	char filename[64];														//ファイルパス
+	int puzzleNum, i;														//パズルの数，ループカウンタ
+	SimplePuzzle_t* spt;													//パズル一覧構造体
 	//get number of pazzle from puzzlenum.csv
 	sprintf_s(filename, 64, "PuzzleInfo/%d%d/puzzlenum.csv", pz->x_size, pz->y_size);
 	fopen_s(&fp, filename, "r");
@@ -114,13 +114,13 @@ void updatesimpleRanking(Puzzle_t* pz, char* name, int time) {
 *** Return: なし
 *******************************************************/
 void updateRanking(Puzzle_t* pz, char playerId[17], int time) {
-	int i, j, rank = 1;
-	char filename[64];
-	FILE* fp;
+	int i, j, rank = 1;										//i,j:ループカウンタ,rank:順位
+	char filename[64];										//ファイルパス
+	FILE* fp;												//ファイルポインタ
 
 	for (i = 0; pz->ranking[i].cleartime <= time; i++) {    //順位の計算
 		rank++;
-		if (pz->ranking[i].flag == 0) {
+		if (pz->ranking[i].flag == 0) {						//この順位にまだプレイヤーが登録されていなかったら，時間を無視して登録する．
 			pz->ranking[i].flag = 1;
 			sprintf_s(pz->ranking[i].playerId, 17, "%s", playerId);
 			pz->ranking[i].cleartime = time;
@@ -128,14 +128,14 @@ void updateRanking(Puzzle_t* pz, char playerId[17], int time) {
 			i = 10;
 			break;
 		}
-		if (i == 9) {
+		if (i == 9) {										//最後までランキングを探索した場合
 			i++;
 			break;
 		}
 
 	}
 
-	if (i <= 9) {
+	if (i <= 9) {											//ランキング入りの場合
 		for (j = 9; j > i; j--) {   //ランキング情報の更新
 			sprintf_s(pz->ranking[j].playerId, 17, "%s", pz->ranking[j - 1].playerId);
 			pz->ranking[j].cleartime = pz->ranking[j - 1].cleartime;
@@ -159,7 +159,7 @@ void updateRanking(Puzzle_t* pz, char playerId[17], int time) {
 	for (i = 0; i < 10; i++)    //ランキイング情報の書き出し
 		fprintf(fp, "%s %d %d\n", pz->ranking[i].playerId, pz->ranking[i].cleartime, pz->ranking[i].flag);
 	fclose(fp);
-	if (rank == 1) {
+	if (rank == 1) {			//ランキング一位だったら，パズル一覧も更新
 		updatesimpleRanking(pz, playerId, time);
 	}
 }

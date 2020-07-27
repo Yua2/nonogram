@@ -17,8 +17,8 @@
 *** Return: Escene
 *******************************************************/
 void updatemSelection(Selection_t* mSelection,const char filename[256],const char filename2[256]) {
-	int error,i;												
-	FILE* fp;													//ファイル構造体
+	int error,i;												//i:ループカウンタ
+	FILE* fp;													//ファイルのポインタ
 	error = fopen_s(&fp, filename2, "r");
 	fscanf_s(fp, "%d", &mSelection->num);
 	fclose(fp);
@@ -69,41 +69,41 @@ int InitializeSelection(Selection_t* mSelection) {
 int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 	int i, scrollsize, scrollBarLength, scrolldy,k;//ループカウンタ，スクロールできる上限，スクロールバーの長さ，スクロールした量，マウスクリック位置
 	char min[20],No[20],filename[64];//時間，パズル番号，ファイルパス
-	k = 0;
+	k = 0;						   	//マウスの位置を記録
 
-	if (mSelection->scrollbar_on == 0) {
-		if (mouse->mX > 140 && mouse->mX < 300 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {
+	if (mSelection->scrollbar_on == 0) {																												//スクロールバー動作中は動作しない
+		if (mouse->mX > 140 && mouse->mX < 300 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {				//10*10サイズのページに切り替わる
 			k = 1;
 			mSelection->size = 1010;
 			mSelection->scroll = 0;
 			updatemSelection(mSelection, "PuzzleInfo/1010/simpleInformation.csv", "PuzzleInfo/1010/puzzlenum.csv");
 		}
-		else if (mouse->mX > 300 && mouse->mX < 460 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {
+		else if (mouse->mX > 300 && mouse->mX < 460 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {		//15*10サイズのページに切り替わる
 			k = 1;
 			mSelection->size = 1510;
 			mSelection->scroll = 0;
 			updatemSelection(mSelection, "PuzzleInfo/1510/simpleInformation.csv", "PuzzleInfo/1510/puzzlenum.csv");
 		}
-		else if (mouse->mX > 460 && mouse->mX < 620 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {
+		else if (mouse->mX > 460 && mouse->mX < 620 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {		//15*15サイズのページに切り替わる
 			k = 1;
 			mSelection->size = 1515;
 			mSelection->scroll = 0;
 			updatemSelection(mSelection, "PuzzleInfo/1515/simpleInformation.csv", "PuzzleInfo/1515/puzzlenum.csv");
 		}
-		else if (mouse->mX > 620 && mouse->mX < 780 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {
+		else if (mouse->mX > 620 && mouse->mX < 780 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {		//20*15サイズのページに切り替わる
 			k = 1;
 			mSelection->size = 2015;
 			mSelection->scroll = 0;
 			updatemSelection(mSelection, "PuzzleInfo/2015/simpleInformation.csv", "PuzzleInfo/2015/puzzlenum.csv");
 		}
-		else if (mouse->mX > 780 && mouse->mX < 940 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {
+		else if (mouse->mX > 780 && mouse->mX < 940 && mouse->mY > 80 && mouse->mY < 135 && mouse->mButton == left && mouse->waitRelease == 0) {		//20*20サイズのページに切り替わる
 			k = 1;
 			mSelection->size = 2020;
 			mSelection->scroll = 0;
 			updatemSelection(mSelection, "PuzzleInfo/2020/simpleInformation.csv", "PuzzleInfo/2020/puzzlenum.csv");
 		}
 	}
-	switch (mSelection->size) {
+	switch (mSelection->size) {																															//サイズ変更に伴う画像の変化
 		case(1010):	DrawGraph(140, 80, mSelection->HandleS1, TRUE);  break;
 		case(1510): DrawGraph(140, 80, mSelection->HandleS2, TRUE);  break;
 		case(1515):	DrawGraph(140, 80, mSelection->HandleS3, TRUE);  break;
@@ -118,10 +118,10 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 	DrawFormatString(520, 100, GetColor(0, 0, 0), "15*15");
 	DrawFormatString(680, 100, GetColor(0, 0, 0), "20*15");
 	DrawFormatString(840, 100, GetColor(0, 0, 0), "20*20");
-	if (mouse->mX < 114 && mouse->mX < 114 >0 && mouse->mY>661 && mouse->mY <720) {
+	if (mouse->mX < 114 && mouse->mX < 114 >0 && mouse->mY>661 && mouse->mY <720) {																		//戻るボタンの位置
 		DrawGraph(-1, 661, mSelection->HandleR2, TRUE);
 		k = 1;
-		if (mouse->mButton == left && mouse->waitRelease ==0)
+		if (mouse->mButton == left && mouse->waitRelease ==0)																							//戻るボタンがクリックされた
 			return MenuScr;
 	}else
 		DrawGraph(-1, 661, mSelection->HandleR1, TRUE);
@@ -129,25 +129,25 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 	
 	DrawFormatString(29, 681, GetColor(0, 0, 0), "return");
 	
-	if (mSelection->num > 3) {
+	if (mSelection->num > 3) {																//もしパズルの数が3以上だったら，スクロールバーなどで制御できるようにする．
 		scrollsize = 430 - mSelection->num * 160;
 		mSelection->scroll += mouse->mWheel * 20;											//マウスホイール制御
-		if (mSelection->scroll > 0)
+		if (mSelection->scroll > 0)															//スクロール量が上限を超えたら上限にする
 			mSelection->scroll = 0;
-		if (mSelection->scroll < scrollsize)
+		if (mSelection->scroll < scrollsize)												//スクロール量が下限を超えたら下限にする
 			mSelection->scroll = scrollsize;
 		DrawBox(920, 139, 940, 159, GetColor(0, 0, 0), FALSE);								//スクロールアロー制御
-		if (mouse->mX > 920 && mouse->mX < 940 && mouse->mY >139 && mouse->mY < 159 && mouse->waitRelease == 0) {
+		if (mouse->mX > 920 && mouse->mX < 940 && mouse->mY >139 && mouse->mY < 159 && mouse->waitRelease == 0) {	//上矢印の場所
 			DrawBox(921, 140, 939, 158, GetColor(192, 192, 192), TRUE);
-			if (mouse->mButton == left && mSelection->scroll < 0)
+			if (mouse->mButton == left && mSelection->scroll < 0)													//上矢印がクリックされたら
 				mSelection->scroll += 20;
 		}
 		else
 			DrawBox(921, 140, 939, 158, GetColor(255, 255, 255), TRUE);
 		DrawBox(920, 617, 940, 637, GetColor(0, 0, 0), FALSE);
-		if (mouse->mX > 920 && mouse->mX < 940 && mouse->mY >617 && mouse->mY < 637 && mouse->waitRelease == 0) {
+		if (mouse->mX > 920 && mouse->mX < 940 && mouse->mY >617 && mouse->mY < 637 && mouse->waitRelease == 0) {	//下矢印の場所
 			DrawBox(921, 618, 939, 636, GetColor(192, 192, 192), TRUE);
-			if (mouse->mButton == left && mSelection->scroll > scrollsize)
+			if (mouse->mButton == left && mSelection->scroll > scrollsize)											//下矢印がクリックされたら
 				mSelection->scroll -= 20;
 		}
 		else
@@ -159,12 +159,12 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 		scrollBarLength = 460 * 496 / (mSelection->num * 160 + 66);
 		DrawBox(920, 158 + 460 * mSelection->scroll / (scrollsize - 496), 940, 158 + 460 * mSelection->scroll / (scrollsize - 496) + scrollBarLength, GetColor(0, 0, 0), FALSE);
 
-		if (mouse->waitRelease == 0 &&mouse->mX > 920 && mouse->mX < 940 && mouse->mY >158 + 460 * mSelection->scroll / (scrollsize - 496) && mouse->mY < 158 + 460 * mSelection->scroll / (scrollsize - 496) + scrollBarLength || mSelection->scrollbar_on == 1) {
-			if (mouse->mButton == left) {
+		if (mouse->waitRelease == 0 &&mouse->mX > 920 && mouse->mX < 940 && mouse->mY >158 + 460 * mSelection->scroll / (scrollsize - 496) && mouse->mY < 158 + 460 * mSelection->scroll / (scrollsize - 496) + scrollBarLength || mSelection->scrollbar_on == 1) {//スクロールバーの座標
+			if (mouse->mButton == left) {																					//スクロールバーが押されたら
 				mSelection->scrollbar_on = 1;
-				if (mSelection->scroll_mouse_y != NULL) {
+				if (mSelection->scroll_mouse_y != NULL) {																	//スクロールバーが押された間にマウスのy座標が変わったら
 					scrolldy = mSelection->scroll_mouse_y - mouse->mY;
-					if (mSelection->scroll < 0 && scrolldy > 0 || mSelection->scroll > scrollsize && scrolldy < 0)
+					if (mSelection->scroll < 0 && scrolldy > 0 || mSelection->scroll > scrollsize && scrolldy < 0)			//スクロール量が上限/下限を超えていなければ
 						mSelection->scroll += -(scrollsize - 396) * scrolldy / 460;
 				}
 				mSelection->scroll_mouse_y = mouse->mY;
@@ -178,10 +178,10 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 		SetDrawArea(143, 140, 941, 636);
 
 		for (i = 0; i < mSelection->num; i++) {                                     //パズル一覧の描画
-			if (mouse->mX > 200 && mouse->mX < 880 && mouse->mY >170 + mSelection->scroll + 160 * i && mouse->mY < 280 + mSelection->scroll + 160 * i && mouse->mY >140 && mouse->mY < 636) {
+			if (mouse->mX > 200 && mouse->mX < 880 && mouse->mY >170 + mSelection->scroll + 160 * i && mouse->mY < 280 + mSelection->scroll + 160 * i && mouse->mY >140 && mouse->mY < 636) {		//パズルにマウスが重なったら
 				DrawGraph(200, 170 + mSelection->scroll + 160 * i, mSelection->HandleP2, TRUE);
 				k = 1;
-				if (mouse->mButton == left && mouse->waitRelease != 1) {
+				if (mouse->mButton == left && mouse->waitRelease != 1) {																															//パズルがクリックされたら
 					sprintf_s(filename, 64, "PuzzleInfo/%d/Puzzle%d.csv", mSelection->size, mSelection->Spz[i].puzzleId);
 					readPuzzle(Puzzle, filename);
 					mouse->waitRelease = 1;
@@ -195,17 +195,17 @@ int UpdateSelection(Selection_t* mSelection, Puzzle_t* Puzzle, Mouse_t* mouse) {
 			DrawStringToHandle(360, 205 + mSelection->scroll + 160 * i, mSelection->Spz[i].puzzleTitle, GetColor(0, 0, 0), mSelection->Font1);
 			DrawStringToHandle(460, 250 + mSelection->scroll + 160 * i, "by", GetColor(0, 0, 0), mSelection->Font2);
 			DrawStringToHandle(490, 250 + mSelection->scroll + 160 * i, mSelection->Spz[i].puzzleMakerName, GetColor(0, 0, 0), mSelection->Font2);
-			if (mSelection->Spz[i].flag == 1) {
+			if (mSelection->Spz[i].flag == 1) {																																						//パズルのランキングが有効であれば
 				DrawStringToHandle(800, 250 + mSelection->scroll + 160 * i, mSelection->Spz[i].fastestId, GetColor(0, 0, 0), mSelection->Font2);
 				DrawStringToHandle(600, 180 + mSelection->scroll + 160 * i, "BEST TIME", GetColor(0, 0, 0), mSelection->Font2);
-				if (mSelection->Spz[i].fastestTime % 60 >= 10)
+				if (mSelection->Spz[i].fastestTime % 60 >= 10)																																		//秒で記録する時間をX分X秒の形に整形
 					sprintf_s(min, 20, "%d:%d", mSelection->Spz[i].fastestTime / 60, mSelection->Spz[i].fastestTime % 60);
 				else
 					sprintf_s(min, 20, "%d:0%d", mSelection->Spz[i].fastestTime / 60, mSelection->Spz[i].fastestTime % 60);
 				DrawStringToHandle(680, 205 + mSelection->scroll + 160 * i, min, GetColor(0, 0, 0), mSelection->Font1);
 			}
 	}
-		if (k == 0 && mouse->mButton == left)
+		if (k == 0 && mouse->mButton == left)																																						//マウスはボタンじゃない場所で押されたら，離すまで動作しない．
 			mouse->waitRelease = 1;
 	ScreenFlip();
 	return SelectionScr;

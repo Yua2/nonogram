@@ -16,14 +16,14 @@
 *** Function:メニュー画面を初期化する．
 *** Return: Escene
 *******************************************************/
-static int first = 0;
+static int first = 0;																							//初めてメニュー画面に来るかどうか
 int InitializeMenu(Menu_t *mMenu,Mouse_t *mouse) {
-	int i, j;
+	
 	*mMenu = {LoadGraph("graph/menu.png"),{{ 100,300,400,500,165,440,"TUTORIAL"},                               //メニュー画面初期化
 						{ 440,640,400,500,520,440,"START" },
 						{ 780,980,400,500,830,440,"MAKE PUZZLE" } } };
 	DrawGraph(0, 0, mMenu->handle, TRUE);
-	if (first == 0) {
+	if (first == 0) {																							//初めてメニュー画面に来るのでなければ表示しない
 		DrawFormatString(480, 400, GetColor(255, 255, 255), "PRESS ANY KEY");
 		ScreenFlip();
 		WaitKey();
@@ -40,16 +40,16 @@ int InitializeMenu(Menu_t *mMenu,Mouse_t *mouse) {
 *** Return: Escene
 *******************************************************/
 int UpdateMenu(Menu_t* mMenu,Mouse_t* mouse,Puzzle_t* puzzle) {
-	int i,j,k,color[3];
-	char name[64]="puzzleInfo/Puzzle0.csv";  //チュートリアルパズルのファイルのパス
+	int i,j,k,color[3];												//i:ループカウンタ，j:ループカウンタ，k:マウスの位置を記録，color:ボタンの色
+	char name[64]="puzzleInfo/Puzzle0.csv";														  //チュートリアルパズルのファイルのパス
 	DrawGraph(0, 0, mMenu->handle, TRUE);
 	k = 0;
 	for (i = 0; i < 3; i++) {                                                                       //マウスが置かれているボタンを判定
-		if (mouse->mX > mMenu->b[i].leftx && mouse->mX<mMenu->b[i].rightx && mouse->mY>mMenu->b[i].upy && mouse->mY < mMenu->b[i].downy) {
+		if (mouse->mX > mMenu->b[i].leftx && mouse->mX<mMenu->b[i].rightx && mouse->mY>mMenu->b[i].upy && mouse->mY < mMenu->b[i].downy) {		//三つのボタンの座標
 			color[i] = GetColor(120, 120, 120);
-			if (mouse->mButton == left && mouse->waitRelease != 1) {
+			if (mouse->mButton == left && mouse->waitRelease != 1) {																			//ボタンが押されたかどうか
 				mouse->waitRelease = 1;
-				switch (i) {
+				switch (i) {																													//選択された画面へ遷移
 				case(0): readPuzzle(puzzle,name); return GameScr;
 				case(1):return SelectionScr;
 				case(2):return MakePuzzleScr;
@@ -62,7 +62,7 @@ int UpdateMenu(Menu_t* mMenu,Mouse_t* mouse,Puzzle_t* puzzle) {
 			color[i] = GetColor(0,0,0);	
 	}
 
-	if (k == 0 && mouse->mButton == left)
+	if (k == 0 && mouse->mButton == left)																										//マウスはボタンじゃない場所で押されたら，離すまで動作しない．
 		mouse->waitRelease = 1;
 
 	for (i = 0; i < 3; i++) {																		//マウスが置かれているボタンの色を変える
