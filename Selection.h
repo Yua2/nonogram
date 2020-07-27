@@ -1,4 +1,9 @@
-﻿#pragma once
+﻿/******************************************************
+*** Designer      : 陳
+*** Date          : 2020.6.12
+*** Purpose       : W2 パズルサイズ・パズル選択画面に関する情報
+*******************************************************/
+#pragma once
 #include "Information.h"
 #include "MouseState.h"
 typedef struct {

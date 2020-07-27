@@ -1,9 +1,9 @@
 /******************************************
-*** Designer : “¡ì
+*** Designer : è—¤å·
 *** Date     : 2020.6.12
-*** Purpose  : ƒ`ƒ…[ƒgƒŠƒAƒ‹/ƒQ[ƒ€ƒvƒŒƒC‰æ–Ê‚Ì
-			@@‚Ì\‘¢‘ÌGame_t‚Ìƒƒ“ƒo‚ÆŠeŠÖ”‚Ì
-			   ƒvƒƒgƒ^ƒCƒvéŒ¾(M12~M15)
+*** Purpose  : ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«/ã‚²ãƒ¼ãƒ ãƒ—ãƒ¬ã‚¤ç”»é¢ã®
+			ã€€ã€€ã®æ§‹é€ ä½“Game_tã®ãƒ¡ãƒ³ãƒã¨å„é–¢æ•°ã®
+			   ãƒ—ãƒ­ãƒˆã‚¿ã‚¤ãƒ—å®£è¨€(M12~M15)
 *******************************************/
 
 #ifndef SCENEMGR_H_
@@ -17,32 +17,32 @@
 #include "MouseState.h"
 #include "Information.h"
 
-// ƒV[ƒ“”Ô†
+// ã‚·ãƒ¼ãƒ³ç•ªå·
 typedef enum {
-	InputNickNameScr,	//@‹N“®ƒV[ƒ“”Ô†
-	MenuScr,	//@ƒƒjƒ…[ƒV[ƒ“”Ô†
-	SelectionScr,	//@“ïˆÕ“xEƒpƒYƒ‹‘I‘ğƒV[ƒ“”Ô†
-	GameScr,	//@ƒ`ƒ…[ƒgƒŠƒAƒ‹/ƒQ[ƒ€ƒvƒŒƒCƒV[ƒ“”Ô†
-	MakePuzzleScr,	// ƒpƒYƒ‹ì¬ƒV[ƒ“”Ô†
-	None	// –¢‹N“®ƒV[ƒ“”Ô†
+	InputNickNameScr,	//ã€€èµ·å‹•æ™‚ã‚·ãƒ¼ãƒ³ç•ªå·
+	MenuScr,	//ã€€ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚·ãƒ¼ãƒ³ç•ªå·
+	SelectionScr,	//ã€€é›£æ˜“åº¦ãƒ»ãƒ‘ã‚ºãƒ«é¸æŠã‚·ãƒ¼ãƒ³ç•ªå·
+	GameScr,	//ã€€ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«/ã‚²ãƒ¼ãƒ ãƒ—ãƒ¬ã‚¤ã‚·ãƒ¼ãƒ³ç•ªå·
+	MakePuzzleScr,	// ãƒ‘ã‚ºãƒ«ä½œæˆã‚·ãƒ¼ãƒ³ç•ªå·
+	None	// æœªèµ·å‹•ã‚·ãƒ¼ãƒ³ç•ªå·
 }EScene;
 
-// ƒV[ƒ“\‘¢‘Ì
+// ã‚·ãƒ¼ãƒ³æ§‹é€ ä½“
 typedef struct SCR_MGR {
-	InputNickName_t mInputNickName;	// ‹N“®‰æ–Ê\‘¢‘Ì
-	Menu_t          mMenu;	// ƒƒjƒ…[‰æ–Ê\‘¢‘Ì
-	Selection_t	    mSelection;	// “ïˆÕ“xEƒpƒYƒ‹‘I‘ğ‰æ–Ê\‘¢‘Ì
-	Game_t          mGame;	// ƒ`ƒ…[ƒgƒŠƒAƒ‹/ƒQ[ƒ€ƒvƒŒƒC‰æ–Ê\‘¢‘Ì
-	MakePuzzle_t    mMakePuzzle;	// ƒpƒYƒ‹ì¬‰æ–Ê\‘¢‘Ì
+	InputNickName_t mInputNickName;	// èµ·å‹•æ™‚ç”»é¢æ§‹é€ ä½“
+	Menu_t          mMenu;	// ãƒ¡ãƒ‹ãƒ¥ãƒ¼ç”»é¢æ§‹é€ ä½“
+	Selection_t	    mSelection;	// é›£æ˜“åº¦ãƒ»ãƒ‘ã‚ºãƒ«é¸æŠç”»é¢æ§‹é€ ä½“
+	Game_t          mGame;	// ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«/ã‚²ãƒ¼ãƒ ãƒ—ãƒ¬ã‚¤ç”»é¢æ§‹é€ ä½“
+	MakePuzzle_t    mMakePuzzle;	// ãƒ‘ã‚ºãƒ«ä½œæˆç”»é¢æ§‹é€ ä½“
 } ScrMgr_t;
 
-// M1:ƒV[ƒ“‰Šú‰»ˆ—
-int InitializeScene(int, ScrMgr_t*, Puzzle_t*);
+// M1:ã‚·ãƒ¼ãƒ³åˆæœŸåŒ–å‡¦ç†
+int InitializeScene(int, ScrMgr_t*, Puzzle_t*,Mouse_t*);
 
-// M2:ƒV[ƒ“XVˆ—
+// M2:ã‚·ãƒ¼ãƒ³æ›´æ–°å‡¦ç†
 int UpdateScene(int, ScrMgr_t*, Mouse_t*, Puzzle_t*);
 
-// M3:ƒV[ƒ“I—¹ˆ—
+// M3:ã‚·ãƒ¼ãƒ³çµ‚äº†å‡¦ç†
 void FinalizeScene(int, ScrMgr_t*, Puzzle_t*);
 
 #endif /* SCENEMGR_H_ */

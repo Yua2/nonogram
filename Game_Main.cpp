@@ -1,7 +1,7 @@
 /******************************************
-*** Designer : “¡ì
+*** Designer : è—¤å·
 *** Date     : 2020.6.12
-*** Purpose  : ƒƒCƒ“ˆ—
+*** Purpose  : ãƒ¡ã‚¤ãƒ³å‡¦ç†
 *******************************************/
 
 #include "DxLib.h"
@@ -11,47 +11,47 @@
 
 /*****************************************************
 *** Function Name : WinMain
-*** Designer      : “¡ì
+*** Designer      : è—¤å·
 *** Date          : 2020.7.20
-*** Function      : ƒƒCƒ“ŠÖ”
-*** Return        : 0 (ƒvƒƒOƒ‰ƒ€‚Ì³íI—¹)
+*** Function      : ãƒ¡ã‚¤ãƒ³é–¢æ•°
+*** Return        : 0 (ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã®æ­£å¸¸çµ‚äº†)
 ******************************************************/
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	SetGraphMode(1080, 720, 16);	// ƒEƒBƒ“ƒhƒEƒTƒCƒY‚ğ1080~720‚Éİ’è
-	ChangeWindowMode(TRUE);	// ƒEƒBƒ“ƒhƒEƒ‚[ƒh‚Éİ’è
-	DxLib_Init();	// DxLib‰Šú‰»
-	SetDrawScreen(DX_SCREEN_BACK);	// — ‰æ–Ê‚Éİ’è
-	SetBackgroundColor(222, 184, 135);	// ”wŒiF‚ğ(R, G, B) = (222, 184, 135)‚Éİ’è
-	
-	ScrMgr_t scrMgr;	// •\¦‚·‚éƒV[ƒ“‚ğ‚ÂƒV[ƒ“\‘¢‘Ì‚Ì•Ï”
+	SetGraphMode(1080, 720, 16);	// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºã‚’1080Ã—720ã«è¨­å®š
+	ChangeWindowMode(TRUE);	// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒ¢ãƒ¼ãƒ‰ã«è¨­å®š
+	DxLib_Init();	// DxLibåˆæœŸåŒ–
+	SetDrawScreen(DX_SCREEN_BACK);	// è£ç”»é¢ã«è¨­å®š
+	SetBackgroundColor(222, 184, 135);	// èƒŒæ™¯è‰²ã‚’(R, G, B) = (222, 184, 135)ã«è¨­å®š
 
-	int scene = None;	// Œ»İ‚ÌƒV[ƒ“”Ô†‚ğŠi”[‚·‚é•Ï”
-	int nextScene = InputNickNameScr;	// Ÿ‚Ì‘JˆÚæ‚ÌƒV[ƒ“‚ğŠi”[‚·‚é•Ï”
+	ScrMgr_t scrMgr;	// è¡¨ç¤ºã™ã‚‹ã‚·ãƒ¼ãƒ³ã‚’æŒã¤ã‚·ãƒ¼ãƒ³æ§‹é€ ä½“ã®å¤‰æ•°
 
-	Mouse_t mouse;	// g‚í‚ê‚Ä‚¢‚éƒ}ƒEƒX‚É‘Î‰‚·‚éƒ}ƒEƒX•Ï”
+	int scene = None;	// ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ç•ªå·ã‚’æ ¼ç´ã™ã‚‹å¤‰æ•°
+	int nextScene = MenuScr;	// æ¬¡ã®é·ç§»å…ˆã®ã‚·ãƒ¼ãƒ³ã‚’æ ¼ç´ã™ã‚‹å¤‰æ•°
 
-	Puzzle_t pz;	// —V‚ÔƒpƒYƒ‹‚ÌƒpƒYƒ‹•Ï”
+	Mouse_t mouse;	// ä½¿ã‚ã‚Œã¦ã„ã‚‹ãƒã‚¦ã‚¹ã«å¯¾å¿œã™ã‚‹ãƒã‚¦ã‚¹å¤‰æ•°
 
-	// ƒƒCƒ“ƒ‹[ƒv
+	Puzzle_t pz;	// éŠã¶ãƒ‘ã‚ºãƒ«ã®ãƒ‘ã‚ºãƒ«å¤‰æ•°
+
+	// ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—
 	while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0) {
-		GetMouseState(&mouse, TRUE);	// ƒ}ƒEƒX‚Ìó‘ÔXV(C1:M4)
+		GetMouseState(&mouse, TRUE);	// ãƒã‚¦ã‚¹ã®çŠ¶æ…‹æ›´æ–°(C1:M4)
 
-		// ƒ}ƒEƒX‚Ìƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚Ä‚¢‚È‚¯‚ê‚Î
+		// ãƒã‚¦ã‚¹ã®ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚Œã¦ã„ãªã‘ã‚Œã°
 		if (mouse.mButton == none) {
-			mouse.waitRelease = 0;	// ‰Ÿ‚µ‚Á‚Ï‚È‚µó‘Ô‚©‚ç•ÏX
+			mouse.waitRelease = 0;	// æŠ¼ã—ã£ã±ãªã—çŠ¶æ…‹ã‹ã‚‰å¤‰æ›´
 		}
 
-		SetDrawScreen(DX_SCREEN_BACK);	// — ‰æ–Ê‚Éİ’è
+		SetDrawScreen(DX_SCREEN_BACK);	// è£ç”»é¢ã«è¨­å®š
 
-		// Œ»İ‚ÌƒV[ƒ“‚ÆŸ‚ÌƒV[ƒ“‚ªˆÙ‚È‚Á‚Ä‚¢‚½‚ç
+		// ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ã¨æ¬¡ã®ã‚·ãƒ¼ãƒ³ãŒç•°ãªã£ã¦ã„ãŸã‚‰
 		if (scene != nextScene) {
-			FinalizeScene(scene, &scrMgr, &pz);	// Œ»İ‚ÌƒV[ƒ“‚É‘Î‚µ‚ÄI—¹ˆ—(C1:M3)
-			scene = InitializeScene(nextScene, &scrMgr, &pz);// Ÿ‚ÌƒV[ƒ“‚ğ‰Šú‰»(C1:M1)‚µ‚ÄŒ»İ‚ÌƒV[ƒ“‚ÉƒZƒbƒg
+			FinalizeScene(scene, &scrMgr, &pz);	// ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ã«å¯¾ã—ã¦çµ‚äº†å‡¦ç†(C1:M3)
+			scene = InitializeScene(nextScene, &scrMgr, &pz,&mouse);// æ¬¡ã®ã‚·ãƒ¼ãƒ³ã‚’åˆæœŸåŒ–(C1:M1)ã—ã¦ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ã«ã‚»ãƒƒãƒˆ
 		}
 
-		nextScene = UpdateScene(scene, &scrMgr, &mouse, &pz);	// Œ»İ‚ÌƒV[ƒ“‚ğXV(C1:M2)‚µ‚ÄŸ‚ÌƒV[ƒ“‚ÉƒZƒbƒg
+		nextScene = UpdateScene(scene, &scrMgr, &mouse, &pz);	// ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ã‚’æ›´æ–°(C1:M2)ã—ã¦æ¬¡ã®ã‚·ãƒ¼ãƒ³ã«ã‚»ãƒƒãƒˆ
 	}
 
-	DxLib_End();	// DxLibë—Â
-	return 0;	// ³íI—¹
+	DxLib_End();	// DxLibç‹©çŒŸ
+	return 0;	// æ­£å¸¸çµ‚äº†
 }
